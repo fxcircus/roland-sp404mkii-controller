@@ -3,194 +3,274 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SP-404MK2 MIDI Test Harness</title>
+<title>SP-404 MKII · MIDI Sketchpad</title>
 <style>
-  body{font-family:system-ui,sans-serif;font-size:14px;margin:12px;max-width:1400px}
-  h1{font-size:20px;margin:4px 0 10px}
-  fieldset{margin:0 0 14px;border:1px solid #999;border-radius:4px}
-  legend{font-weight:bold;padding:0 6px}
-  .note{color:#555;font-size:12px;margin:2px 0 8px}
-  code.hx{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:#eee;border:1px solid #ccc;border-radius:3px;padding:1px 4px;min-width:52px;display:inline-block;text-align:center;white-space:nowrap}
-  button{font-size:13px;padding:4px 8px;margin:2px}
-  select,input[type=number],input[type=text]{font-size:13px;padding:2px}
-  .row{display:flex;align-items:center;gap:6px;margin:3px 0;flex-wrap:wrap}
-  .cols{display:flex;gap:14px;flex-wrap:wrap}
-  .fxcol{border:1px solid #ccc;border-radius:4px;padding:8px;min-width:250px;flex:1;position:relative}
-  .fxcol h3{margin:0 0 2px;font-size:14px}
-  .fx-ann{font-size:11px;color:#555;margin:0 0 6px;min-height:14px}
-  .fxcol.fx-inactive{background:#f6f6f6;border-style:dashed;border-color:#bbb}
-  .fxcol.fx-inactive h3{color:#999}
-  .fxcol.fx-inactive .fx-ann{color:#b06a00;font-weight:bold}
-  #fxRouting{border:1px solid #ccd;background:#f4f6fb;border-radius:4px;padding:8px;margin:0 0 10px}
-  #fxRouting .title{font-weight:bold;font-size:13px;margin-bottom:4px}
-  #fxRouting label{margin-right:12px;font-size:12px}
-  #fxRouting .rn{color:#555;font-size:11px;margin-top:5px}
-  .slrow{display:grid;grid-template-columns:1fr auto auto;gap:4px;align-items:center;margin:3px 0}
-  .slrow .lbl{font-size:12px}
-  .slrow input[type=range]{width:100%;grid-column:1/2}
-  .slrow[data-off] .lbl{color:#aaa}
-  .val{font-family:ui-monospace,Menlo,monospace;font-size:11px;width:26px;text-align:right}
-  .padgrid{display:grid;grid-template-columns:repeat(4,72px);gap:6px;margin:6px 0}
-  .padgrid button{height:56px;font-size:12px;line-height:1.25;user-select:none;touch-action:none}
-  .kbd{display:flex;flex-wrap:wrap;gap:2px;margin:6px 0}
-  .kbd button{width:38px;height:52px;font-size:10px;padding:0;user-select:none;touch-action:none}
-  .kbd button.blk{background:#333;color:#fff}
-  .patgrid{display:grid;grid-template-columns:repeat(8,72px);gap:6px;margin:6px 0}
-  #monLog{height:280px;overflow-y:auto;border:1px solid #999;background:#fafafa;font-family:ui-monospace,Menlo,monospace;font-size:11px;padding:4px;white-space:pre}
-  #monLog .in{color:#06529b}
-  #monLog .out{color:#1a7a1a}
-  #monLog .err{color:#b00}
-  .lamp{display:inline-block;width:10px;height:10px;border-radius:50%;background:#c00;vertical-align:middle}
-  .lamp.on{background:#0a0}
+  :root{
+    --paper:#f5c4d3; --paper2:#fce2ea; --panel:#fff6f9;
+    --ink:#191016; --ink2:#5a4650; --accent:#e6438a; --accent2:#7b52d6;
+    --lcd-bg:#0c1a12; --lcd:#79f6a2;
+    --marker:'Permanent Marker','Marker Felt','Comic Sans MS','Chalkboard SE','Segoe Print',cursive;
+    --sans:system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:var(--sans); font-size:14px; color:var(--ink); margin:0;
+    background:var(--paper);
+    background-image:radial-gradient(rgba(25,16,22,.06) 1.1px, transparent 1.1px);
+    background-size:9px 9px;
+  }
+  #loadError{color:#a00;font-weight:bold;font-family:var(--sans);padding:16px}
+  #wrap{max-width:1180px;margin:0 auto;padding:0 14px 60px}
+
+  /* hero */
+  #hero{text-align:center;padding:22px 10px 8px}
+  #hero h1{font-family:var(--marker);font-size:52px;margin:0;letter-spacing:1px;line-height:.95;
+    text-shadow:3px 3px 0 #fff, 5px 5px 0 rgba(25,16,22,.85);transform:rotate(-1.4deg)}
+  #hero h1 span{color:var(--accent)}
+  #hero .tag{font-family:var(--marker);font-size:15px;color:var(--ink2);margin:10px 0 0;transform:rotate(-.6deg)}
+
+  /* sticky jump menu */
+  #nav{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;align-items:center;gap:6px;
+    padding:8px;margin:6px 0 18px;background:var(--paper);
+    border:2.5px solid var(--ink);border-radius:16px 6px 16px 6px/6px 16px 6px 16px;
+    box-shadow:4px 4px 0 rgba(25,16,22,.8)}
+  #nav button{font-family:var(--marker);font-size:14px;background:#fff;color:var(--ink);
+    border:2px solid var(--ink);border-radius:9px 3px 9px 3px/3px 9px 3px 9px;padding:3px 10px;cursor:pointer}
+  #nav button:hover{background:var(--paper2)}
+  #nav button.active{background:var(--ink);color:#fff}
+  #nav .status{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);
+    font-family:var(--sans);max-width:46%}
+  #connStatus{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lamp{display:inline-block;width:13px;height:13px;border-radius:50%;background:#c0324a;
+    border:2px solid var(--ink);flex:0 0 auto}
+  .lamp.on{background:#46c46e}
+
+  /* cards */
+  .card{background:var(--panel);border:2.5px solid var(--ink);padding:14px 16px 16px;margin:0 0 22px;
+    box-shadow:5px 5px 0 rgba(25,16,22,.82);position:relative;scroll-margin-top:64px;
+    border-radius:255px 14px 225px 14px/14px 225px 14px 255px}
+  .card:nth-of-type(even){border-radius:14px 225px 14px 255px/225px 14px 255px 14px}
+  .card > h2{font-family:var(--marker);font-size:26px;margin:0 0 4px;transform:rotate(-.5deg)}
+  .card > h2 .n{color:var(--accent);font-size:18px;vertical-align:super;margin-right:4px}
+  .card .sub{color:var(--ink2);font-size:12px;margin:0 0 12px;font-family:var(--sans)}
+  .row{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}
+
+  /* sketch buttons */
+  .sbtn{font-family:var(--marker);font-size:14px;background:#fff;color:var(--ink);
+    border:2.5px solid var(--ink);border-radius:11px 4px 12px 5px/5px 12px 4px 11px;
+    box-shadow:3px 3px 0 rgba(25,16,22,.8);padding:6px 12px;cursor:pointer;user-select:none;line-height:1.1}
+  .sbtn:hover{background:var(--paper2)}
+  .sbtn:active,.sbtn.held{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(25,16,22,.8)}
+  .sbtn.on{background:var(--accent);color:#fff}
+  .sbtn.accent2.on{background:var(--accent2)}
+  .sbtn.sm{font-size:12px;padding:4px 9px;box-shadow:2px 2px 0 rgba(25,16,22,.8)}
+  .sbtn.danger{background:#ffe3e3;color:#a00;border-color:#a00}
+  .sbtn[disabled]{opacity:.4;pointer-events:none}
+
+  /* knobs */
+  .knob{width:66px;text-align:center;user-select:none;font-family:var(--sans)}
+  .knob-dial{width:54px;height:54px;margin:0 auto;border-radius:50%;position:relative;cursor:ns-resize;
+    touch-action:none;background:radial-gradient(circle at 38% 32%,#ffffff,#e7d6de 70%,#d7c2cc);
+    border:2.5px solid var(--ink);box-shadow:3px 3px 0 rgba(25,16,22,.7)}
+  .knob-dial::after{content:"";position:absolute;inset:6px;border-radius:50%;border:1.5px dashed rgba(25,16,22,.28)}
+  .knob-ind{position:absolute;width:4px;height:21px;background:var(--ink);left:calc(50% - 2px);top:5px;
+    border-radius:2px;transform-origin:50% 22px}
+  .knob-label{font-size:10.5px;font-weight:700;margin-top:4px;line-height:1.05;min-height:24px;
+    display:flex;align-items:center;justify-content:center}
+  .knob-val{font-family:var(--mono);font-size:11px;color:var(--ink2)}
+  .knob.disabled{opacity:.32;pointer-events:none}
+  .knob-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin-top:8px}
+
+  /* effect bus strips */
+  .bus{border:2.5px solid var(--ink);background:#fff;padding:10px 12px;margin:0 0 12px;
+    border-radius:12px 5px 12px 5px/5px 12px 5px 12px;box-shadow:3px 3px 0 rgba(25,16,22,.55)}
+  .bus.inactive{opacity:.62;background:repeating-linear-gradient(45deg,#f3f3f3,#f3f3f3 7px,#ececec 7px,#ececec 14px);
+    border-style:dashed}
+  .bus-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .bus-name{font-family:var(--marker);font-size:19px}
+  .bus-ch{font-size:11px;color:#fff;background:var(--ink);border-radius:6px;padding:1px 6px}
+  .bus-ann{font-size:11px;color:var(--ink2);flex:1 1 200px}
+  .bus.inactive .bus-ann{color:#b06a00;font-weight:700}
+  .lcd{background:var(--lcd-bg);border:2.5px solid var(--ink);border-radius:6px;padding:2px 4px;
+    box-shadow:inset 0 0 8px rgba(0,0,0,.6)}
+  .lcd select{background:transparent;color:var(--lcd);border:0;font-family:var(--mono);font-size:12.5px;
+    padding:2px;max-width:190px;outline:none}
+  .lcd select option{color:#111}
+
+  /* routing declaration */
+  #fxRouting{border:2px dashed var(--ink);background:var(--paper2);border-radius:10px;padding:9px 11px;margin:0 0 14px}
+  #fxRouting .title{font-family:var(--marker);font-size:15px;margin-bottom:6px}
+  #fxRouting label{margin-right:14px;font-size:12px}
+  #fxRouting select{font-family:var(--sans);font-size:12px;border:2px solid var(--ink);border-radius:6px;padding:2px 4px;background:#fff}
+  #fxRouting .rn{color:var(--ink2);font-size:11px;margin-top:7px}
+
+  /* pads */
+  .padgrid{display:grid;grid-template-columns:repeat(4,minmax(64px,1fr));gap:10px;margin:10px 0;max-width:560px}
+  .pad{aspect-ratio:1/1;border:2.5px solid var(--ink);border-radius:14px 6px 14px 6px/6px 14px 6px 14px;
+    box-shadow:3px 3px 0 rgba(25,16,22,.8);cursor:pointer;user-select:none;touch-action:none;
+    font-family:var(--marker);color:var(--ink);display:flex;flex-direction:column;align-items:center;
+    justify-content:center;line-height:1;position:relative}
+  .pad .num{font-size:22px}
+  .pad .nn{font-size:10px;font-family:var(--sans);color:rgba(25,16,22,.7);margin-top:3px}
+  .pad.active-key{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(25,16,22,.8);filter:brightness(1.15)}
+  .bankrow{display:flex;flex-wrap:wrap;gap:5px}
+  .bankrow .sbtn{min-width:40px;text-align:center}
+
+  /* keyboards */
+  .kbd{display:flex;flex-wrap:wrap;gap:3px;margin:8px 0}
+  .key{width:40px;height:58px;border:2.5px solid var(--ink);background:#fff;border-radius:5px 5px 9px 9px;
+    box-shadow:2px 3px 0 rgba(25,16,22,.7);font-size:10px;font-family:var(--sans);cursor:pointer;
+    user-select:none;touch-action:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;color:var(--ink2)}
+  .key.blk{background:var(--ink);color:#fff}
+  .key.active-key{transform:translate(1px,2px);box-shadow:1px 1px 0 rgba(25,16,22,.7);background:var(--accent);color:#fff}
+
+  .patgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin:10px 0;max-width:720px}
+  .patgrid .sbtn{text-align:center;padding:9px 2px;font-size:13px}
+
+  .looprow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+
+  /* dev tools (collapsible) */
+  details#dev{background:#fafafa;border:2px solid #999;box-shadow:none;font-family:var(--sans);border-radius:8px}
+  details#dev > summary{font-family:var(--marker);font-size:20px;cursor:pointer;padding:4px 2px;list-style:none}
+  details#dev > summary::-webkit-details-marker{display:none}
+  details#dev > summary::before{content:"▸ ";color:var(--accent)}
+  details#dev[open] > summary::before{content:"▾ "}
+  .devpanel{border:1px solid #ccc;border-radius:6px;padding:10px;margin:12px 0;background:#fff}
+  .devpanel h3{margin:0 0 6px;font-size:14px;font-family:var(--sans)}
+  code.hx{font-family:var(--mono);font-size:11px;background:#eee;border:1px solid #ccc;border-radius:3px;padding:1px 4px}
+  #monLog{height:280px;overflow-y:auto;border:1px solid #999;background:#fafafa;font-family:var(--mono);font-size:11px;padding:4px;white-space:pre}
+  #monLog .in{color:#06529b}#monLog .out{color:#1a7a1a}#monLog .err{color:#b00}
   .checkitem{border:1px solid #ccc;border-radius:4px;padding:8px;margin:6px 0}
   .checkitem textarea{width:100%;box-sizing:border-box;min-height:44px;font-size:13px}
-  .active-key{outline:3px solid #06529b}
-  #loadError{color:#b00;font-weight:bold}
-  input[type=range]{margin:0}
-  /* Shortcut Finder */
-  #scCtrls{position:sticky;top:0;background:#fff;padding:6px 0;z-index:1;border-bottom:1px solid #eee}
-  #scSearch{width:260px}
+  .note{color:#555;font-size:12px;margin:2px 0 8px}
+  .devpanel input[type=text],.devpanel select{font-size:13px;padding:2px}
+
+  /* shortcut finder */
+  #scCtrls{position:sticky;top:60px;background:var(--panel);padding:8px 0;z-index:2;border-bottom:2px dashed var(--ink)}
+  #scSearch{width:260px;font-size:13px;padding:4px;border:2px solid var(--ink);border-radius:6px}
+  #scCat,#scCap{font-size:13px;border:2px solid var(--ink);border-radius:6px;padding:2px}
   #scList{margin-top:8px}
-  .sc-cat{font-size:14px;margin:12px 0 4px;border-bottom:1px solid #ddd;padding-bottom:2px}
-  .sc-cat .cnt{color:#888;font-weight:normal;font-size:12px}
-  .sc-item{display:grid;grid-template-columns:210px 1fr auto;gap:10px;align-items:baseline;padding:5px 4px;border-bottom:1px solid #f0f0f0}
-  .sc-combo{display:flex;flex-wrap:wrap;gap:3px;align-items:center}
-  .sc-key{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:#2b2b2b;color:#fff;border-radius:3px;padding:1px 5px;white-space:nowrap}
+  .sc-cat{font-family:var(--marker);font-size:17px;margin:14px 0 4px;color:var(--accent2)}
+  .sc-cat .cnt{color:#999;font-size:12px}
+  .sc-item{display:grid;grid-template-columns:220px 1fr auto;gap:10px;align-items:baseline;padding:6px 4px;border-bottom:1px solid #eadfe4}
+  .sc-combo{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+  .sc-key{font-family:var(--mono);font-size:11px;background:var(--ink);color:#fff;border-radius:4px;padding:1px 6px;white-space:nowrap}
   .sc-plus{color:#aaa;font-size:11px}
-  .sc-name{font-weight:bold}
-  .sc-desc{color:#444;font-weight:normal;font-size:12px;margin-left:6px}
-  .sc-mode{color:#888;font-size:11px;margin-left:6px}
+  .sc-name{font-weight:700}.sc-desc{color:#444;font-size:12px;margin-left:6px}
+  .sc-mode{color:#999;font-size:11px;margin-left:6px}
   .sc-right{text-align:right;white-space:nowrap}
-  .sc-cap{font-size:11px;border-radius:3px;padding:1px 6px;cursor:help}
-  .sc-cap.full{background:#dff3df;color:#1a6b1a;border:1px solid #a9d8a9}
-  .sc-cap.partial{background:#fdf0d5;color:#8a5a00;border:1px solid #eccf8f}
-  .sc-cap.hw{background:#eee;color:#666;border:1px solid #ccc}
+  .sc-cap{font-size:11px;border-radius:5px;padding:1px 7px;cursor:help;border:2px solid var(--ink)}
+  .sc-cap.full{background:#c9f0cf}.sc-cap.partial{background:#fbe6b8}.sc-cap.hw{background:#e7e7e7;color:#666}
   .sc-link{font-size:11px;margin-left:8px}
   .sc-none{color:#888;font-style:italic;padding:8px 4px}
-  #panicBtn{background:#fdecec;border:1px solid #d98c8c;color:#a00000;font-weight:bold}
-  #panicBtn:active{background:#f6d0d0}
+  @media(max-width:640px){
+    #hero h1{font-size:40px}
+    .sc-item{grid-template-columns:1fr}
+    .knob{width:60px}
+  }
 </style>
 </head>
 <body>
-<h1>SP-404MK2 MIDI Test Harness</h1>
 <div id="loadError"></div>
 <div id="app" hidden>
+<header id="hero">
+  <h1>SP&#8209;404 <span>MKII</span></h1>
+  <p class="tag">a browser MIDI sketchpad · play the buttons</p>
+</header>
 
-<fieldset id="pSetup"><legend>1 · MIDI setup</legend>
+<nav id="nav">
+  <button data-t="setup">Setup</button>
+  <button data-t="fx">Effects</button>
+  <button data-t="pads">Pads</button>
+  <button data-t="keys">Keys</button>
+  <button data-t="patterns">Patterns</button>
+  <button data-t="looper">Looper</button>
+  <button data-t="transport">Transport</button>
+  <button data-t="dj">DJ</button>
+  <button data-t="shortcuts">Shortcuts</button>
+  <button data-t="dev">Dev</button>
+  <span class="status"><span class="lamp" id="lamp"></span><span id="connStatus">starting…</span></span>
+</nav>
+
+<div id="wrap">
+
+<section id="setup" class="card">
+  <h2><span class="n">1</span>Setup</h2>
+  <div class="row"><label>Output <select id="outSel"></select></label>
+    <label>Input <select id="inSel"></select></label>
+    <button id="rescanBtn" class="sbtn sm" type="button">Rescan</button></div>
   <div class="row">
-    <span class="lamp" id="lamp"></span><span id="connStatus">starting…</span>
-  </div>
-  <div class="row"><label>Output: <select id="outSel"></select></label>
-    <label>Input: <select id="inSel"></select></label>
-    <button id="rescanBtn" type="button">Rescan</button></div>
-  <div class="row">
-    <button id="panicBtn" type="button">⏻ Panic — all notes / sound off</button>
+    <button id="panicBtn" class="sbtn danger" type="button">⏻ Panic — all notes / sound off</button>
     <span class="note" id="panicNote"></span>
   </div>
-</fieldset>
+</section>
 
-<fieldset id="pFx"><legend>2 · Effects test (CC per bus channel)</legend>
-  <div class="note" id="fxDesc"></div>
+<section id="fx" class="card">
+  <h2><span class="n">2</span>Effects</h2>
+  <div class="sub" id="fxDesc"></div>
   <div id="fxRouting"></div>
-  <div class="cols" id="fxCols"></div>
-</fieldset>
+  <div id="fxCols"></div>
+</section>
 
-<fieldset id="pLooper"><legend>3 · Looper</legend>
-  <div class="note" id="looperDesc"></div>
-  <div id="looperRows"></div>
-</fieldset>
-
-<fieldset id="pPads"><legend>4 · Pad grid (MIDI Mode A)</legend>
-  <div class="note" id="padDesc"></div>
-  <div class="row"><label>Bank: <select id="padBank"></select></label>
-    <label>Velocity: <input type="range" id="padVel" min="1" max="127" value="100"> <span class="val" id="padVelVal">100</span></label>
-    <span>last sent: <code class="hx" id="padHex">—</code></span></div>
+<section id="pads" class="card">
+  <h2><span class="n">3</span>Pads</h2>
+  <div class="sub" id="padDesc"></div>
+  <div class="row"><b>Bank</b><div class="bankrow" id="padBanks"></div></div>
+  <div class="row"><span id="padVelMount"></span></div>
   <div class="padgrid" id="padGrid"></div>
-  <div class="row">
-    <button id="extBtn" type="button">EXT SOURCE</button>
-    <label><input type="radio" name="extMode" value="toggle" checked> toggle (single note-on)</label>
-    <label><input type="radio" name="extMode" value="gate"> gate (hold)</label>
-    <code class="hx" id="extHex">—</code>
+  <div class="row" id="extRow">
+    <span id="extMount"></span>
+    <button class="sbtn sm" id="extModeToggle" type="button">mode: toggle</button>
   </div>
   <div class="note" id="extDesc"></div>
-</fieldset>
+</section>
 
-<fieldset id="pChroma"><legend>5 · Chromatic keyboard</legend>
-  <div class="note" id="chromaDesc"></div>
+<section id="keys" class="card">
+  <h2><span class="n">4</span>Keys</h2>
+  <div class="sub" id="chromaDesc"></div>
   <div class="kbd" id="chromaKbd"></div>
-  <div class="row"><span>last sent: <code class="hx" id="chromaHex">—</code></span>
-    <button id="asoBtn" type="button">All Sound Off (CC120)</button><code class="hx" id="asoHex">—</code></div>
-</fieldset>
-
-<fieldset id="pPattern"><legend>6 · Pattern launch (Program Change)</legend>
-  <div class="note" id="patDesc"></div>
-  <div class="row"><label>Bank: <select id="patBank"></select></label>
-    <span>last sent: <code class="hx" id="patHex">—</code></span></div>
-  <div class="patgrid" id="patGrid"></div>
-</fieldset>
-
-<fieldset id="pDj"><legend>7 · DJ mode — recognized CCs</legend>
-  <div class="note" id="djWarn"></div>
-  <div id="djRows"></div>
-</fieldset>
-
-<fieldset id="pRt"><legend>8 · System realtime</legend>
-  <div class="note" id="rtDesc"></div>
-  <div class="row">
-    <button id="rtStart" type="button">Start (FA)</button><code class="hx" id="rtStartHex">—</code>
-    <button id="rtStop" type="button">Stop (FC)</button><code class="hx" id="rtStopHex">—</code>
-    <button id="rtCont" type="button">Continue (FB) — untested</button><code class="hx" id="rtContHex">—</code>
-  </div>
-  <div class="row">
-    <label>BPM: <input type="number" id="bpm" min="20" max="300" value="120" step="0.1" style="width:70px"></label>
-    <button id="clockBtn" type="button">Start clock (F8 · 24 ppqn)</button>
-    <span id="clockStatus">clock stopped</span>
-  </div>
-</fieldset>
-
-<fieldset id="pVoc"><legend>9 · Vocoder input</legend>
-  <div class="note" id="vocDesc"></div>
+  <div class="row"><span id="asoMount"></span></div>
+  <div class="sub" id="vocDesc" style="margin-top:14px"></div>
   <div class="kbd" id="vocKbd"></div>
-  <div class="row"><span>last sent: <code class="hx" id="vocHex">—</code></span></div>
-  <div class="row"><label>Pitch bend (snaps to center on release):
-    <input type="range" id="vocBend" min="-8192" max="8191" value="0" style="width:280px"></label>
-    <span class="val" id="vocBendVal" style="width:44px">0</span>
-    <code class="hx" id="vocBendHex">—</code></div>
-</fieldset>
+  <div class="row"><span id="vocBendMount"></span><span class="note">pitch bend springs back to center on release</span></div>
+</section>
 
-<fieldset id="pMon"><legend>10 · MIDI monitor</legend>
-  <div class="row">
-    <label>Filter: <input type="text" id="monFilter" placeholder="substring or regex, e.g. IN.*Ctrl[4-6]" style="width:280px"></label>
-    <button id="monClear" type="button">Clear</button>
-    <label><input type="checkbox" id="monHideRt" checked> hide Clock (F8) / Active Sensing (FE)</label>
-    <span class="note" id="monSuppressed"></span>
-  </div>
-  <div id="monLog"></div>
-</fieldset>
+<section id="patterns" class="card">
+  <h2><span class="n">5</span>Patterns</h2>
+  <div class="sub" id="patDesc"></div>
+  <div class="row"><b>Bank</b><div class="bankrow" id="patBanks"></div></div>
+  <div class="patgrid" id="patGrid"></div>
+</section>
 
-<fieldset id="pRaw"><legend>11 · Raw sender</legend>
-  <div class="row">
-    <label>Bytes (hex): <input type="text" id="raw0" placeholder="B0" size="4">
-    <input type="text" id="raw1" placeholder="13" size="4">
-    <input type="text" id="raw2" placeholder="7F" size="4"></label>
-    <button id="rawSend" type="button">Send</button>
-    <code class="hx" id="rawHex">—</code>
-    <span id="rawErr" style="color:#b00"></span>
-  </div>
-</fieldset>
+<section id="looper" class="card">
+  <h2><span class="n">6</span>Looper</h2>
+  <div class="sub" id="looperDesc"></div>
+  <div id="looperRows"></div>
+</section>
 
-<fieldset id="pCheck"><legend>12 · Verification checklist (open hardware questions)</legend>
-  <div id="checkItems"></div>
-</fieldset>
+<section id="transport" class="card">
+  <h2><span class="n">7</span>Transport</h2>
+  <div class="sub" id="rtDesc"></div>
+  <div class="row" id="rtMount"></div>
+  <div class="row" id="clockMount"></div>
+</section>
 
-<fieldset id="pShortcuts"><legend>13 · Shortcut Finder (hardware button combos)</legend>
-  <div class="note" id="scDesc"></div>
+<section id="dj" class="card">
+  <h2><span class="n">8</span>DJ mode</h2>
+  <div class="sub" id="djWarn"></div>
+  <div class="knob-row" id="djRows"></div>
+</section>
+
+<section id="shortcuts" class="card">
+  <h2><span class="n">9</span>Shortcut Finder</h2>
+  <div class="sub" id="scDesc"></div>
   <div id="scCtrls" class="row">
     <input type="text" id="scSearch" placeholder="Search combos, names, descriptions…">
-    <label>Category: <select id="scCat"><option value="">All</option></select></label>
-    <label>Show: <select id="scCap">
+    <label>Category <select id="scCat"><option value="">All</option></select></label>
+    <label>Show <select id="scCap">
       <option value="">All</option>
-      <option value="app">App can do it (full/partial)</option>
+      <option value="app">App can do it</option>
       <option value="full">App: full</option>
       <option value="partial">App: partial</option>
       <option value="hw">Hardware only</option>
@@ -198,9 +278,43 @@
     <span class="note" id="scCount"></span>
   </div>
   <div id="scList"></div>
-</fieldset>
+</section>
 
-</div>
+<details id="dev" class="card">
+  <summary>Developer tools — MIDI monitor · raw sender · verification checklist</summary>
+
+  <div class="devpanel" id="pMon">
+    <h3>MIDI monitor</h3>
+    <div class="row">
+      <label>Filter <input type="text" id="monFilter" placeholder="substring or regex, e.g. IN.*Ctrl[4-6]" style="width:280px"></label>
+      <button id="monClear" class="sbtn sm" type="button">Clear</button>
+      <label><input type="checkbox" id="monHideRt" checked> hide Clock (F8) / Active Sensing (FE)</label>
+      <span class="note" id="monSuppressed"></span>
+    </div>
+    <div id="monLog"></div>
+  </div>
+
+  <div class="devpanel">
+    <h3>Raw sender</h3>
+    <div class="row">
+      <label>Bytes (hex) <input type="text" id="raw0" placeholder="B0" size="4">
+      <input type="text" id="raw1" placeholder="13" size="4">
+      <input type="text" id="raw2" placeholder="7F" size="4"></label>
+      <button id="rawSend" class="sbtn sm" type="button">Send</button>
+      <code class="hx" id="rawHex">—</code>
+      <span id="rawErr" style="color:#b00"></span>
+    </div>
+  </div>
+
+  <div class="devpanel">
+    <h3>Verification checklist (open hardware questions)</h3>
+    <div id="checkItems"></div>
+  </div>
+</details>
+
+</div><!-- /wrap -->
+</div><!-- /app -->
+
 <script>
 'use strict';
 (async function(){
@@ -218,6 +332,12 @@ try{
 }
 document.getElementById('app').hidden = false;
 
+/* ---------- tiny DOM helpers ---------- */
+const $ = id => document.getElementById(id);
+const el = (t,c,x)=>{ const e=document.createElement(t); if(c)e.className=c; if(x!=null)e.textContent=x; return e; };
+const div=(c,x)=>el('div',c,x), span=(c,x)=>el('span',c,x);
+const sbtn=(x,c)=>{ const b=el('button','sbtn'+(c?' '+c:''),x); b.type='button'; return b; };
+
 /* ---------- derive constants from the map ---------- */
 const FXCC = MAP.effects_control.cc;
 let CC_SW = null, CC_SEL = null;
@@ -229,7 +349,7 @@ for(const [num, def] of Object.entries(FXCC)){
 }
 const TABLES = MAP.cc83_effect_tables;
 const PARAMS = MAP.effects_parameters;
-const BUSES = [                            // per spec: bus_1_2 covers buses 1+2, bus_3_4 covers 3+4, input_fx covers INPUT
+const BUSES = [
   {label:'BUS 1', ch:1, table:'bus_1_2'},
   {label:'BUS 2', ch:2, table:'bus_1_2'},
   {label:'BUS 3', ch:3, table:'bus_3_4'},
@@ -237,12 +357,13 @@ const BUSES = [                            // per spec: bus_1_2 covers buses 1+2
   {label:'INPUT', ch:5, table:'input_fx'},
 ];
 const busByCh = {}; BUSES.forEach(b=>busByCh[b.ch]=b);
-const busEffect = {};                      // ch → last known effect name (from UI or any CC83 seen in either direction)
+const busEffect = {};
 
 const LOOP = MAP.looper_mode;
 const PADS = MAP.pads_and_patterns;
-const PAD_MAP = PADS.midi_mode_A.pad_note_map;      // authoritative note<->pad table (grid display order: note ascending = top-left to bottom-right)
+const PAD_MAP = PADS.midi_mode_A.pad_note_map;      // authoritative note<->pad table
 const padNumForNote = {}; PAD_MAP.forEach(p=> padNumForNote[p.note] = p.pad);
+const padToNote = {}; PAD_MAP.forEach(p=> padToNote[p.pad] = p.note);
 const EXT_NOTE = MAP.ext_source_control.note_mode_A;
 const CHROMA_CH = PADS.chromatic.channel;
 const chromaR = PADS.chromatic.notes.match(/(\d+)-(\d+)/);
@@ -253,49 +374,42 @@ const VOC_CH = +(Object.keys(MAP.channel_map).find(k=>/vocoder/i.test(MAP.channe
 const BANK_LETTERS = 'ABCDEFGHIJ';
 const DJ_REC = MAP.dj_mode.recognized;
 const DJ_TX  = MAP.dj_mode.transmit_only;
+const DJ_ROWS = [ {cc:7, ch:1}, {cc:7, ch:2}, {cc:7, ch:3}, {cc:8, ch:1} ];   // CC7 ch1-3, CC8 ch1
 
-/* ---------- MIDI plumbing (same shape as the VG800 tuner) ---------- */
+/* ---------- MIDI plumbing ---------- */
 let midiAccess = null, midiOut = null, midiIn = null;
-const $ = id => document.getElementById(id);
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
-
 function hex(bytes){ return bytes.map(b=>b.toString(16).toUpperCase().padStart(2,'0')).join(' '); }
 function noteName(n){ return ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][n%12] + (Math.floor(n/12)-1); }
 
 function setStatus(){
   const ok = !!midiOut;
   $('lamp').classList.toggle('on', ok);
-  const outName = midiOut ? midiOut.name : 'none';
-  const inName  = midiIn ? midiIn.name : 'none';
   $('connStatus').textContent = ok
-    ? 'connected — OUT: '+outName+' · IN: '+inName
-    : 'no MIDI output — OUT: none · IN: '+inName;
+    ? 'OUT: '+midiOut.name+' · IN: '+(midiIn?midiIn.name:'none')
+    : 'no MIDI output';
 }
-
 function setInput(inp){
   if(midiIn) midiIn.onmidimessage = null;
   midiIn = inp || null;
   if(midiIn) midiIn.onmidimessage = e => logMsg('IN', [...e.data]);
 }
-
 function refreshPorts(){
   const outs = midiAccess ? [...midiAccess.outputs.values()] : [];
   const ins  = midiAccess ? [...midiAccess.inputs.values()]  : [];
   const outSel = $('outSel'), inSel = $('inSel');
-
   outSel.innerHTML = '';
   if(!outs.length){ outSel.innerHTML = '<option value="">No outputs</option>'; midiOut = null; }
   else{
-    outs.forEach(o=>{ const op=document.createElement('option'); op.value=o.id; op.textContent=o.name; outSel.appendChild(op); });
+    outs.forEach(o=>{ const op=el('option',null,o.name); op.value=o.id; outSel.appendChild(op); });
     const saved = lsGet('sp404_out');
     const pick = outs.find(o=>o.id===saved) || outs.find(o=>/sp-?404|mk2/i.test(o.name)) || outs[0];
-    outSel.value = pick.id; midiOut = pick;   // auto-picks are never persisted — only a user choice writes localStorage, so the saved SP id survives loading before the SP is plugged in
+    outSel.value = pick.id; midiOut = pick;
   }
-
   inSel.innerHTML = '<option value="">(none)</option>';
-  ins.forEach(i=>{ const op=document.createElement('option'); op.value=i.id; op.textContent=i.name; inSel.appendChild(op); });
-  const savedIn = lsGet('sp404_in');   // null = never chosen → auto-pick; '' = user chose none
+  ins.forEach(i=>{ const op=el('option',null,i.name); op.value=i.id; inSel.appendChild(op); });
+  const savedIn = lsGet('sp404_in');
   let pickIn = null;
   if(savedIn === null) pickIn = ins.find(i=>/sp-?404|mk2/i.test(i.name)) || ins[0] || null;
   else if(savedIn !== '') pickIn = ins.find(i=>i.id===savedIn) || ins.find(i=>/sp-?404|mk2/i.test(i.name)) || ins[0] || null;
@@ -303,20 +417,16 @@ function refreshPorts(){
   setInput(pickIn);
   setStatus();
 }
-
 $('outSel').addEventListener('change', e=>{
   const outs = [...midiAccess.outputs.values()];
   midiOut = outs.find(o=>o.id===e.target.value) || null;
-  if(midiOut) lsSet('sp404_out', midiOut.id);
-  else refreshPorts();                     // picked id vanished (device unplugged) → re-resolve
+  if(midiOut) lsSet('sp404_out', midiOut.id); else refreshPorts();
   setStatus();
 });
 $('inSel').addEventListener('change', e=>{
   const ins = [...midiAccess.inputs.values()];
   const pick = ins.find(i=>i.id===e.target.value) || null;
-  setInput(pick);
-  lsSet('sp404_in', pick ? pick.id : '');
-  setStatus();
+  setInput(pick); lsSet('sp404_in', pick ? pick.id : ''); setStatus();
 });
 $('rescanBtn').addEventListener('click', refreshPorts);
 $('panicBtn').addEventListener('click', panicAll);
@@ -343,28 +453,71 @@ const sendCC   = (ch, cc, val, hexEl) => sendBytes([0xB0|((ch-1)&0x0F), cc&0x7F,
 const sendOn   = (ch, note, vel, hexEl) => sendBytes([0x90|((ch-1)&0x0F), note&0x7F, vel&0x7F], hexEl);
 const sendOff  = (ch, note, hexEl) => sendBytes([0x80|((ch-1)&0x0F), note&0x7F, 0], hexEl);
 const sendPC   = (ch, pgm, hexEl) => sendBytes([0xC0|((ch-1)&0x0F), pgm&0x7F], hexEl);
-function sendBend(ch, val, hexEl){        // val −8192..8191 → 14-bit
+function sendBend(ch, val, hexEl){
   const v = Math.max(0, Math.min(16383, val+8192));
   return sendBytes([0xE0|((ch-1)&0x0F), v&0x7F, (v>>7)&0x7F], hexEl);
 }
 
-/* ---------- panic: blanket notes-off / sound-off on all 16 channels ---------- */
+/* ---------- panic ---------- */
 function panicAll(){
   const msgs = [];
   for(let ch=1; ch<=16; ch++){
     const st = (ch-1)&0x0F;
-    msgs.push([0xB0|st, 120, 0]);   // All Sound Off
-    msgs.push([0xB0|st, 123, 0]);   // All Notes Off
-    msgs.push([0xB0|st, 121, 0]);   // Reset All Controllers
-    msgs.push([0xE0|st, 0, 64]);    // pitch bend → center (8192)
+    msgs.push([0xB0|st, 120, 0], [0xB0|st, 123, 0], [0xB0|st, 121, 0], [0xE0|st, 0, 64]);
   }
   let sent = 0, failed = false;
   if(midiOut){ for(const m of msgs){ try{ midiOut.send(m); sent++; }catch(e){ failed = true; } } }
-  document.querySelectorAll('.active-key').forEach(el=>el.classList.remove('active-key'));   // clear stuck held-key highlights
+  document.querySelectorAll('.active-key').forEach(el=>el.classList.remove('active-key'));
   const line = fmtTime()+' OUT PANIC     All Sound Off + All Notes Off + Reset Ctrls + pitch-center, ch1-16 ('
     + (midiOut ? sent+' msgs'+(failed?' (some failed)':'') : 'NO OUTPUT PORT') + ')';
-  monBuf.push({dir:'OUT', line}); if(monBuf.length > MON_CAP) monBuf.shift();   // one summary line instead of 64
+  monBuf.push({dir:'OUT', line}); if(monBuf.length > MON_CAP) monBuf.shift();
   if(monMatch(line)) appendMonLine('OUT', line);
+}
+
+/* ---------- reusable KNOB control ---------- */
+function makeKnob(opts){
+  const min = opts.min!=null?opts.min:0, max = opts.max!=null?opts.max:127;
+  let value = opts.value!=null?opts.value:min;
+  const def = opts.defaultVal!=null?opts.defaultVal:value;
+  const fmt = opts.format || (v=>String(Math.round(v)));
+  const step = opts.step || 1;
+  const root = div('knob'); root.tabIndex = 0;
+  const dial = div('knob-dial'); const ind = div('knob-ind'); dial.appendChild(ind);
+  const labEl = div('knob-label', opts.label||''); const valEl = div('knob-val');
+  root.append(dial, labEl, valEl);
+  let enabled = true;
+  const clamp = v => Math.max(min, Math.min(max, v));
+  function paint(){
+    const frac = (value-min)/((max-min)||1);
+    ind.style.transform = 'rotate('+(-135+frac*270)+'deg)';
+    valEl.textContent = fmt(value);
+  }
+  function setV(v, silent){
+    v = clamp(Math.round(v));
+    if(v===value){ paint(); return; }
+    value = v; paint();
+    if(!silent && opts.onChange) opts.onChange(value);
+  }
+  paint();
+  let dragging=false, startY=0, startVal=0;
+  dial.addEventListener('pointerdown', e=>{ if(!enabled) return; e.preventDefault(); dragging=true; startY=e.clientY; startVal=value; try{dial.setPointerCapture(e.pointerId);}catch(_){}});
+  dial.addEventListener('pointermove', e=>{ if(!dragging) return; setV(startVal + (startY-e.clientY)*((max-min)/200)); });
+  const endDrag = e=>{ if(!dragging) return; dragging=false; try{dial.releasePointerCapture(e.pointerId);}catch(_){}
+    if(opts.springBack) setV(def); };
+  dial.addEventListener('pointerup', endDrag);
+  dial.addEventListener('pointercancel', endDrag);
+  dial.addEventListener('wheel', e=>{ if(!enabled) return; e.preventDefault(); setV(value + (e.deltaY<0?step:-step)); }, {passive:false});
+  root.addEventListener('dblclick', ()=>{ if(enabled) setV(def); });
+  root.addEventListener('keydown', e=>{ if(!enabled) return;
+    if(e.key==='ArrowUp'||e.key==='ArrowRight'){ e.preventDefault(); setV(value+step); }
+    else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ e.preventDefault(); setV(value-step); } });
+  return {
+    el:root, cc:opts.cc,
+    set:(v,s)=>setV(v,s), get:()=>value,
+    setLabel:t=>{ labEl.textContent=t; },
+    setTitle:t=>{ root.title=t||''; },
+    setEnabled:on=>{ enabled=!!on; root.classList.toggle('disabled', !on); },
+  };
 }
 
 /* ---------- monitor ---------- */
@@ -373,18 +526,9 @@ const monBuf = [];
 let monMatch = () => true;
 let supClock = 0, supSense = 0;
 const monLog = $('monLog');
-
-function fmtTime(){
-  const d = new Date();
-  return d.toTimeString().slice(0,8) + '.' + String(d.getMilliseconds()).padStart(3,'0');
-}
-
+function fmtTime(){ const d = new Date(); return d.toTimeString().slice(0,8) + '.' + String(d.getMilliseconds()).padStart(3,'0'); }
 function ctrlIdx(cc){ return CTRL_CCS.indexOf(cc); }
-function paramFor(ch, cc){
-  const eff = busEffect[ch];
-  const ps = eff && PARAMS[eff];
-  return ps ? ps.find(p=>p.cc===cc) : null;
-}
+function paramFor(ch, cc){ const eff = busEffect[ch]; const ps = eff && PARAMS[eff]; return ps ? ps.find(p=>p.cc===cc) : null; }
 function looperDecode(cc, val){
   const def = LOOP.cc[String(cc)];
   if(!def) return null;
@@ -397,20 +541,15 @@ function looperDecode(cc, val){
   }
   return 'Looper '+def.function + (match ? ' — '+match : '');
 }
-
 function describe(bytes){
   const st = bytes[0];
-  if(st >= 0xF8){
-    return {0xF8:'Timing Clock',0xFA:'Start',0xFB:'Continue',0xFC:'Stop',0xFE:'Active Sensing',0xFF:'System Reset'}[st] || 'Realtime';
-  }
+  if(st >= 0xF8) return {0xF8:'Timing Clock',0xFA:'Start',0xFB:'Continue',0xFC:'Stop',0xFE:'Active Sensing',0xFF:'System Reset'}[st] || 'Realtime';
   if(st === 0xF0) return 'SysEx ('+bytes.length+' bytes)';
   if((st & 0x80) === 0) return 'data bytes (running status?)';
-  const type = st & 0xF0, ch = (st & 0x0F) + 1;
-  const chs = 'ch'+ch;
+  const type = st & 0xF0, ch = (st & 0x0F) + 1; const chs = 'ch'+ch;
   if(type === 0x90 || type === 0x80){
     const n = bytes[1], vel = bytes[2];
-    const on = type === 0x90 && vel > 0;
-    const kind = on ? 'NoteOn' : 'NoteOff';
+    const on = type === 0x90 && vel > 0; const kind = on ? 'NoteOn' : 'NoteOff';
     let role = '';
     if(ch === CHROMA_CH) role = 'Chromatic '+noteName(n);
     else if(ch === VOC_CH) role = 'Vocoder '+noteName(n);
@@ -422,79 +561,50 @@ function describe(bytes){
     return chs+' '+kind+' '+n+' v'+vel+' → '+role;
   }
   if(type === 0xB0){
-    const cc = bytes[1], val = bytes[2];
-    const base = chs+' CC'+cc+'='+val;
-    const bus = busByCh[ch];
+    const cc = bytes[1], val = bytes[2]; const base = chs+' CC'+cc+'='+val; const bus = busByCh[ch];
     if(bus){
       if(cc === CC_SW) return base+' → '+bus.label+' EFX '+(val>=64?'ON':'OFF');
       if(cc === CC_SEL){
         const name = TABLES[bus.table][String(val)];
-        if(name !== undefined) busEffect[ch] = name;   // both directions keep the per-bus effect state warm for Ctrl decoding
+        if(name !== undefined) busEffect[ch] = name;
         return base+' → '+bus.label+' select '+(name !== undefined ? name : '(out of range — ignored)');
       }
       const ci = ctrlIdx(cc);
-      if(ci >= 0){
-        const p = paramFor(ch, cc);
-        return base+' → '+bus.label+' Ctrl'+(ci+1)+(p ? ' ('+p.name+')' : '');
-      }
+      if(ci >= 0){ const p = paramFor(ch, cc); return base+' → '+bus.label+' Ctrl'+(ci+1)+(p ? ' ('+p.name+')' : ''); }
     }
-    if(ch === LOOP.channel){
-      const ld = looperDecode(cc, val);
-      if(ld) return base+' → '+ld;
-    }
+    if(ch === LOOP.channel){ const ld = looperDecode(cc, val); if(ld) return base+' → '+ld; }
     if(DJ_REC[String(cc)] && DJ_ROWS.some(r=>r.cc===cc && r.ch===ch)) return base+' → DJ '+DJ_REC[String(cc)];
     if(DJ_TX[String(cc)]) return base+' → DJ '+DJ_TX[String(cc)]+' (transmit-only)';
     if(cc >= 120) return base+' → '+({120:'All Sound Off',121:'Reset All Controllers',123:'All Notes Off'}[cc]||'Channel Mode');
     return base;
   }
-  if(type === 0xC0){
-    const p = bytes[1];
-    const bank = (ch>=1 && ch<=10) ? ' (bank '+BANK_LETTERS[ch-1]+')' : '';
-    return chs+' ProgramChange '+p+' → Pattern '+(p+1)+bank;
-  }
-  if(type === 0xE0){
-    const v = (bytes[2]<<7 | bytes[1]) - 8192;
-    return chs+' PitchBend '+(v>0?'+':'')+v+(ch===VOC_CH?' → Vocoder':'');
-  }
+  if(type === 0xC0){ const p = bytes[1]; const bank = (ch>=1 && ch<=10) ? ' (bank '+BANK_LETTERS[ch-1]+')' : ''; return chs+' ProgramChange '+p+' → Pattern '+(p+1)+bank; }
+  if(type === 0xE0){ const v = (bytes[2]<<7 | bytes[1]) - 8192; return chs+' PitchBend '+(v>0?'+':'')+v+(ch===VOC_CH?' → Vocoder':''); }
   if(type === 0xA0) return chs+' PolyPressure '+bytes[1]+'='+bytes[2];
   if(type === 0xD0) return chs+' ChannelPressure '+bytes[1];
   return 'status '+hex([st]);
 }
-
-function updateSuppressed(){
-  $('monSuppressed').textContent = (supClock||supSense)
-    ? 'suppressed: '+supClock+' clock, '+supSense+' sensing' : '';
-}
-
+function updateSuppressed(){ $('monSuppressed').textContent = (supClock||supSense) ? 'suppressed: '+supClock+' clock, '+supSense+' sensing' : ''; }
 function logMsg(dir, bytes, extra){
   if($('monHideRt').checked && (bytes[0]===0xF8 || bytes[0]===0xFE)){
     if(bytes[0]===0xF8) supClock++; else supSense++;
-    updateSuppressed();
-    return;
+    updateSuppressed(); return;
   }
   const line = fmtTime()+' '+dir.padEnd(3)+' '+hex(bytes).padEnd(9)+' '+describe(bytes)+(extra||'');
-  monBuf.push({dir, line});
-  if(monBuf.length > MON_CAP) monBuf.shift();
+  monBuf.push({dir, line}); if(monBuf.length > MON_CAP) monBuf.shift();
   if(monMatch(line)) appendMonLine(dir, line);
 }
-
 function appendMonLine(dir, line){
   const nearBottom = monLog.scrollTop + monLog.clientHeight >= monLog.scrollHeight - 30;
-  const div = document.createElement('div');
-  div.className = dir==='IN' ? 'in' : (/SEND FAILED/.test(line) ? 'err' : 'out');
-  div.textContent = line;
-  monLog.appendChild(div);
+  const d = el('div', dir==='IN' ? 'in' : (/SEND FAILED/.test(line) ? 'err' : 'out'), line);
+  monLog.appendChild(d);
   while(monLog.childElementCount > MON_CAP) monLog.firstElementChild.remove();
   if(nearBottom) monLog.scrollTop = monLog.scrollHeight;
 }
-
 function applyFilter(){
   const q = $('monFilter').value;
   if(!q){ monMatch = () => true; }
-  else{
-    try{ const re = new RegExp(q, 'i'); monMatch = l => re.test(l); }
-    catch(e){ const s = q.toLowerCase(); monMatch = l => l.toLowerCase().includes(s); }
-  }
+  else{ try{ const re = new RegExp(q, 'i'); monMatch = l => re.test(l); } catch(e){ const s = q.toLowerCase(); monMatch = l => l.toLowerCase().includes(s); } }
   monLog.innerHTML = '';
   monBuf.forEach(e => { if(monMatch(e.line)) appendMonLine(e.dir, e.line); });
   monLog.scrollTop = monLog.scrollHeight;
@@ -502,328 +612,257 @@ function applyFilter(){
 $('monFilter').addEventListener('input', applyFilter);
 $('monClear').addEventListener('click', ()=>{ monBuf.length = 0; monLog.innerHTML=''; supClock = supSense = 0; updateSuppressed(); });
 
-/* ---------- panel 2: effects ---------- */
-$('fxDesc').textContent = MAP.effects_control.description+' EFX switch = CC'+CC_SW+', select = CC'+CC_SEL+', Ctrl 1-6 = CC '+CTRL_CCS.join('/')+'.';
+/* ---------- EFFECTS ---------- */
+$('fxDesc').textContent = MAP.effects_control.description+' EFX switch = CC'+CC_SW+', select = CC'+CC_SEL+', Ctrl 1-6 = CC '+CTRL_CCS.join('/')+'. Drag knobs (or scroll / double-click to reset).';
 BUSES.forEach(bus=>{
-  const col = document.createElement('div'); col.className = 'fxcol';
-  const h = document.createElement('h3'); h.textContent = bus.label+' — ch'+bus.ch+' ('+bus.table+')'; col.appendChild(h);
-  const ann = document.createElement('div'); ann.className = 'fx-ann'; col.appendChild(ann);
-
-  const swRow = document.createElement('div'); swRow.className = 'row';
-  const swLabel = document.createElement('label');
-  const sw = document.createElement('input'); sw.type = 'checkbox';
-  swLabel.append(sw, ' EFX on (CC'+CC_SW+')');
-  const swHex = document.createElement('code'); swHex.className = 'hx'; swHex.textContent = '—';
-  swRow.append(swLabel, swHex); col.appendChild(swRow);
-  sw.addEventListener('change', ()=> sendCC(bus.ch, CC_SW, sw.checked?127:0, swHex));
-
-  const selRow = document.createElement('div'); selRow.className = 'row';
-  const sel = document.createElement('select');
-  Object.entries(TABLES[bus.table])
-    .sort((a,b)=>+a[0]-+b[0])
-    .forEach(([code,name])=>{
-      const op = document.createElement('option');
-      op.value = code; op.dataset.name = name; op.textContent = code+': '+name;
-      sel.appendChild(op);
-    });
-  const selHex = document.createElement('code'); selHex.className = 'hx'; selHex.textContent = '—';
-  selRow.append(sel, selHex); col.appendChild(selRow);
-
-  bus.sliders = [];
-  CTRL_CCS.forEach((cc, i)=>{
-    const row = document.createElement('div'); row.className = 'slrow';
-    const lbl = document.createElement('span'); lbl.className = 'lbl';
-    const input = document.createElement('input'); input.type = 'range'; input.min = 0; input.max = 127; input.value = 0;
-    const val = document.createElement('span'); val.className = 'val'; val.textContent = '0';
-    const hx = document.createElement('code'); hx.className = 'hx'; hx.textContent = '—';
-    row.append(lbl, val, hx, input);
-    col.appendChild(row);
-    input.addEventListener('input', ()=>{ val.textContent = input.value; sendCC(bus.ch, cc, +input.value, hx); });
-    bus.sliders.push({row, lbl, input, val, hx, cc});
+  const strip = div('bus'); strip.dataset.ch = bus.ch;
+  const head = div('bus-head');
+  const efx = sbtn('EFX'); efx.classList.add('sm');
+  let efxOn = false;
+  efx.addEventListener('click', ()=>{ efxOn = !efxOn; efx.classList.toggle('on', efxOn); sendCC(bus.ch, CC_SW, efxOn?127:0, null); });
+  const lcd = div('lcd'); const sel = el('select');
+  Object.entries(TABLES[bus.table]).sort((a,b)=>+a[0]-+b[0]).forEach(([code,name])=>{
+    const op = el('option', null, code+': '+name); op.value = code; op.dataset.name = name; sel.appendChild(op);
   });
+  lcd.appendChild(sel);
+  const ann = span('bus-ann','');
+  head.append(span('bus-name', bus.label), span('bus-ch','ch'+bus.ch), efx, lcd, ann);
+
+  const krow = div('knob-row');
+  bus.knobs = CTRL_CCS.map((cc,i)=> {
+    const k = makeKnob({ label:'CTRL '+(i+1), cc, value:0, onChange:v=>sendCC(bus.ch, cc, v, null) });
+    krow.appendChild(k.el); return k;
+  });
+  strip.append(head, krow);
 
   function applyParams(){
     const name = sel.selectedOptions[0] ? sel.selectedOptions[0].dataset.name : null;
     busEffect[bus.ch] = name;
     const ps = name ? PARAMS[name] : null;
-    bus.sliders.forEach((s, i)=>{
-      const p = ps ? ps.find(p=>p.cc===s.cc) : null;
-      if(p){
-        s.lbl.textContent = p.name+' — '+p.value_range+' (CC'+s.cc+')';
-        s.lbl.title = p.hint || '';
-        s.input.disabled = false; delete s.row.dataset.off;
-      }else if(ps){
-        s.lbl.textContent = 'CTRL '+(i+1)+' (CC'+s.cc+') — unused';
-        s.lbl.title = '';
-        s.input.disabled = true; s.row.dataset.off = '1';
-      }else{
-        s.lbl.textContent = 'CTRL '+(i+1)+' (CC'+s.cc+')';
-        s.lbl.title = 'parameter names unknown for this selection';
-        s.input.disabled = false; delete s.row.dataset.off;
-      }
+    bus.knobs.forEach((k,i)=>{
+      const p = ps ? ps.find(pp=>pp.cc===k.cc) : null;
+      if(p){ k.setLabel(p.name); k.setTitle(p.value_range+(p.hint?' — '+p.hint:'')+' (CC'+k.cc+')'); k.setEnabled(true); }
+      else if(ps){ k.setLabel('CTRL '+(i+1)); k.setTitle('unused by this effect (CC'+k.cc+')'); k.setEnabled(false); }
+      else { k.setLabel('CTRL '+(i+1)); k.setTitle('CC'+k.cc+' — param names unknown for this selection'); k.setEnabled(true); }
     });
   }
-  sel.addEventListener('change', ()=>{ sendCC(bus.ch, CC_SEL, +sel.value, selHex); applyParams(); });
+  sel.addEventListener('change', ()=>{ sendCC(bus.ch, CC_SEL, +sel.value, null); applyParams(); });
   applyParams();
-  bus.selEl = sel; bus.swEl = sw; bus.swHex = swHex; bus.selHex = selHex; bus.applyParams = applyParams;
-  bus.colEl = col; bus.annEl = ann;
-  $('fxCols').appendChild(col);
+  bus.selEl = sel; bus.setEfx = on=>{ efxOn=on; efx.classList.toggle('on',on); };
+  bus.applyParams = applyParams; bus.stripEl = strip; bus.annEl = ann;
+  $('fxCols').appendChild(strip);
 });
 
-/* ---------- declared audio routing (hardware-only, not MIDI-readable) drives per-column state ---------- */
+/* ---------- declared audio routing ---------- */
 const ROUTING = MAP.audio_routing;
 if(ROUTING && Array.isArray(ROUTING.params)){
   const routeState = (function(){
-    let saved = {};
-    try{ saved = JSON.parse(lsGet('sp404_routing')) || {}; }catch(e){}
-    const st = {};
-    ROUTING.params.forEach(p=>{ st[p.key] = (p.options.includes(saved[p.key]) ? saved[p.key] : p.ui_default); });
+    let saved = {}; try{ saved = JSON.parse(lsGet('sp404_routing')) || {}; }catch(e){}
+    const st = {}; ROUTING.params.forEach(p=>{ st[p.key] = (p.options.includes(saved[p.key]) ? saved[p.key] : p.ui_default); });
     return st;
   })();
-  const paramByKey = {}; ROUTING.params.forEach(p=> paramByKey[p.key] = p);
-
   const wrap = $('fxRouting');
-  const title = document.createElement('div'); title.className = 'title';
-  title.textContent = 'Your SP audio routing (declare it — the app can’t read it; it always sends on ch1-5)';
-  wrap.appendChild(title);
-  const ctrls = document.createElement('div');
+  wrap.appendChild(div('title','Your SP audio routing — declare it (the app can’t read it; it always sends on ch1-5)'));
+  const ctrls = div();
   ROUTING.params.forEach(p=>{
-    const lab = document.createElement('label');
-    lab.appendChild(document.createTextNode(p.label+' '));
-    const sel = document.createElement('select');
-    p.options.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; sel.appendChild(op); });
-    sel.value = routeState[p.key];
-    if(p.note) sel.title = p.note;
-    sel.addEventListener('change', ()=>{ routeState[p.key] = sel.value; lsSet('sp404_routing', JSON.stringify(routeState)); applyRouting(); });
-    lab.appendChild(sel);
-    ctrls.appendChild(lab);
+    const lab = el('label'); lab.appendChild(document.createTextNode(p.label+' '));
+    const sel = el('select');
+    p.options.forEach(o=>{ const op=el('option',null,o); op.value=o; sel.appendChild(op); });
+    sel.value = routeState[p.key]; if(p.note) sel.title = p.note;
+    sel.addEventListener('change', ()=>{ routeState[p.key]=sel.value; lsSet('sp404_routing', JSON.stringify(routeState)); applyRouting(); });
+    lab.appendChild(sel); ctrls.appendChild(lab);
   });
   wrap.appendChild(ctrls);
-  const rnote = document.createElement('div'); rnote.className = 'rn'; wrap.appendChild(rnote);
-
+  const rnote = div('rn'); wrap.appendChild(rnote);
   function applyRouting(){
     const serial = /TYPE A/i.test(routeState.bus12);
     const favOff = /bypass/i.test(routeState.favorite);
     const inputBus = routeState.inputBus;
     const dryThroughMaster = /before BUS 3/i.test(routeState.dryRouting);
-
     BUSES.forEach(bus=>{
       if(!bus.annEl) return;
-      bus.colEl.classList.remove('fx-inactive');
+      bus.stripEl.classList.remove('inactive');
       if(bus.ch === 1) bus.annEl.textContent = serial ? 'Insert FX · serial → feeds BUS 2' : 'Insert FX · parallel (independent)';
       else if(bus.ch === 2) bus.annEl.textContent = serial ? 'Insert FX · serial ← receives BUS 1' : 'Insert FX · parallel (independent)';
       else if(bus.ch === 3 || bus.ch === 4){
-        if(favOff){
-          bus.colEl.classList.add('fx-inactive');
-          bus.annEl.textContent = '⚠ INACTIVE — FAVORITE = Bypass · CC still sends, not audible';
-        }else{
-          bus.annEl.textContent = 'Master FX · FAVORITE ' + routeState.favorite + (bus.ch===3 && dryThroughMaster ? ' · DRY runs through here' : '');
-        }
-      }else if(bus.ch === 5){
-        bus.annEl.textContent = 'External input → feeds ' + inputBus + (inputBus === 'DRY' ? ' (skips BUS 1/2 insert FX)' : '');
-      }
+        if(favOff){ bus.stripEl.classList.add('inactive'); bus.annEl.textContent = '⚠ INACTIVE — FAVORITE = Bypass · CC still sends, not audible'; }
+        else bus.annEl.textContent = 'Master FX · FAVORITE ' + routeState.favorite + (bus.ch===3 && dryThroughMaster ? ' · DRY runs through here' : '');
+      }else if(bus.ch === 5) bus.annEl.textContent = 'External input → feeds ' + inputBus + (inputBus === 'DRY' ? ' (skips BUS 1/2 insert FX)' : '');
     });
-    rnote.textContent = 'Signal: '
-      + (serial ? 'BUS1→BUS2' : 'BUS1 ∥ BUS2') + ' → '
-      + (favOff ? '(BUS3/4 bypassed)' : 'BUS3→BUS4') + ' → OUT'
-      + ' · DRY ' + routeState.dryRouting + ' · INPUT→' + inputBus
-      + '.  These are hardware-only settings; nothing here is sent over MIDI.';
-  };
+    rnote.textContent = 'Signal: ' + (serial ? 'BUS1→BUS2' : 'BUS1 ∥ BUS2') + ' → '
+      + (favOff ? '(BUS3/4 bypassed)' : 'BUS3→BUS4') + ' → OUT · DRY ' + routeState.dryRouting + ' · INPUT→' + inputBus
+      + '.  Hardware-only settings; nothing here is sent over MIDI.';
+  }
   applyRouting();
 }
 
-/* ---------- panel 3: looper (rows generated from the JSON values strings) ---------- */
+/* ---------- shared key helper: note on while pressed, off on release ---------- */
+function pressable(node, getCh, note, getVel){
+  let downCh = null;
+  node.addEventListener('pointerdown', e=>{ e.preventDefault(); downCh = getCh(); node.classList.add('active-key'); sendOn(downCh, note, getVel()); });
+  const up = ()=>{ if(downCh === null) return; sendOff(downCh, note); downCh = null; node.classList.remove('active-key'); };
+  node.addEventListener('pointerup', up);
+  node.addEventListener('pointerleave', up);
+  node.addEventListener('pointercancel', up);
+  node.addEventListener('contextmenu', e=>e.preventDefault());
+}
+
+/* ---------- PADS ---------- */
+$('padDesc').textContent = PADS.midi_mode_A.notes;
+let padBank = 1;
+const bankBtns = [];
+for(let i=0;i<10;i++){
+  const b = sbtn(BANK_LETTERS[i], 'sm'); if(i===0) b.classList.add('on');
+  b.title = 'Bank '+BANK_LETTERS[i]+' (ch'+(i+1)+')';
+  b.addEventListener('click', ()=>{ padBank = i+1; bankBtns.forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
+  bankBtns.push(b); $('padBanks').appendChild(b);
+}
+const padVelKnob = makeKnob({ label:'VELOCITY', min:1, max:127, value:100, defaultVal:100 });
+$('padVelMount').appendChild(padVelKnob.el);
+const padCh = ()=> padBank;
+const padVel = ()=> padVelKnob.get();
+for(let pad=1; pad<=16; pad++){
+  const note = padToNote[pad];
+  const p = div('pad'); p.style.background = 'hsl('+((pad-1)*23)%360+',66%,63%)';
+  p.append(span('num', String(pad)), span('nn', noteName(note)+' · '+note));
+  pressable(p, padCh, note, padVel);
+  $('padGrid').appendChild(p);
+}
+
+/* EXT SOURCE */
+$('extDesc').textContent = MAP.ext_source_control.description;
+{
+  const extBtn = sbtn('EXT SOURCE','accent2'); $('extMount').appendChild(extBtn);
+  const modeBtn = $('extModeToggle');
+  let gateMode = false;
+  modeBtn.addEventListener('click', ()=>{ gateMode = !gateMode; modeBtn.textContent = 'mode: '+(gateMode?'gate (hold)':'toggle'); });
+  let gateCh = null;
+  extBtn.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    if(!gateMode){ sendOn(padCh(), EXT_NOTE, padVel()); }
+    else{ gateCh = padCh(); extBtn.classList.add('held'); sendOn(gateCh, EXT_NOTE, padVel()); }
+  });
+  const up = ()=>{ if(gateCh === null) return; sendOff(gateCh, EXT_NOTE); gateCh = null; extBtn.classList.remove('held'); };
+  extBtn.addEventListener('pointerup', up);
+  extBtn.addEventListener('pointerleave', up);
+  extBtn.addEventListener('pointercancel', up);
+}
+
+/* ---------- KEYS: chromatic (ch16) + vocoder (ch11) ---------- */
+function buildKeyboard(container, ch, lo, hi){
+  for(let n=lo; n<=hi; n++){
+    const k = div('key'+([1,3,6,8,10].includes(n%12)?' blk':''), noteName(n));
+    pressable(k, ()=>ch, n, ()=>100);
+    container.appendChild(k);
+  }
+}
+$('chromaDesc').textContent = 'ch'+CHROMA_CH+' — '+PADS.chromatic.notes;
+buildKeyboard($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI);
+{
+  const aso = sbtn('All Sound Off (CC120)','sm');
+  aso.addEventListener('click', ()=> sendCC(CHROMA_CH, 120, 0, null));
+  $('asoMount').appendChild(aso);
+}
+$('vocDesc').textContent = 'ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)];
+buildKeyboard($('vocKbd'), VOC_CH, 48, 72);
+{
+  const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256, springBack:true,
+    format:v=> (v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) });
+  $('vocBendMount').appendChild(bendKnob.el);
+}
+
+/* ---------- PATTERNS ---------- */
+$('patDesc').textContent = PADS.pattern_launch.message+'. '+PADS.pattern_launch.mapping;
+let patBank = 1;
+const patBankBtns = [];
+for(let i=0;i<10;i++){
+  const b = sbtn(BANK_LETTERS[i], 'sm'); if(i===0) b.classList.add('on');
+  b.title = 'Bank '+BANK_LETTERS[i]+' (ch'+(i+1)+')';
+  b.addEventListener('click', ()=>{ patBank = i+1; patBankBtns.forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
+  patBankBtns.push(b); $('patBanks').appendChild(b);
+}
+for(let p=PC_LO; p<=PC_HI; p++){
+  const b = sbtn(String(p+1)); b.title = 'Pattern '+(p+1)+' (PC'+p+')';
+  b.addEventListener('click', ()=> sendPC(patBank, p, null));
+  $('patGrid').appendChild(b);
+}
+
+/* ---------- LOOPER ---------- */
 $('looperDesc').textContent = LOOP.description+' All CCs on ch'+LOOP.channel+'.';
 Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).forEach(([ccStr, def])=>{
   const cc = +ccStr;
-  const row = document.createElement('div'); row.className = 'row';
-  const name = document.createElement('b'); name.textContent = 'CC'+cc+' '+def.function+': ';
-  row.appendChild(name);
+  const row = div('looprow');
+  row.appendChild(span(null, 'CC'+cc+' '+def.function));
   const rangeM = def.values.match(/^(\d+)-(\d+) = (.+)$/);
   if(rangeM){
-    const input = document.createElement('input'); input.type='range'; input.min=+rangeM[1]; input.max=+rangeM[2]; input.value=64;
-    input.style.width = '180px';
-    const val = document.createElement('span'); val.className='val'; val.textContent='64';
-    const hx = document.createElement('code'); hx.className='hx'; hx.textContent='—';
-    input.addEventListener('input', ()=>{ val.textContent=input.value; sendCC(LOOP.channel, cc, +input.value, hx); });
-    row.append(input, val, document.createTextNode(rangeM[3]+' '), hx);
+    const k = makeKnob({ label:rangeM[3], min:+rangeM[1], max:+rangeM[2], value:64, defaultVal:64, onChange:v=>sendCC(LOOP.channel, cc, v, null) });
+    row.appendChild(k.el);
   }else{
     def.values.split(', ').forEach(part=>{
-      const m = part.match(/^(\d+) = (.+)$/);
-      if(!m) return;
-      const btn = document.createElement('button'); btn.type='button'; btn.textContent = m[2]+' ('+m[1]+')';
-      const hx = document.createElement('code'); hx.className='hx'; hx.textContent='—';
-      btn.addEventListener('click', ()=> sendCC(LOOP.channel, cc, +m[1], hx));
-      row.append(btn, hx);
+      const m = part.match(/^(\d+) = (.+)$/); if(!m) return;
+      const b = sbtn(m[2]+' ('+m[1]+')','sm');
+      b.addEventListener('click', ()=> sendCC(LOOP.channel, cc, +m[1], null));
+      row.appendChild(b);
     });
   }
   $('looperRows').appendChild(row);
 });
 
-/* ---------- shared key helper: note on while pressed, off on release ---------- */
-function pressable(btn, getCh, note, getVel, hexEl){
-  let downCh = null;                        // remember the channel used for note-on so the note-off matches after a bank switch
-  btn.addEventListener('pointerdown', e=>{
-    e.preventDefault();
-    downCh = getCh();
-    btn.classList.add('active-key');
-    sendOn(downCh, note, getVel(), hexEl);
-  });
-  const up = ()=>{
-    if(downCh === null) return;
-    sendOff(downCh, note, hexEl);
-    downCh = null;
-    btn.classList.remove('active-key');
-  };
-  btn.addEventListener('pointerup', up);
-  btn.addEventListener('pointerleave', up);
-  btn.addEventListener('pointercancel', up);
-  btn.addEventListener('contextmenu', e=>e.preventDefault());
-}
-
-/* ---------- panel 4: pads ---------- */
-$('padDesc').textContent = PADS.midi_mode_A.notes;
-for(let i=0;i<10;i++){
-  const op = document.createElement('option'); op.value = i+1; op.textContent = 'Bank '+BANK_LETTERS[i]+' (ch'+(i+1)+')';
-  $('padBank').appendChild(op);
-}
-$('padVel').addEventListener('input', ()=> $('padVelVal').textContent = $('padVel').value);
-const padCh = ()=> +$('padBank').value;
-const padVel = ()=> +$('padVel').value;
-PAD_MAP.forEach(({note, pad})=>{           // grid rows follow the map's order → hardware layout (top row = pads 13-16, bottom = 1-4)
-  const btn = document.createElement('button'); btn.type='button';
-  btn.innerHTML = 'Pad '+pad+'<br>'+noteName(note)+' ('+note+')';
-  pressable(btn, padCh, note, padVel, $('padHex'));
-  $('padGrid').appendChild(btn);
-});
-
-/* ---------- EXT SOURCE ---------- */
-$('extDesc').textContent = MAP.ext_source_control.description;
-{
-  const btn = $('extBtn');
-  const mode = ()=> document.querySelector('input[name=extMode]:checked').value;
-  let gateCh = null;
-  btn.addEventListener('pointerdown', e=>{
-    e.preventDefault();
-    if(mode()==='toggle'){ sendOn(padCh(), EXT_NOTE, padVel(), $('extHex')); }
-    else{ gateCh = padCh(); btn.classList.add('active-key'); sendOn(gateCh, EXT_NOTE, padVel(), $('extHex')); }
-  });
-  const up = ()=>{
-    if(gateCh === null) return;
-    sendOff(gateCh, EXT_NOTE, $('extHex'));
-    gateCh = null;
-    btn.classList.remove('active-key');
-  };
-  btn.addEventListener('pointerup', up);
-  btn.addEventListener('pointerleave', up);
-  btn.addEventListener('pointercancel', up);
-}
-
-/* ---------- keyboards (5: chromatic ch16, 9: vocoder ch11) ---------- */
-function buildKeyboard(container, ch, lo, hi, hexEl){
-  for(let n=lo; n<=hi; n++){
-    const btn = document.createElement('button'); btn.type='button';
-    btn.textContent = noteName(n);
-    if([1,3,6,8,10].includes(n%12)) btn.classList.add('blk');
-    pressable(btn, ()=>ch, n, ()=>100, hexEl);
-    container.appendChild(btn);
-  }
-}
-$('chromaDesc').textContent = 'ch'+CHROMA_CH+' — '+PADS.chromatic.notes;
-buildKeyboard($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI, $('chromaHex'));
-$('asoBtn').addEventListener('click', ()=> sendCC(CHROMA_CH, 120, 0, $('asoHex')));  // recognized in chromatic mode per system_realtime
-
-$('vocDesc').textContent = 'ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)];
-buildKeyboard($('vocKbd'), VOC_CH, 48, 72, $('vocHex'));   // C3–C5 window into the 0-127 range the vocoder accepts
-{
-  const sl = $('vocBend');
-  sl.addEventListener('input', ()=>{ $('vocBendVal').textContent = sl.value; sendBend(VOC_CH, +sl.value, $('vocBendHex')); });
-  const snap = ()=>{
-    if(+sl.value === 0) return;
-    sl.value = 0; $('vocBendVal').textContent = '0';
-    sendBend(VOC_CH, 0, $('vocBendHex'));
-  };
-  sl.addEventListener('change', snap);
-  sl.addEventListener('pointerup', snap);
-}
-
-/* ---------- panel 6: pattern launch ---------- */
-$('patDesc').textContent = PADS.pattern_launch.message+'. '+PADS.pattern_launch.mapping;
-for(let i=0;i<10;i++){
-  const op = document.createElement('option'); op.value = i+1; op.textContent = 'Bank '+BANK_LETTERS[i]+' (ch'+(i+1)+')';
-  $('patBank').appendChild(op);
-}
-for(let p=PC_LO; p<=PC_HI; p++){
-  const btn = document.createElement('button'); btn.type='button';
-  btn.textContent = 'Pattern '+(p+1)+' (PC'+p+')';
-  btn.addEventListener('click', ()=> sendPC(+$('patBank').value, p, $('patHex')));
-  $('patGrid').appendChild(btn);
-}
-
-/* ---------- panel 7: DJ mode ---------- */
-$('djWarn').textContent = MAP.dj_mode.warning;
-const DJ_ROWS = [
-  {cc:7, ch:1}, {cc:7, ch:2}, {cc:7, ch:3},   // per spec: CC7 on channels 1-3, CC8 on channel 1
-  {cc:8, ch:1},
-];
-DJ_ROWS.forEach(({cc, ch})=>{
-  const row = document.createElement('div'); row.className='row';
-  const lbl = document.createElement('b'); lbl.textContent = 'CC'+cc+' ch'+ch+' — '+DJ_REC[String(cc)]+': ';
-  const input = document.createElement('input'); input.type='range'; input.min=0; input.max=127; input.value = cc===8?64:100;
-  input.style.width='180px';
-  const val = document.createElement('span'); val.className='val'; val.textContent=input.value;
-  const hx = document.createElement('code'); hx.className='hx'; hx.textContent='—';
-  input.addEventListener('input', ()=>{ val.textContent=input.value; sendCC(ch, cc, +input.value, hx); });
-  row.append(lbl, input, val, hx);
-  $('djRows').appendChild(row);
-});
-
-/* ---------- panel 8: realtime + clock generator ---------- */
+/* ---------- TRANSPORT: realtime + clock ---------- */
 $('rtDesc').textContent = MAP.system_realtime.start_stop;
-$('rtStart').addEventListener('click', ()=> sendBytes([0xFA], $('rtStartHex')));
-$('rtStop').addEventListener('click',  ()=> sendBytes([0xFC], $('rtStopHex')));
-$('rtCont').addEventListener('click',  ()=> sendBytes([0xFB], $('rtContHex')));
-
-const clock = {running:false, next:0, timer:null, count:0};
+[['Start (FA)',0xFA],['Stop (FC)',0xFC],['Continue (FB) — untested',0xFB]].forEach(([label,byte])=>{
+  const b = sbtn(label); b.addEventListener('click', ()=> sendBytes([byte], null)); $('rtMount').appendChild(b);
+});
+const clock = {running:false, next:0, timer:null, count:0, bpm:120};
+const bpmKnob = makeKnob({ label:'BPM', min:40, max:300, value:120, defaultVal:120, step:1, onChange:v=>{ clock.bpm=v; } });
+$('clockMount').appendChild(bpmKnob.el);
+const clockBtn = sbtn('Start clock (F8 · 24 ppqn)');
+const clockStatus = span('note','clock stopped'); clockStatus.style.marginLeft='6px';
+$('clockMount').append(clockBtn, clockStatus);
 function clockPump(){
   if(!clock.running || !midiOut) return;
-  const bpm = Math.max(20, Math.min(300, parseFloat($('bpm').value) || 120));
+  const bpm = Math.max(40, Math.min(300, clock.bpm || 120));
   const tick = 60000/(bpm*24);
   const now = performance.now();
-  if(clock.next < now) clock.next = now;        // drop missed ticks — a background-tab timer stall must never replay its backlog as an F8 burst
-  const horizon = now + 150;                    // schedule ~150ms ahead with output timestamps — steadier than firing per-tick timers
+  if(clock.next < now) clock.next = now;
+  const horizon = now + 150;
   while(clock.next < horizon){
-    if($('monHideRt').checked){ supClock++; }
-    else logMsg('OUT', [0xF8]);
+    if($('monHideRt').checked){ supClock++; } else logMsg('OUT', [0xF8]);
     try{ midiOut.send([0xF8], clock.next); }catch(e){}
-    clock.count++;
-    clock.next += tick;
+    clock.count++; clock.next += tick;
   }
   updateSuppressed();
-  $('clockStatus').textContent = 'running — '+clock.count+' ticks sent';
+  clockStatus.textContent = 'running — '+clock.count+' ticks sent';
 }
-$('clockBtn').addEventListener('click', ()=>{
+clockBtn.addEventListener('click', ()=>{
   if(clock.running){
     clock.running = false; clearInterval(clock.timer);
-    $('clockBtn').textContent = 'Start clock (F8 · 24 ppqn)';
-    $('clockStatus').textContent = 'clock stopped — '+clock.count+' ticks sent';
+    clockBtn.textContent = 'Start clock (F8 · 24 ppqn)'; clockBtn.classList.remove('on');
+    clockStatus.textContent = 'clock stopped — '+clock.count+' ticks sent';
   }else{
-    if(!midiOut){ $('clockStatus').textContent = 'no output port'; return; }
-    clock.running = true; clock.count = 0;
-    clock.next = performance.now() + 20;
+    if(!midiOut){ clockStatus.textContent = 'no output port'; return; }
+    clock.running = true; clock.count = 0; clock.next = performance.now() + 20;
     clock.timer = setInterval(clockPump, 50);
-    $('clockBtn').textContent = 'Stop clock';
-    clockPump();
+    clockBtn.textContent = 'Stop clock'; clockBtn.classList.add('on'); clockPump();
   }
 });
 
-/* ---------- panel 11: raw sender ---------- */
+/* ---------- DJ ---------- */
+$('djWarn').textContent = MAP.dj_mode.warning;
+DJ_ROWS.forEach(({cc, ch})=>{
+  const k = makeKnob({ label:'CC'+cc+' ch'+ch, min:0, max:127, value: cc===8?64:100, defaultVal: cc===8?64:100,
+    onChange:v=>sendCC(ch, cc, v, null) });
+  k.setTitle(DJ_REC[String(cc)]);
+  $('djRows').appendChild(k.el);
+});
+
+/* ---------- raw sender ---------- */
 $('rawSend').addEventListener('click', ()=>{
   $('rawErr').textContent = '';
   const bytes = [];
   for(const id of ['raw0','raw1','raw2']){
     const s = $(id).value.trim().replace(/^0x/i,'');
-    if(s === '') break;                        // contiguous bytes only — stop at the first empty field
+    if(s === '') break;
     if(!/^[0-9a-f]{1,2}$/i.test(s)){ $('rawErr').textContent = 'bad hex byte: "'+s+'"'; return; }
     bytes.push(parseInt(s, 16));
   }
@@ -832,160 +871,103 @@ $('rawSend').addEventListener('click', ()=>{
   if(!ok && midiOut) $('rawErr').textContent = 'rejected by Web MIDI (invalid MIDI message?)';
 });
 
-/* ---------- panel 12: verification checklist ---------- */
+/* ---------- verification checklist ---------- */
 const CHECKS = [
-  {
-    id:'ctrl456_mapping',
-    title:'(a) Do CC80/81/82 drive the 4th/5th/6th listed parameter? — RESOLVED by manual',
-    desc:'ANSWERED YES by the v5.50 manual. p.33 "Editing the effects": CTRL 1-3 edit the main parameters, and holding [VALUE] + CTRL 1-3 edits the sub-parameters; the MFX List (pp.143-157) prints params in exactly that order (main 1-3, then sub 4-6). The implementation chart example 0xB2 50 7F = "BUS 3 Ctrl 4=127" pins CC80=Ctrl4 (so 81=Ctrl5, 82=Ctrl6). All 46 effect parameter lists in the map were verified against the MFX List. Optional hardware re-confirm: this steps CC80 through 0/32/64/96/127 on a Tape Echo (BUS 1) — the tape-head MODE should change.',
-    run: runTestA,
-  },
-  {
-    id:'transmit_ctrl456',
-    title:'(b) Does the SP transmit CCs for Ctrl 4-6 via held-VALUE combos? — RESOLVED by manual',
-    desc:'ANSWERED YES by the implementation chart: "CC#80–83  o  o" marks CC80-82 as Transmitted (first column = o). Since Ctrl 4-6 are only reachable by holding [VALUE] + CTRL 1-3 (there are just three physical knobs), the transmitted CC80-82 must come from those held-VALUE moves. Optional hardware re-confirm: this filters the monitor to incoming Ctrl4-6 lines; on the SP, hold [VALUE] and turn CTRL 1-3 on a 6-parameter effect — any "IN … Ctrl4/5/6" lines confirm it.',
-    run: runTestB,
-  },
+  { id:'ctrl456_mapping', title:'(a) Do CC80/81/82 drive the 4th/5th/6th listed parameter? — RESOLVED by manual',
+    desc:'ANSWERED YES by the v5.50 manual. p.33 "Editing the effects": CTRL 1-3 edit the main parameters, and holding [VALUE] + CTRL 1-3 edits the sub-parameters; the MFX List (pp.143-157) prints params in exactly that order. The implementation chart example 0xB2 50 7F = "BUS 3 Ctrl 4=127" pins CC80=Ctrl4. Optional hardware re-confirm: steps CC80 through 0/32/64/96/127 on a Tape Echo (BUS 1) — the tape-head MODE should change.',
+    run: runTestA },
+  { id:'transmit_ctrl456', title:'(b) Does the SP transmit CCs for Ctrl 4-6 via held-VALUE combos? — RESOLVED by manual',
+    desc:'ANSWERED YES by the implementation chart: "CC#80–83  o  o" marks CC80-82 as Transmitted. Optional hardware re-confirm: filters the monitor to incoming Ctrl4-6 lines; on the SP, hold [VALUE] and turn CTRL 1-3 on a 6-parameter effect — any "IN … Ctrl4/5/6" lines confirm it.',
+    run: runTestB },
 ];
-
 function loadChecks(){ try{ return JSON.parse(lsGet('sp404_checklist')) || {}; }catch(e){ return {}; } }
 function saveChecks(state){ lsSet('sp404_checklist', JSON.stringify(state)); }
 const checkState = loadChecks();
-
 CHECKS.forEach(chk=>{
   const saved = checkState[chk.id] || {status:'untested', notes:''};
-  const box = document.createElement('div'); box.className = 'checkitem';
-  const h = document.createElement('b'); h.textContent = chk.title;
-  const d = document.createElement('div'); d.className = 'note'; d.textContent = chk.desc;
-  const row = document.createElement('div'); row.className = 'row';
-  const btn = document.createElement('button'); btn.type='button'; btn.textContent = 'Test';
-  const status = document.createElement('select');
-  ['untested','pass','fail'].forEach(s=>{ const op=document.createElement('option'); op.value=s; op.textContent=s; status.appendChild(op); });
+  const box = div('checkitem');
+  const row = div('row');
+  const btn = sbtn('Test','sm');
+  const status = el('select');
+  ['untested','pass','fail'].forEach(s=>{ const op=el('option',null,s); op.value=s; status.appendChild(op); });
   status.value = saved.status;
-  const prog = document.createElement('span'); prog.className = 'note';
-  const notes = document.createElement('textarea'); notes.placeholder = 'notes…'; notes.value = saved.notes;
+  const prog = span('note');
+  const notes = el('textarea'); notes.placeholder = 'notes…'; notes.value = saved.notes;
   const persist = ()=>{ checkState[chk.id] = {status: status.value, notes: notes.value}; saveChecks(checkState); };
   status.addEventListener('change', persist);
   notes.addEventListener('input', persist);
   btn.addEventListener('click', ()=> chk.run(prog, btn));
   row.append(btn, document.createTextNode(' result: '), status, prog);
-  box.append(h, d, row, notes);
+  box.append(el('b',null,chk.title), div('note',chk.desc), row, notes);
   $('checkItems').appendChild(box);
 });
-
 const sleep = ms => new Promise(res=>setTimeout(res, ms));
 async function runTestA(prog, btn){
   if(!midiOut){ prog.textContent = 'no output port — connect the SP first'; return; }
   btn.disabled = true;
   try{
-    const bus = BUSES[0];                        // BUS 1
+    const bus = BUSES[0];
     const entry = Object.entries(TABLES[bus.table]).find(([,name])=>name==='Tape Echo');
     if(!entry){ prog.textContent = 'Tape Echo not found in '+bus.table; return; }
     prog.textContent = 'EFX ON + select Tape Echo…';
-    bus.swEl.checked = true;
-    sendCC(bus.ch, CC_SW, 127, bus.swHex);
-    bus.selEl.value = entry[0];
-    sendCC(bus.ch, CC_SEL, +entry[0], bus.selHex);
-    bus.applyParams();
+    bus.setEfx(true); sendCC(bus.ch, CC_SW, 127, null);
+    bus.selEl.value = entry[0]; sendCC(bus.ch, CC_SEL, +entry[0], null); bus.applyParams();
     await sleep(600);
-    const s4 = bus.sliders.find(s=>s.cc===CTRL_CCS[3]);   // keep the panel-2 slider mirrored so its state matches what was sent
-    for(const v of [0, 32, 64, 96, 127]){
-      prog.textContent = 'CC'+s4.cc+'='+v+' — watch the MODE (tape head) value…';
-      s4.input.value = v; s4.val.textContent = v;
-      sendCC(bus.ch, s4.cc, v, s4.hx);
-      await sleep(800);
-    }
+    const k4 = bus.knobs.find(k=>k.cc===CTRL_CCS[3]);
+    for(const v of [0, 32, 64, 96, 127]){ prog.textContent = 'CC'+k4.cc+'='+v+' — watch the MODE (tape head) value…'; k4.set(v); await sleep(800); }
     prog.textContent = 'done — did MODE step through its head combos? Record pass/fail.';
   }finally{ btn.disabled = false; }
 }
 async function runTestB(prog){
+  $('dev').open = true;
   $('monHideRt').checked = true;
-  $('monFilter').value = '^\\S+ IN\\b.*Ctrl[4-6]';   // anchored to the direction column — plain "IN" would also match OUT lines that mention "INPUT Ctrl…"
+  $('monFilter').value = '^\\S+ IN\\b.*Ctrl[4-6]';
   applyFilter();
   $('pMon').scrollIntoView({behavior:'smooth'});
   prog.textContent = 'monitor filtered to IN Ctrl4-6. Hold [VALUE] + turn CTRL 1-3 on the SP now.';
 }
 
-/* ---------- panel 13: Shortcut Finder (rendered from sp404mk2-shortcuts.json) ---------- */
+/* ---------- SHORTCUT FINDER ---------- */
 (async function shortcutFinder(){
   let SC;
-  try{
-    const r = await fetch('sp404mk2-shortcuts.json');
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    SC = await r.json();
-  }catch(e){
-    $('scDesc').textContent = 'Shortcut list unavailable (sp404mk2-shortcuts.json did not load: '+e.message+'). The rest of the harness is unaffected.';
-    return;
-  }
+  try{ const r = await fetch('sp404mk2-shortcuts.json'); if(!r.ok) throw new Error('HTTP '+r.status); SC = await r.json(); }
+  catch(e){ $('scDesc').textContent = 'Shortcut list unavailable ('+e.message+'). The rest of the app is unaffected.'; return; }
   const items = SC.shortcuts || [];
-  $('scDesc').textContent = (SC.meta && SC.meta.device ? SC.meta.device+' ' : '')+'hardware button combos ('+items.length+'), from the '+((SC.meta&&SC.meta.manual_version)||'')+' manual. Each row shows whether this app can reproduce it over MIDI; hover the badge for how. Links open Roland’s manual page.';
-
+  $('scDesc').textContent = (SC.meta && SC.meta.device ? SC.meta.device+' ' : '')+'hardware button combos ('+items.length+'), from the '+((SC.meta&&SC.meta.manual_version)||'')+' manual. Each row shows whether this app can reproduce it over MIDI; hover the badge for how.';
   const catSel = $('scCat');
-  (SC.categories || [...new Set(items.map(i=>i.category))].sort()).forEach(c=>{
-    const op = document.createElement('option'); op.value = c; op.textContent = c; catSel.appendChild(op);
-  });
-
-  const capOf = it => it.app_midi ? (it.app_midi.can || 'partial') : 'hw';   // null app_midi => hardware only
+  (SC.categories || [...new Set(items.map(i=>i.category))].sort()).forEach(c=>{ const op=el('option',null,c); op.value=c; catSel.appendChild(op); });
+  const capOf = it => it.app_midi ? (it.app_midi.can || 'partial') : 'hw';
   const capLabel = { full:'App: full', partial:'App: partial', hw:'Hardware only' };
-
   function render(){
-    const q = $('scSearch').value.trim().toLowerCase();
-    const cat = $('scCat').value;
-    const capF = $('scCap').value;
-    const list = $('scList');
-    list.innerHTML = '';
+    const q = $('scSearch').value.trim().toLowerCase(); const cat = $('scCat').value; const capF = $('scCap').value;
+    const list = $('scList'); list.innerHTML = '';
     const matches = items.filter(it=>{
       if(cat && it.category !== cat) return false;
       const cap = capOf(it);
       if(capF === 'app' && cap === 'hw') return false;
       if((capF === 'full' || capF === 'partial' || capF === 'hw') && cap !== capF) return false;
-      if(q){
-        const hay = [it.name, it.desc, it.mode, it.category, (it.combo||[]).join(' '),
-                     it.app_midi && it.app_midi.how].filter(Boolean).join(' ').toLowerCase();
-        if(!hay.includes(q)) return false;
-      }
+      if(q){ const hay=[it.name,it.desc,it.mode,it.category,(it.combo||[]).join(' '),it.app_midi&&it.app_midi.how].filter(Boolean).join(' ').toLowerCase(); if(!hay.includes(q)) return false; }
       return true;
     });
     $('scCount').textContent = matches.length + ' of ' + items.length + ' shown';
     if(!matches.length){ list.innerHTML = '<div class="sc-none">No shortcuts match.</div>'; return; }
-
-    // group by category, preserving the JSON's category order
     const order = (SC.categories || []).length ? SC.categories : [...new Set(items.map(i=>i.category))];
-    const byCat = {};
-    matches.forEach(it=>{ (byCat[it.category] = byCat[it.category] || []).push(it); });
+    const byCat = {}; matches.forEach(it=>{ (byCat[it.category] = byCat[it.category] || []).push(it); });
     order.filter(c=>byCat[c]).forEach(cat=>{
-      const h = document.createElement('div'); h.className = 'sc-cat';
-      h.innerHTML = cat + ' <span class="cnt">(' + byCat[cat].length + ')</span>';
-      list.appendChild(h);
+      const h = div('sc-cat'); h.innerHTML = cat + ' <span class="cnt">(' + byCat[cat].length + ')</span>'; list.appendChild(h);
       byCat[cat].forEach(it=>{
-        const row = document.createElement('div'); row.className = 'sc-item';
-
-        const combo = document.createElement('div'); combo.className = 'sc-combo';
-        (it.combo || []).forEach((k, i)=>{
-          if(i){ const p = document.createElement('span'); p.className = 'sc-plus'; p.textContent = '+'; combo.appendChild(p); }
-          const key = document.createElement('span'); key.className = 'sc-key'; key.textContent = k; combo.appendChild(key);
-        });
-
-        const mid = document.createElement('div');
-        const nm = document.createElement('span'); nm.className = 'sc-name'; nm.textContent = it.name;
-        const ds = document.createElement('span'); ds.className = 'sc-desc'; ds.textContent = it.desc || '';
-        mid.append(nm, ds);
-        if(it.mode){ const md = document.createElement('span'); md.className = 'sc-mode'; md.textContent = '['+it.mode+']'; mid.append(document.createTextNode(' '), md); }
-
-        const right = document.createElement('div'); right.className = 'sc-right';
-        const cap = capOf(it);
-        const badge = document.createElement('span'); badge.className = 'sc-cap ' + cap; badge.textContent = capLabel[cap];
-        if(it.app_midi && it.app_midi.how) badge.title = it.app_midi.how;
-        else if(cap === 'hw') badge.title = 'Not reachable over MIDI — SP-404MK2 front-panel only.';
+        const row = div('sc-item');
+        const combo = div('sc-combo');
+        (it.combo || []).forEach((k, i)=>{ if(i) combo.appendChild(span('sc-plus','+')); combo.appendChild(span('sc-key', k)); });
+        const mid = div();
+        mid.append(span('sc-name', it.name), span('sc-desc', it.desc || ''));
+        if(it.mode) mid.append(document.createTextNode(' '), span('sc-mode', '['+it.mode+']'));
+        const right = div('sc-right'); const cap = capOf(it);
+        const badge = span('sc-cap ' + cap, capLabel[cap]);
+        badge.title = (it.app_midi && it.app_midi.how) ? it.app_midi.how : (cap === 'hw' ? 'Not reachable over MIDI — front-panel only.' : '');
         right.appendChild(badge);
-        if(it.manual_url){
-          const a = document.createElement('a'); a.className = 'sc-link'; a.href = it.manual_url;
-          a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'manual ↗';
-          right.appendChild(a);
-        }
-
-        row.append(combo, mid, right);
-        list.appendChild(row);
+        if(it.manual_url){ const a = el('a','sc-link','manual ↗'); a.href = it.manual_url; a.target = '_blank'; a.rel = 'noopener'; right.appendChild(a); }
+        row.append(combo, mid, right); list.appendChild(row);
       });
     });
   }
@@ -994,6 +976,17 @@ async function runTestB(prog){
   $('scCap').addEventListener('change', render);
   render();
 })();
+
+/* ---------- jump menu (scroll + scroll-spy) ---------- */
+const navBtns = [...document.querySelectorAll('#nav button')];
+navBtns.forEach(b=> b.addEventListener('click', ()=>{ const t = $(b.dataset.t); if(t){ if(t.tagName==='DETAILS') t.open = true; t.scrollIntoView({behavior:'smooth', block:'start'}); } }));
+if('IntersectionObserver' in window){
+  const byId = {}; navBtns.forEach(b=> byId[b.dataset.t] = b);
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(en=>{ if(en.isIntersecting){ navBtns.forEach(x=>x.classList.remove('active')); const b = byId[en.target.id]; if(b) b.classList.add('active'); } });
+  }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
+  ['setup','fx','pads','keys','patterns','looper','transport','dj','shortcuts','dev'].forEach(id=>{ const s=$(id); if(s) obs.observe(s); });
+}
 
 /* ---------- go ---------- */
 updateSuppressed();
