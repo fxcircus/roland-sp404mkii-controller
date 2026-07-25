@@ -67,6 +67,8 @@
   .sc-cap.hw{background:#eee;color:#666;border:1px solid #ccc}
   .sc-link{font-size:11px;margin-left:8px}
   .sc-none{color:#888;font-style:italic;padding:8px 4px}
+  #panicBtn{background:#fdecec;border:1px solid #d98c8c;color:#a00000;font-weight:bold}
+  #panicBtn:active{background:#f6d0d0}
 </style>
 </head>
 <body>
@@ -81,6 +83,10 @@
   <div class="row"><label>Output: <select id="outSel"></select></label>
     <label>Input: <select id="inSel"></select></label>
     <button id="rescanBtn" type="button">Rescan</button></div>
+  <div class="row">
+    <button id="panicBtn" type="button">⏻ Panic — all notes / sound off</button>
+    <span class="note" id="panicNote"></span>
+  </div>
 </fieldset>
 
 <fieldset id="pFx"><legend>2 · Effects test (CC per bus channel)</legend>
@@ -313,6 +319,8 @@ $('inSel').addEventListener('change', e=>{
   setStatus();
 });
 $('rescanBtn').addEventListener('click', refreshPorts);
+$('panicBtn').addEventListener('click', panicAll);
+$('panicNote').textContent = 'All Notes Off + All Sound Off + Reset Controllers + pitch-center on all 16 channels; also clears stuck held-key highlights. Note: the SP only honors All Sound Off on ch16 and ignores note-off for pads — to stop pad/looper playback use the Looper "stop all" (CC85) or the hardware.';
 
 async function initMIDI(){
   if(!navigator.requestMIDIAccess){ $('connStatus').textContent = 'Web MIDI not supported — use Chrome or Edge'; return; }
@@ -338,6 +346,25 @@ const sendPC   = (ch, pgm, hexEl) => sendBytes([0xC0|((ch-1)&0x0F), pgm&0x7F], h
 function sendBend(ch, val, hexEl){        // val −8192..8191 → 14-bit
   const v = Math.max(0, Math.min(16383, val+8192));
   return sendBytes([0xE0|((ch-1)&0x0F), v&0x7F, (v>>7)&0x7F], hexEl);
+}
+
+/* ---------- panic: blanket notes-off / sound-off on all 16 channels ---------- */
+function panicAll(){
+  const msgs = [];
+  for(let ch=1; ch<=16; ch++){
+    const st = (ch-1)&0x0F;
+    msgs.push([0xB0|st, 120, 0]);   // All Sound Off
+    msgs.push([0xB0|st, 123, 0]);   // All Notes Off
+    msgs.push([0xB0|st, 121, 0]);   // Reset All Controllers
+    msgs.push([0xE0|st, 0, 64]);    // pitch bend → center (8192)
+  }
+  let sent = 0, failed = false;
+  if(midiOut){ for(const m of msgs){ try{ midiOut.send(m); sent++; }catch(e){ failed = true; } } }
+  document.querySelectorAll('.active-key').forEach(el=>el.classList.remove('active-key'));   // clear stuck held-key highlights
+  const line = fmtTime()+' OUT PANIC     All Sound Off + All Notes Off + Reset Ctrls + pitch-center, ch1-16 ('
+    + (midiOut ? sent+' msgs'+(failed?' (some failed)':'') : 'NO OUTPUT PORT') + ')';
+  monBuf.push({dir:'OUT', line}); if(monBuf.length > MON_CAP) monBuf.shift();   // one summary line instead of 64
+  if(monMatch(line)) appendMonLine('OUT', line);
 }
 
 /* ---------- monitor ---------- */
