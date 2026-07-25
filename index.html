@@ -40,6 +40,8 @@
   [data-zn-theme='pink']{--paper:#f7dbe8;--paper2:#fdeef5;--panel:#fffafc;--accent:#e6187d;--accent2:#a3005a}
 
   *{box-sizing:border-box}
+  .sbtn,.pad,.knob,.wkey,.bkey,.seg-btn,#nav button,.dd-trigger,.dd-opt,.hint{
+    -webkit-tap-highlight-color:transparent}
   body{font-family:var(--hand);font-size:var(--s-base);color:var(--ink);margin:0;
     background-color:var(--paper);background-image:var(--dot);background-size:17px 17px}
   i,em,cite{font-style:normal}
@@ -77,23 +79,37 @@
   .lamp.on{background:var(--accent);box-shadow:0 0 0 3px var(--ink)}
 
   /* panels */
-  .card{position:relative;background:var(--panel);border:var(--bd-heavy) solid var(--ink);
+  .card{position:relative;overflow-wrap:anywhere;background:var(--panel);border:var(--bd-heavy) solid var(--ink);
     border-radius:var(--r-panel);box-shadow:var(--off-lg) var(--off-lg) 0 var(--shadow);
     padding:26px 22px 30px;margin:0 0 26px;scroll-margin-top:118px}
   .card:nth-of-type(even){border-radius:var(--r-panel-alt)}
   .card::after{content:'';position:absolute;inset:3px 4px 4px 3px;border:1.5px solid var(--ink);
-    border-radius:inherit;opacity:.3;pointer-events:none}
+    border-radius:inherit;opacity:.3;pointer-events:none;z-index:0}
   /* hatched depth along the bottom — the drawn "side of the unit" */
   .card::before{content:'';position:absolute;left:0;right:0;bottom:0;height:13px;
     border-top:3px solid var(--ink);border-radius:0 0 var(--r-panel);
     background:var(--hatch-ink);opacity:.8;pointer-events:none}
   /* section header = white silkscreen on black */
-  .card > h2{position:absolute;top:-14px;left:20px;display:inline-flex;align-items:center;gap:9px;
+  .card > h2{position:absolute;top:-14px;left:20px;z-index:3;display:inline-flex;align-items:center;gap:9px;
     margin:0;font-family:var(--marker);font-size:var(--s-label);letter-spacing:1.1px;
     text-transform:uppercase;color:var(--white);background:var(--ink);
     border-radius:var(--r-chip);padding:5px 13px 6px;line-height:1.15}
   .card > h2 .n{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;
     font-size:12px;color:var(--ink);background:var(--white);border-radius:50%}
+  /* "?" hint — the explainer text moved off-screen until asked for */
+  .hint{position:relative;display:inline-flex;align-items:center;justify-content:center;
+    width:19px;height:19px;flex:0 0 auto;font-family:var(--mono);font-size:12px;font-weight:700;
+    color:var(--ink);background:var(--white);border:0;border-radius:50%;cursor:help;padding:0;line-height:1}
+  .hint:hover,.hint.open{background:var(--accent);color:var(--white)}
+  .hint__bub{position:absolute;top:18px;left:14px;right:14px;z-index:59;max-width:560px;
+    font-family:var(--hand);font-size:14px;line-height:1.4;letter-spacing:0;text-transform:none;
+    color:var(--ink);background:var(--white);border:var(--bd) solid var(--ink);border-radius:var(--r-btn);
+    box-shadow:var(--off) var(--off) 0 var(--shadow);padding:9px 12px;text-align:left;
+    opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .12s ease,transform .12s ease}
+  .card:has(.hint:hover) .hint__bub,
+  .hint__bub.open{opacity:1;visibility:visible;transform:translateY(0)}
+  @media(hover:none){.card:has(.hint:hover) .hint__bub{opacity:0;visibility:hidden}
+    .hint__bub.open{opacity:1;visibility:visible}}
   .card .sub{font-family:var(--hand);color:var(--ink2);font-size:15px;margin:0 0 12px;line-height:1.4;max-width:86ch}
   .row{display:flex;align-items:center;gap:12px;margin:9px 0;flex-wrap:wrap}
   b.mini,.label{display:inline-block;font-family:var(--marker);font-size:var(--s-label);
@@ -167,8 +183,8 @@
   #fxRouting .rn{font-family:var(--hand);color:var(--ink2);font-size:14px;margin-top:10px;line-height:1.4}
 
   /* ---- origami dropdown ---- */
-  .dd{position:relative;display:inline-block;font-family:var(--hand);font-size:var(--s-base);vertical-align:middle}
-  .dd-trigger{display:inline-flex;align-items:center;gap:10px;width:100%;min-width:172px;font:inherit;
+  .dd{position:relative;display:inline-block;max-width:100%;font-family:var(--hand);font-size:var(--s-base);vertical-align:middle}
+  .dd-trigger{display:inline-flex;align-items:center;gap:10px;width:100%;max-width:100%;min-width:0;font:inherit;
     text-align:left;color:var(--ink);background:var(--white);border:var(--bd) solid var(--ink);
     border-radius:var(--r-btn);box-shadow:var(--off) var(--off) 0 var(--shadow);padding:9px 14px 10px;cursor:pointer}
   .dd-trigger:hover{background:var(--paper2)}
@@ -178,7 +194,8 @@
   .dd.open .dd-trigger{box-shadow:1px 1px 0 var(--shadow)}
   /* never display:none — a transition can't fire leaving display:none, so the
      fold would snap. Gated on visibility+opacity, held through .closing. */
-  .dd-panel{position:absolute;z-index:40;top:calc(100% + 7px);left:0;min-width:100%;
+  .dd-panel{display:none;position:absolute;z-index:40;top:calc(100% + 7px);left:0;min-width:100%;
+    max-width:calc(100vw - 26px);
     perspective:560px;perspective-origin:50% -20px;transform-style:preserve-3d;
     visibility:hidden;pointer-events:none;opacity:0}
   .dd.open .dd-panel,.dd.closing .dd-panel{visibility:visible;opacity:1}
@@ -196,7 +213,7 @@
   .dd.closing .dd-fold{transition:transform .3s cubic-bezier(.55,.06,.68,.19)}
   .dd.closing .dd-fold-b{transition-delay:70ms}
   .dd.closing .dd-fold-a{transition-delay:140ms}
-  .dd-leaf{position:relative;background:var(--white);border:var(--bd) solid var(--ink);
+  .dd-leaf{position:relative;overflow:hidden;background:var(--white);border:var(--bd) solid var(--ink);
     border-top-width:0;border-bottom-width:0;transform-style:preserve-3d}
   .dd-leaf.first{border-top-width:var(--bd);border-radius:var(--r-sheet) var(--r-sheet) 0 0}
   .dd-leaf.last{border-bottom-width:var(--bd);border-radius:0 0 var(--r-sheet) var(--r-sheet);
@@ -210,7 +227,8 @@
   .dd.closing .dd-fold-b > .dd-leaf::before{transition-delay:70ms}
   .dd.closing .dd-fold-a > .dd-leaf::before{transition-delay:140ms}
   .dd-opt{display:flex;align-items:center;gap:9px;width:100%;font:inherit;text-align:left;
-    color:var(--ink);background:transparent;border:0;padding:10px 14px;cursor:pointer}
+    color:var(--ink);background:transparent;border:0;padding:10px 14px;cursor:pointer;
+    min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
   .dd-opt:hover{background:var(--paper2)}
   .dd-opt.sel{background:var(--ink);color:var(--white)}
   /* effect-select display variant: black panel, mono, hatched */
@@ -227,12 +245,12 @@
   .pad{position:relative;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
     font-family:var(--marker);color:var(--ink);border:var(--bd-heavy) solid var(--ink);
     border-radius:var(--r-pad);box-shadow:var(--off) 5px 0 var(--shadow);cursor:pointer;padding:0;
-    user-select:none;touch-action:none;transition:transform .05s steps(2),box-shadow .05s steps(2)}
+    user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;
+    touch-action:none;transition:none}
   .pad::after{content:'';position:absolute;inset:3px;border:1.5px solid var(--ink);border-radius:inherit;
     opacity:.28;pointer-events:none}
+  .pad *{pointer-events:none}
   .pad .num{font-size:34px;text-shadow:2px 2px 0 rgba(255,255,255,.6)}
-  .pad .nn{position:absolute;left:8px;bottom:5px;font-family:var(--hand);font-size:12px;
-    letter-spacing:.5px;text-transform:uppercase;color:var(--ink);opacity:.9}
   .pad.active-key{transform:translate(4px,5px);box-shadow:0 0 0 var(--shadow);filter:brightness(1.12)}
   .bankrow{display:flex;flex-wrap:wrap;gap:6px}
   .bankrow .sbtn{min-width:44px;text-align:center}
@@ -276,7 +294,7 @@
     text-transform:uppercase;color:var(--white);background:var(--ink);border-radius:var(--r-chip);
     padding:3px 10px 4px;margin:0 0 8px}
   code.hx{font-family:var(--mono);font-size:12px;background:var(--ink);color:var(--white);border-radius:4px;padding:2px 6px}
-  #monLog{height:280px;overflow-y:auto;border:var(--bd) solid var(--ink);border-radius:5px;background:#f5f7fb;
+  #monLog{height:280px;overflow:auto;border:var(--bd) solid var(--ink);border-radius:5px;background:#f5f7fb;
     font-family:var(--mono);font-size:12px;padding:6px;white-space:pre}
   #monLog .in{color:#0a2fae}#monLog .out{color:#0b6b2f}#monLog .err{color:#b00}
   .checkitem{border:var(--bd) solid var(--ink);border-radius:var(--r-btn);padding:9px 11px;margin:7px 0}
@@ -321,13 +339,31 @@
     .dd-fold,.dd-leaf::before{transition-duration:1ms!important;transition-delay:0ms!important}
   }
   @media(max-width:700px){
-    #hero h1{font-size:30px}
-    #heroDisp{width:96px;height:96px}
-    #wrap{padding:0 14px 50px}
-    .card{padding:22px 13px 28px}
+    #hero h1{font-size:26px;padding:7px 14px 9px}
+    #heroDisp{width:84px;height:84px}
+    #hero{gap:14px;padding:14px 6px 4px}
+    #wrap{padding:0 12px 50px}
+    #nav{margin:8px auto 18px;padding:7px 8px;border-radius:6px 4px 5px 4px/4px 5px 4px 6px}
+    #nav button{font-size:12px;padding:4px 9px}
+    .card{padding:22px 11px 26px}
+    .card > h2{left:12px;font-size:12px;padding:4px 10px 5px}
     .sc-item{grid-template-columns:1fr}
-    .knob{width:96px}
-    .patgrid{grid-template-columns:repeat(4,1fr)}
+    .knob{width:88px}
+    .knob-svg{width:88px;height:83px}
+    .knob-row{gap:10px}
+    /* A dropdown mid-row puts its absolutely-positioned panel at left+width,
+       which runs off a phone screen — and it counts even while hidden. Full
+       width on its own line keeps the panel inside the card. */
+    .dd{display:block;width:100%;flex:1 1 100%}
+    .dd-panel{max-width:100%}
+    #fxRouting label.rlab{flex:1 1 100%}
+    /* minmax(74px,1fr) forces a floor wider than a phone — let the tracks shrink */
+    .padgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+    .patgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .piano-case{max-width:100%}
+    #scSearch{width:100%}
+    .bus{padding:10px 11px}
+    #fxRouting{padding:10px 11px}
   }
 </style>
 </head>
@@ -364,7 +400,8 @@
     <button data-t="shortcuts">Shortcuts</button>
     <button data-t="dev">Dev</button>
   </div>
-  <div class="status"><span class="lamp" id="lamp"></span><span id="connStatus">starting…</span></div>
+  <div class="status"><span class="lamp" id="lamp"></span><span id="connStatus">starting…</span>
+    <button id="panicBtn" class="sbtn sm danger" type="button">Stop All</button></div>
 </nav>
 
 <div id="wrap">
@@ -374,22 +411,16 @@
   <div class="row"><b class="mini">Output</b><span id="outMount"></span>
     <b class="mini">Input</b><span id="inMount"></span>
     <button id="rescanBtn" class="sbtn sm" type="button">Rescan</button></div>
-  <div class="row">
-    <button id="panicBtn" class="sbtn danger" type="button">⏻ Panic — all notes / sound off</button>
-    <span class="note" id="panicNote"></span>
-  </div>
 </section>
 
 <section id="fx" class="card">
   <h2><span class="n">2</span>Effects</h2>
-  <div class="sub" id="fxDesc"></div>
   <div id="fxRouting"></div>
   <div id="fxCols"></div>
 </section>
 
 <section id="pads" class="card">
   <h2><span class="n">3</span>Pads</h2>
-  <div class="sub" id="padDesc"></div>
   <div class="row"><b class="mini">Bank</b><div class="bankrow" id="padBanks"></div></div>
   <div class="row" id="padVelRow"><span id="padVelMount"></span></div>
   <div class="padgrid" id="padGrid"></div>
@@ -397,7 +428,6 @@
     <span id="extMount"></span>
     <button class="sbtn sm" id="extModeToggle" type="button">mode: toggle</button>
   </div>
-  <div class="note" id="extDesc"></div>
 </section>
 
 <section id="keys" class="card">
@@ -410,46 +440,39 @@
     <span id="keyVelMount"></span>
   </div>
   <div id="keysSamples">
-    <div class="sub" id="chromaDesc"></div>
     <div class="piano-case"><div class="piano" id="chromaKbd"></div></div>
     <div class="row"><span id="asoMount"></span></div>
   </div>
   <div id="keysVocoder" hidden>
-    <div class="sub" id="vocDesc"></div>
     <div class="piano-case"><div class="piano" id="vocKbd"></div></div>
-    <div class="row"><span id="vocBendMount"></span><span class="note">pitch bend springs back to center on release</span></div>
+    <div class="row"><span id="vocBendMount"></span></div>
   </div>
 </section>
 
 <section id="patterns" class="card">
   <h2><span class="n">5</span>Patterns</h2>
-  <div class="sub" id="patDesc"></div>
   <div class="row"><b class="mini">Bank</b><div class="bankrow" id="patBanks"></div></div>
   <div class="patgrid" id="patGrid"></div>
 </section>
 
 <section id="looper" class="card">
   <h2><span class="n">6</span>Looper</h2>
-  <div class="sub" id="looperDesc"></div>
   <div id="looperRows"></div>
 </section>
 
 <section id="transport" class="card">
   <h2><span class="n">7</span>Transport</h2>
-  <div class="sub" id="rtDesc"></div>
   <div class="row" id="rtMount"></div>
   <div class="row" id="clockMount"></div>
 </section>
 
 <section id="dj" class="card">
   <h2><span class="n">8</span>DJ mode</h2>
-  <div class="sub" id="djWarn"></div>
   <div class="knob-row" id="djRows"></div>
 </section>
 
 <section id="shortcuts" class="card">
   <h2><span class="n">9</span>Shortcut Finder</h2>
-  <div class="sub" id="scDesc"></div>
   <div id="scCtrls" class="row">
     <input type="text" id="scSearch" placeholder="Search combos, names, descriptions…">
     <b class="mini">Category</b><span id="scCatMount"></span>
@@ -513,6 +536,39 @@ const $ = id => document.getElementById(id);
 const el = (t,c,x)=>{ const e=document.createElement(t); if(c)e.className=c; if(x!=null)e.textContent=x; return e; };
 const div=(c,x)=>el('div',c,x), span=(c,x)=>el('span',c,x);
 const sbtn=(x,c)=>{ const b=el('button','sbtn'+(c?' '+c:''),x); b.type='button'; return b; };
+
+/* ---------- "?" hints ----------
+   The explainer text used to sit permanently under every heading. It is
+   reference material, not something you need while playing, so it now lives
+   behind a "?" in the section title: hover on desktop, tap on touch.       */
+const openHints = [];
+function hint(sectionId, text){
+  if(!text) return null;
+  const h2 = document.querySelector('#'+sectionId+' > h2');
+  if(!h2) return null;
+  let b = h2.querySelector('.hint');
+  if(!b){
+    b = el('button','hint','?'); b.type='button';
+    b.setAttribute('aria-label','What is this section?');
+    /* the bubble is a child of the CARD, not the button — anchored to the
+       button it would start wherever the title ends and run off a phone. */
+    const bub = div('hint__bub'); h2.parentNode.appendChild(bub);
+    b._bub = bub;
+    b.addEventListener('click', e=>{
+      e.stopPropagation();
+      const wasOpen = bub.classList.contains('open');
+      openHints.forEach(x=>{ x.classList.remove('open'); x._bub.classList.remove('open'); });
+      b.classList.toggle('open', !wasOpen);
+      bub.classList.toggle('open', !wasOpen);
+    });
+    h2.appendChild(b); openHints.push(b);
+  }
+  const bub = b._bub;
+  bub.textContent = text;
+  b.title = text;
+  return b;
+}
+document.addEventListener('click', ()=> openHints.forEach(x=>{ x.classList.remove('open'); x._bub.classList.remove('open'); }));
 
 /* ---------- constants from the map ---------- */
 const FXCC = MAP.effects_control.cc;
@@ -603,15 +659,24 @@ function makeDropdown(opts){
   }
   function setCur(v){ current = v; paintSel(); }
   function choose(v, fire){ setCur(v); closeIt(); if(fire && opts.onChange) opts.onChange(v, options.find(x=>x.value===v)); }
+  /* The panel is display:none while closed — a rotateX(88deg) fold under a
+     perspective projects a box wider than its layout width, and that counts
+     toward page scroll width even when hidden, which drifts the page sideways
+     on a phone. Flush layout between showing it and animating, or the folded
+     start pose and the flat end pose land in the same recalc and it snaps. */
   function openIt(){
     allDropdowns.forEach(d=> d!==api && d.close());
     clearTimeout(closeTimer); wrap.classList.remove('closing');
-    open=true; wrap.classList.add('open');
+    open=true;
+    panel.style.display='block';
+    void panel.offsetHeight;
+    requestAnimationFrame(()=>{ if(open) wrap.classList.add('open'); });
   }
   function closeIt(){
     if(!open) return;
     open=false; wrap.classList.remove('open'); wrap.classList.add('closing');
-    clearTimeout(closeTimer); closeTimer = setTimeout(()=> wrap.classList.remove('closing'), CLOSE_MS);
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(()=>{ wrap.classList.remove('closing'); panel.style.display='none'; }, CLOSE_MS);
   }
   trigger.addEventListener('click', e=>{ e.stopPropagation(); open?closeIt():openIt(); });
   trigger.addEventListener('keydown', e=>{
@@ -807,7 +872,7 @@ function refreshPorts(){
 }
 $('rescanBtn').addEventListener('click', refreshPorts);
 $('panicBtn').addEventListener('click', panicAll);
-$('panicNote').textContent = 'All Notes Off + All Sound Off + Reset Controllers + pitch-center on all 16 channels; also clears stuck held-key highlights. Note: the SP only honors All Sound Off on ch16 and ignores note-off for pads — to stop pad/looper playback use the Looper "stop all" (CC85) or the hardware.';
+$('panicBtn').title = 'All Notes Off + All Sound Off + Reset Controllers + pitch-center on all 16 channels. The SP only honors All Sound Off on ch16 and ignores note-off for pads — to stop pad/looper playback use the Looper stop-all (CC85) or the hardware.';
 async function initMIDI(){
   if(!navigator.requestMIDIAccess){ $('connStatus').textContent = 'Web MIDI not supported — use Chrome or Edge'; return; }
   try{ midiAccess = await navigator.requestMIDIAccess({sysex:false}); midiAccess.onstatechange = refreshPorts; refreshPorts(); }
@@ -923,7 +988,7 @@ $('monFilter').addEventListener('input', applyFilter);
 $('monClear').addEventListener('click', ()=>{ monBuf.length = 0; monLog.innerHTML=''; supClock = supSense = 0; updateSuppressed(); });
 
 /* ---------- EFFECTS ---------- */
-$('fxDesc').textContent = MAP.effects_control.description+' EFX switch = CC'+CC_SW+', select = CC'+CC_SEL+', Ctrl 1-6 = CC '+CTRL_CCS.join('/')+'. Drag knobs (or scroll / double-click to reset).';
+hint('fx', MAP.effects_control.description+' EFX switch = CC'+CC_SW+', select = CC'+CC_SEL+', Ctrl 1-6 = CC '+CTRL_CCS.join('/')+'. Drag knobs, scroll to step, double-click to reset.');
 BUSES.forEach(bus=>{
   const strip = div('bus'); strip.dataset.ch = bus.ch;
   const head = div('bus-head');
@@ -981,10 +1046,11 @@ if(ROUTING && Array.isArray(ROUTING.params)){
     BUSES.forEach(bus=>{
       if(!bus.annEl) return;
       bus.stripEl.classList.remove('inactive');
+      bus.stripEl.hidden = false;
       if(bus.ch === 1) bus.annEl.textContent = serial ? 'Insert FX · serial → feeds BUS 2' : 'Insert FX · parallel (independent)';
       else if(bus.ch === 2) bus.annEl.textContent = serial ? 'Insert FX · serial ← receives BUS 1' : 'Insert FX · parallel (independent)';
       else if(bus.ch === 3 || bus.ch === 4){
-        if(favOff){ bus.stripEl.classList.add('inactive'); bus.annEl.textContent = '⚠ INACTIVE — FAVORITE = Bypass · CC still sends, not audible'; }
+        if(favOff){ bus.stripEl.hidden = true; bus.annEl.textContent = ''; }
         else bus.annEl.textContent = 'Master FX · FAVORITE ' + routeState.favorite + (bus.ch===3 && dryThroughMaster ? ' · DRY runs through here' : '');
       }else if(bus.ch === 5) bus.annEl.textContent = 'External input → feeds ' + inputBus + (inputBus === 'DRY' ? ' (skips BUS 1/2 insert FX)' : '');
     });
@@ -1007,7 +1073,7 @@ function pressable(node, getCh, note, getVel){
 }
 
 /* ---------- PADS ---------- */
-$('padDesc').textContent = PADS.midi_mode_A.notes;
+hint('pads', PADS.midi_mode_A.notes+' '+MAP.ext_source_control.description);
 let padBank = 1;
 const bankBtns = [];
 for(let i=0;i<10;i++){
@@ -1027,11 +1093,11 @@ for(let pad=1; pad<=16; pad++){
   const note = padToNote[pad];
   const p = div('pad'); p.style.background = PAD_COLORS[(pad-1) % PAD_COLORS.length];
   p.title = 'Pad '+pad+' — '+noteName(note)+' (note '+note+')';
-  p.append(span('num', String(pad)), span('nn', noteName(note)));
+  p.append(span('num', String(pad)));
   pressable(p, padCh, note, padVel);
   $('padGrid').appendChild(p);
 }
-$('extDesc').textContent = MAP.ext_source_control.description;
+
 {
   const extBtn = sbtn('EXT SOURCE','accent2'); $('extMount').appendChild(extBtn);
   const modeBtn = $('extModeToggle');
@@ -1070,10 +1136,10 @@ function buildPiano(container, ch, lo, hi){
   }
   container.style.width = (wIdx ? (wIdx-1)*W_ADV + W_WIDTH : 0)+'px';
 }
-$('chromaDesc').textContent = 'ch'+CHROMA_CH+' — '+PADS.chromatic.notes;
+const KEYS_HINT_A = 'Samples: ch'+CHROMA_CH+' — '+PADS.chromatic.notes;
 buildPiano($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI);
 { const aso = sbtn('All Sound Off (CC120)','sm'); aso.addEventListener('click', ()=> sendCC(CHROMA_CH, 120, 0, null)); $('asoMount').appendChild(aso); }
-$('vocDesc').textContent = 'ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)];
+hint('keys', KEYS_HINT_A+'  |  Vocoder: ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)]+' Pitch bend springs back to centre on release.');
 buildPiano($('vocKbd'), VOC_CH, 36, 72);
 { const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256, springBack:true, format:v=>(v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) }); $('vocBendMount').appendChild(bendKnob.el); }
 
@@ -1098,7 +1164,7 @@ buildPiano($('vocKbd'), VOC_CH, 36, 72);
 }
 
 /* ---------- PATTERNS ---------- */
-$('patDesc').textContent = PADS.pattern_launch.message+'. '+PADS.pattern_launch.mapping;
+hint('patterns', PADS.pattern_launch.message+'. '+PADS.pattern_launch.mapping);
 let patBank = 1;
 const patBankBtns = [];
 for(let i=0;i<10;i++){
@@ -1110,7 +1176,7 @@ for(let i=0;i<10;i++){
 for(let p=PC_LO; p<=PC_HI; p++){ const b = sbtn(String(p+1)); b.title = 'Pattern '+(p+1)+' (PC'+p+')'; b.addEventListener('click', ()=> sendPC(patBank, p, null)); $('patGrid').appendChild(b); }
 
 /* ---------- LOOPER ---------- */
-$('looperDesc').textContent = LOOP.description+' All CCs on ch'+LOOP.channel+'.';
+hint('looper', LOOP.description+' All CCs on ch'+LOOP.channel+'.');
 Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).forEach(([ccStr, def])=>{
   const cc = +ccStr; const row = div('looprow'); row.appendChild(span(null, 'CC'+cc+' '+def.function));
   const rangeM = def.values.match(/^(\d+)-(\d+) = (.+)$/);
@@ -1120,7 +1186,7 @@ Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).forEach(([ccStr, def])=>{
 });
 
 /* ---------- TRANSPORT ---------- */
-$('rtDesc').textContent = MAP.system_realtime.start_stop;
+hint('transport', MAP.system_realtime.start_stop);
 [['Start (FA)',0xFA],['Stop (FC)',0xFC],['Continue (FB) — untested',0xFB]].forEach(([label,byte])=>{ const b = sbtn(label); b.addEventListener('click', ()=> sendBytes([byte], null)); $('rtMount').appendChild(b); });
 const clock = {running:false, next:0, timer:null, count:0, bpm:120};
 const bpmKnob = makeKnob({ label:'BPM', min:40, max:300, value:120, defaultVal:120, step:1, onChange:v=>{ clock.bpm=v; } });
@@ -1148,7 +1214,7 @@ clockBtn.addEventListener('click', ()=>{
 });
 
 /* ---------- DJ ---------- */
-$('djWarn').textContent = MAP.dj_mode.warning;
+hint('dj', MAP.dj_mode.warning);
 DJ_ROWS.forEach(({cc, ch})=>{ const k = makeKnob({ label:'CC'+cc+' ch'+ch, min:0, max:127, value: cc===8?64:100, defaultVal: cc===8?64:100, onChange:v=>sendCC(ch, cc, v, null) }); k.setTitle(DJ_REC[String(cc)]); $('djRows').appendChild(k.el); });
 
 /* ---------- raw sender ---------- */
@@ -1211,9 +1277,9 @@ async function runTestB(){
 (async function shortcutFinder(){
   let SC;
   try{ const r = await fetch('sp404mk2-shortcuts.json'); if(!r.ok) throw new Error('HTTP '+r.status); SC = await r.json(); }
-  catch(e){ $('scDesc').textContent = 'Shortcut list unavailable ('+e.message+'). The rest of the app is unaffected.'; return; }
+  catch(e){ hint('shortcuts', 'Shortcut list unavailable ('+e.message+'). The rest of the app is unaffected.'); return; }
   const items = SC.shortcuts || [];
-  $('scDesc').textContent = (SC.meta && SC.meta.device ? SC.meta.device+' ' : '')+'hardware button combos ('+items.length+'), from the '+((SC.meta&&SC.meta.manual_version)||'')+' manual. Each row shows whether this app can reproduce it over MIDI; hover the badge for how.';
+  hint('shortcuts', (SC.meta && SC.meta.device ? SC.meta.device+' ' : '')+'hardware button combos ('+items.length+'), from the '+((SC.meta&&SC.meta.manual_version)||'')+' manual. Each row shows whether this app can reproduce it over MIDI; hover the badge for how.');
   const cats = SC.categories || [...new Set(items.map(i=>i.category))].sort();
   const ddCat = makeDropdown({ options:[{value:'',label:'All'}].concat(cats.map(c=>({value:c,label:c}))), value:'', onChange:render });
   const ddCap = makeDropdown({ options:[{value:'',label:'All'},{value:'app',label:'App can do it'},{value:'full',label:'App: full'},{value:'partial',label:'App: partial'},{value:'hw',label:'Hardware only'}], value:'', onChange:render });
