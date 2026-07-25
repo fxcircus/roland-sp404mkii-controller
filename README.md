@@ -24,12 +24,14 @@ Then open http://localhost:8404/ in **Chrome or Edge** (Web MIDI required; `file
 10. **MIDI monitor** — timestamped log of all IN/OUT messages with hex and a JSON-resolved decode (e.g. `ch1 CC17=64 → BUS1 Ctrl2 (FEEDBACK)`); filter box (regex or substring), clear button, optional clock/active-sensing suppression.
 11. **Raw sender** — three hex byte fields for ad-hoc messages.
 12. **Verification checklist** — the two hardware questions from the map's meta (both now resolved by the manual — see `MIDI-VERIFICATION.md`), each with a scripted Test button and a persisted pass/fail + notes field for optional hardware re-confirmation.
+13. **Shortcut Finder** — searchable reference of the SP-404MK2's hardware button combos (from `sp404mk2-shortcuts.json`), grouped by category with a search box and filters. Each entry shows the combo as key badges, what it does, and whether this app can reproduce it over MIDI (App: full / App: partial / Hardware only — hover for how), with a deep link to Roland's manual page.
 
 Every control shows the hex bytes of its last sent message.
 
 ## Reference material
 
-- `sp404mk2-midi-map.json` — the runtime map; single source of truth for the app.
+- `sp404mk2-midi-map.json` — the runtime MIDI map; single source of truth for the test panels.
+- `sp404mk2-shortcuts.json` — the runtime data for the Shortcut Finder (panel 13).
 - `MIDI-VERIFICATION.md` — cross-check of every map value against the official manual (what was verified, the one error fixed).
 - `manual-v550-text.txt` + `manual-index.md` — full searchable manual text with a section/page index.
 - `SP-404mk2_v550_reference_eng04_W.pdf` — the original manual.

@@ -39,6 +39,26 @@
   .active-key{outline:3px solid #06529b}
   #loadError{color:#b00;font-weight:bold}
   input[type=range]{margin:0}
+  /* Shortcut Finder */
+  #scCtrls{position:sticky;top:0;background:#fff;padding:6px 0;z-index:1;border-bottom:1px solid #eee}
+  #scSearch{width:260px}
+  #scList{margin-top:8px}
+  .sc-cat{font-size:14px;margin:12px 0 4px;border-bottom:1px solid #ddd;padding-bottom:2px}
+  .sc-cat .cnt{color:#888;font-weight:normal;font-size:12px}
+  .sc-item{display:grid;grid-template-columns:210px 1fr auto;gap:10px;align-items:baseline;padding:5px 4px;border-bottom:1px solid #f0f0f0}
+  .sc-combo{display:flex;flex-wrap:wrap;gap:3px;align-items:center}
+  .sc-key{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:#2b2b2b;color:#fff;border-radius:3px;padding:1px 5px;white-space:nowrap}
+  .sc-plus{color:#aaa;font-size:11px}
+  .sc-name{font-weight:bold}
+  .sc-desc{color:#444;font-weight:normal;font-size:12px;margin-left:6px}
+  .sc-mode{color:#888;font-size:11px;margin-left:6px}
+  .sc-right{text-align:right;white-space:nowrap}
+  .sc-cap{font-size:11px;border-radius:3px;padding:1px 6px;cursor:help}
+  .sc-cap.full{background:#dff3df;color:#1a6b1a;border:1px solid #a9d8a9}
+  .sc-cap.partial{background:#fdf0d5;color:#8a5a00;border:1px solid #eccf8f}
+  .sc-cap.hw{background:#eee;color:#666;border:1px solid #ccc}
+  .sc-link{font-size:11px;margin-left:8px}
+  .sc-none{color:#888;font-style:italic;padding:8px 4px}
 </style>
 </head>
 <body>
@@ -146,6 +166,23 @@
 
 <fieldset id="pCheck"><legend>12 · Verification checklist (open hardware questions)</legend>
   <div id="checkItems"></div>
+</fieldset>
+
+<fieldset id="pShortcuts"><legend>13 · Shortcut Finder (hardware button combos)</legend>
+  <div class="note" id="scDesc"></div>
+  <div id="scCtrls" class="row">
+    <input type="text" id="scSearch" placeholder="Search combos, names, descriptions…">
+    <label>Category: <select id="scCat"><option value="">All</option></select></label>
+    <label>Show: <select id="scCap">
+      <option value="">All</option>
+      <option value="app">App can do it (full/partial)</option>
+      <option value="full">App: full</option>
+      <option value="partial">App: partial</option>
+      <option value="hw">Hardware only</option>
+    </select></label>
+    <span class="note" id="scCount"></span>
+  </div>
+  <div id="scList"></div>
 </fieldset>
 
 </div>
@@ -768,6 +805,95 @@ async function runTestB(prog){
   $('pMon').scrollIntoView({behavior:'smooth'});
   prog.textContent = 'monitor filtered to IN Ctrl4-6. Hold [VALUE] + turn CTRL 1-3 on the SP now.';
 }
+
+/* ---------- panel 13: Shortcut Finder (rendered from sp404mk2-shortcuts.json) ---------- */
+(async function shortcutFinder(){
+  let SC;
+  try{
+    const r = await fetch('sp404mk2-shortcuts.json');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    SC = await r.json();
+  }catch(e){
+    $('scDesc').textContent = 'Shortcut list unavailable (sp404mk2-shortcuts.json did not load: '+e.message+'). The rest of the harness is unaffected.';
+    return;
+  }
+  const items = SC.shortcuts || [];
+  $('scDesc').textContent = (SC.meta && SC.meta.device ? SC.meta.device+' ' : '')+'hardware button combos ('+items.length+'), from the '+((SC.meta&&SC.meta.manual_version)||'')+' manual. Each row shows whether this app can reproduce it over MIDI; hover the badge for how. Links open Roland’s manual page.';
+
+  const catSel = $('scCat');
+  (SC.categories || [...new Set(items.map(i=>i.category))].sort()).forEach(c=>{
+    const op = document.createElement('option'); op.value = c; op.textContent = c; catSel.appendChild(op);
+  });
+
+  const capOf = it => it.app_midi ? (it.app_midi.can || 'partial') : 'hw';   // null app_midi => hardware only
+  const capLabel = { full:'App: full', partial:'App: partial', hw:'Hardware only' };
+
+  function render(){
+    const q = $('scSearch').value.trim().toLowerCase();
+    const cat = $('scCat').value;
+    const capF = $('scCap').value;
+    const list = $('scList');
+    list.innerHTML = '';
+    const matches = items.filter(it=>{
+      if(cat && it.category !== cat) return false;
+      const cap = capOf(it);
+      if(capF === 'app' && cap === 'hw') return false;
+      if((capF === 'full' || capF === 'partial' || capF === 'hw') && cap !== capF) return false;
+      if(q){
+        const hay = [it.name, it.desc, it.mode, it.category, (it.combo||[]).join(' '),
+                     it.app_midi && it.app_midi.how].filter(Boolean).join(' ').toLowerCase();
+        if(!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    $('scCount').textContent = matches.length + ' of ' + items.length + ' shown';
+    if(!matches.length){ list.innerHTML = '<div class="sc-none">No shortcuts match.</div>'; return; }
+
+    // group by category, preserving the JSON's category order
+    const order = (SC.categories || []).length ? SC.categories : [...new Set(items.map(i=>i.category))];
+    const byCat = {};
+    matches.forEach(it=>{ (byCat[it.category] = byCat[it.category] || []).push(it); });
+    order.filter(c=>byCat[c]).forEach(cat=>{
+      const h = document.createElement('div'); h.className = 'sc-cat';
+      h.innerHTML = cat + ' <span class="cnt">(' + byCat[cat].length + ')</span>';
+      list.appendChild(h);
+      byCat[cat].forEach(it=>{
+        const row = document.createElement('div'); row.className = 'sc-item';
+
+        const combo = document.createElement('div'); combo.className = 'sc-combo';
+        (it.combo || []).forEach((k, i)=>{
+          if(i){ const p = document.createElement('span'); p.className = 'sc-plus'; p.textContent = '+'; combo.appendChild(p); }
+          const key = document.createElement('span'); key.className = 'sc-key'; key.textContent = k; combo.appendChild(key);
+        });
+
+        const mid = document.createElement('div');
+        const nm = document.createElement('span'); nm.className = 'sc-name'; nm.textContent = it.name;
+        const ds = document.createElement('span'); ds.className = 'sc-desc'; ds.textContent = it.desc || '';
+        mid.append(nm, ds);
+        if(it.mode){ const md = document.createElement('span'); md.className = 'sc-mode'; md.textContent = '['+it.mode+']'; mid.append(document.createTextNode(' '), md); }
+
+        const right = document.createElement('div'); right.className = 'sc-right';
+        const cap = capOf(it);
+        const badge = document.createElement('span'); badge.className = 'sc-cap ' + cap; badge.textContent = capLabel[cap];
+        if(it.app_midi && it.app_midi.how) badge.title = it.app_midi.how;
+        else if(cap === 'hw') badge.title = 'Not reachable over MIDI — SP-404MK2 front-panel only.';
+        right.appendChild(badge);
+        if(it.manual_url){
+          const a = document.createElement('a'); a.className = 'sc-link'; a.href = it.manual_url;
+          a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'manual ↗';
+          right.appendChild(a);
+        }
+
+        row.append(combo, mid, right);
+        list.appendChild(row);
+      });
+    });
+  }
+  $('scSearch').addEventListener('input', render);
+  $('scCat').addEventListener('change', render);
+  $('scCap').addEventListener('change', render);
+  render();
+})();
 
 /* ---------- go ---------- */
 updateSuppressed();
