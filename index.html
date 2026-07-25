@@ -6,10 +6,10 @@
 <title>SP-404 MKII · MIDI Sketchpad</title>
 <style>
   :root{
-    --paper:#f9dee9; --paper2:#fdeef4; --panel:#fffbfd;
-    --ink:#241820; --ink2:#7a6570; --accent:#ef5aa0; --accent2:#8a63e0;
-    --lcd-bg:#0e1f14; --lcd:#7bf0a2;
-    --sh:rgba(36,24,32,.14); --sh2:rgba(36,24,32,.22);
+    --paper:#f7dbe8; --paper2:#fdeef5; --panel:#fffcfd;
+    --ink:#1b1218; --ink2:#7d6773; --accent:#ef4f9c; --accent2:#8a5fe3;
+    --lcd-bg:#0b1d13; --lcd:#7bf0a2;
+    --sh:rgba(27,18,24,.17); --sh2:rgba(27,18,24,.27);
     --marker:'Permanent Marker','Marker Felt','Comic Sans MS','Chalkboard SE','Segoe Print',cursive;
     --sans:system-ui,-apple-system,'Segoe UI',sans-serif;
     --mono:ui-monospace,Menlo,Consolas,monospace;
@@ -18,194 +18,298 @@
   body{
     font-family:var(--sans); font-size:14px; color:var(--ink); margin:0;
     background:var(--paper);
-    background-image:radial-gradient(rgba(36,24,32,.045) 1px, transparent 1px);
+    background-image:radial-gradient(rgba(27,18,24,.05) 1px, transparent 1px);
     background-size:11px 11px;
   }
   #loadError{color:#a00;font-weight:bold;padding:16px}
-  #wrap{max-width:1120px;margin:0 auto;padding:0 16px 70px}
+  #wrap{max-width:1120px;margin:0 auto;padding:0 16px 80px}
 
   /* hero */
-  #hero{text-align:center;padding:24px 10px 6px}
-  #hero h1{font-family:var(--marker);font-size:52px;margin:0;letter-spacing:1px;line-height:.95;
-    text-shadow:2px 2px 0 #fff;transform:rotate(-1.4deg)}
+  #hero{text-align:center;padding:28px 10px 4px}
+  #hero h1{font-family:var(--marker);font-size:58px;margin:0;letter-spacing:1px;line-height:.95;
+    text-shadow:3px 3px 0 #fff, 5px 5px 0 var(--sh);transform:rotate(-1.6deg)}
   #hero h1 span{color:var(--accent)}
-  #hero .tag{font-family:var(--marker);font-size:15px;color:var(--ink2);margin:10px 0 0;transform:rotate(-.5deg)}
+  #hero .squig{display:block;margin:2px auto 0;width:min(430px,76vw);height:16px;overflow:visible}
+  #hero .squig path{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round}
+  #hero .tag{font-family:var(--marker);font-size:15px;color:var(--ink2);margin:9px 0 0;transform:rotate(-.5deg)}
 
   /* sticky jump menu — centered */
-  #nav{position:sticky;top:0;z-index:40;display:flex;flex-direction:column;align-items:center;gap:7px;
-    padding:9px 12px;margin:8px auto 22px;max-width:1120px;background:var(--paper2);
-    border:2.5px solid var(--ink);border-radius:16px 7px 16px 7px/7px 16px 7px 16px;
-    box-shadow:3px 4px 0 var(--sh)}
+  #nav{position:sticky;top:0;z-index:40;display:flex;flex-direction:column;align-items:center;gap:8px;
+    padding:11px 14px;margin:14px auto 26px;max-width:1120px;background:var(--paper2);
+    border:3px solid var(--ink);border-radius:16px 7px 16px 7px/7px 16px 7px 16px;
+    box-shadow:4px 5px 0 var(--sh)}
+  #nav::before{content:'';position:absolute;top:-10px;left:50%;width:98px;height:21px;margin-left:-49px;
+    background:rgba(255,255,255,.68);box-shadow:0 0 0 1.5px rgba(27,18,24,.16);transform:rotate(-2deg)}
   #nav .navrow{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}
   #nav button{font-family:var(--marker);font-size:14px;background:#fff;color:var(--ink);
-    border:2px solid var(--ink);border-radius:9px 3px 9px 3px/3px 9px 3px 9px;padding:4px 12px;cursor:pointer;
-    box-shadow:1.5px 1.5px 0 var(--sh)}
-  #nav button:hover{background:var(--paper)}
-  #nav button.active{background:var(--ink);color:#fff}
+    border:2.5px solid var(--ink);border-radius:9px 3px 9px 3px/3px 9px 3px 9px;padding:5px 13px;cursor:pointer;
+    box-shadow:2px 2px 0 var(--sh);transition:transform .1s ease, box-shadow .1s ease}
+  #nav button:hover{background:var(--paper);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--sh)}
+  #nav button.active{background:var(--ink);color:#fff;box-shadow:2px 2px 0 var(--accent)}
   #nav .status{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);max-width:100%}
   #connStatus{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}
-  .lamp{display:inline-block;width:13px;height:13px;border-radius:50%;background:#d15;
-    border:2px solid var(--ink);flex:0 0 auto}
-  .lamp.on{background:#46c46e}
+  .lamp{display:inline-block;width:14px;height:14px;border-radius:50%;background:#d15;
+    border:2.5px solid var(--ink);flex:0 0 auto}
+  .lamp.on{background:#46c46e;box-shadow:0 0 0 3px rgba(70,196,110,.28)}
 
-  /* cards */
-  .card{background:var(--panel);border:2.5px solid var(--ink);padding:16px 18px 18px;margin:0 0 24px;
-    box-shadow:3px 5px 0 var(--sh);position:relative;scroll-margin-top:72px;
-    border-radius:230px 14px 230px 14px/14px 230px 14px 230px}
-  .card:nth-of-type(even){border-radius:14px 230px 14px 230px/230px 14px 230px 14px}
-  .card > h2{font-family:var(--marker);font-size:27px;margin:0 0 4px;transform:rotate(-.5deg)}
-  .card > h2 .n{color:var(--accent);font-size:18px;vertical-align:super;margin-right:5px}
-  .card .sub{color:var(--ink2);font-size:12px;margin:0 0 14px}
-  .row{display:flex;align-items:center;gap:9px;margin:7px 0;flex-wrap:wrap}
+  /* cards — wobbly hand-inked rectangles, taped to the page */
+  .card{background:var(--panel);border:3px solid var(--ink);padding:20px 22px 22px;margin:0 0 30px;
+    box-shadow:5px 7px 0 var(--sh);position:relative;scroll-margin-top:112px;
+    border-radius:15px 6px 16px 7px/7px 16px 6px 15px}
+  .card:nth-of-type(even){border-radius:7px 16px 6px 15px/15px 6px 16px 7px}
+  .card::after{content:'';position:absolute;inset:4px;border:2px solid var(--ink);opacity:.13;
+    border-radius:inherit;pointer-events:none}
+  .card::before{content:'';position:absolute;top:-10px;right:36px;width:76px;height:20px;
+    background:rgba(255,255,255,.62);box-shadow:0 0 0 1.5px rgba(27,18,24,.15);
+    transform:rotate(3deg);pointer-events:none}
+  .card > h2{font-family:var(--marker);font-size:29px;margin:0 0 6px;transform:rotate(-.5deg);
+    display:flex;align-items:center;gap:11px}
+  .card > h2 .n{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+    width:33px;height:33px;font-size:17px;color:#fff;background:var(--accent);
+    border:3px solid var(--ink);border-radius:52% 48% 50% 50%/50% 52% 48% 50%;transform:rotate(-4deg)}
+  .card .sub{color:var(--ink2);font-size:12.5px;margin:0 0 16px;line-height:1.5;max-width:82ch}
+  .row{display:flex;align-items:center;gap:10px;margin:9px 0;flex-wrap:wrap}
   b.mini{font-family:var(--marker);font-size:15px}
 
   /* sketch buttons */
-  .sbtn{font-family:var(--marker);font-size:14px;background:#fff;color:var(--ink);
-    border:2.5px solid var(--ink);border-radius:11px 4px 12px 5px/5px 12px 4px 11px;
-    box-shadow:2px 2px 0 var(--sh2);padding:6px 13px;cursor:pointer;user-select:none;line-height:1.1}
+  .sbtn{font-family:var(--marker);font-size:14.5px;background:#fff;color:var(--ink);
+    border:3px solid var(--ink);border-radius:11px 4px 12px 5px/5px 12px 4px 11px;
+    box-shadow:2.5px 3px 0 var(--sh2);padding:7px 14px;cursor:pointer;user-select:none;line-height:1.1}
   .sbtn:hover{background:var(--paper2)}
-  .sbtn:active,.sbtn.held{transform:translate(2px,2px);box-shadow:0 0 0 var(--sh2)}
+  .sbtn:active,.sbtn.held{transform:translate(2.5px,3px);box-shadow:0 0 0 var(--sh2)}
   .sbtn.on{background:var(--accent);color:#fff}
   .sbtn.accent2.on,.sbtn.accent2.held{background:var(--accent2);color:#fff}
-  .sbtn.sm{font-size:12px;padding:4px 9px}
+  .sbtn.sm{font-size:12.5px;padding:5px 10px;border-width:2.5px}
   .sbtn.danger{background:#ffe6ec;color:#b0143c;border-color:#b0143c}
   .sbtn[disabled]{opacity:.4;pointer-events:none}
 
-  /* FLAT hand-drawn knobs (SVG + rough filter) */
-  .knob{width:70px;text-align:center;user-select:none}
-  .knob-svg{width:58px;height:58px;display:block;margin:0 auto;overflow:visible;cursor:ns-resize;touch-action:none;
-    filter:url(#rough)}
-  .k-face{fill:rgba(255,255,255,.45);stroke:var(--ink);stroke-width:2}
-  .k-ticks{stroke:var(--ink2);stroke-width:1.4;stroke-linecap:round}
-  .k-ptr{stroke:var(--ink);stroke-width:2.6;stroke-linecap:round}
+  /* segmented tab switch */
+  .seg{display:inline-flex;margin:4px 0 12px}
+  .seg .seg-btn{font-family:var(--marker);font-size:16px;background:#fff;color:var(--ink2);
+    border:3px solid var(--ink);border-right-width:0;padding:8px 22px;cursor:pointer;
+    box-shadow:0 4px 0 var(--sh);position:relative;top:0;line-height:1.1}
+  .seg .seg-btn:first-child{border-radius:13px 4px 0 0/10px 4px 0 0}
+  .seg .seg-btn:last-child{border-right-width:3px;border-radius:4px 13px 0 0/4px 10px 0 0}
+  .seg .seg-btn.on{background:var(--accent);color:#fff;top:-3px;box-shadow:0 7px 0 var(--sh)}
+  .keys-top{display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap;margin-bottom:2px}
+
+  /* hand-inked SVG knobs — chunky ink, flat fill, value gauge */
+  .knob{width:88px;text-align:center;user-select:none}
+  .knob-svg{width:80px;height:80px;display:block;margin:0 auto;overflow:visible;
+    cursor:grab;touch-action:none}
+  .knob.drag .knob-svg{cursor:grabbing}
+  .k-shadow{fill:var(--sh)}
+  .k-track{fill:none;stroke:rgba(27,18,24,.17);stroke-width:3.8;stroke-linecap:round;stroke-linejoin:round}
+  .k-fill{fill:none;stroke:var(--accent);stroke-width:5.4;stroke-linecap:round;stroke-linejoin:round}
+  .k-tick{fill:none;stroke:var(--ink2);stroke-width:2.6;stroke-linecap:round}
+  .k-body{fill:#fff;stroke:var(--ink);stroke-width:4.2;stroke-linejoin:round}
+  .k-body2{fill:none;stroke:var(--ink);stroke-width:1.7;opacity:.45}
+  .k-ptr{fill:none;stroke:var(--ink);stroke-width:6.6;stroke-linecap:round}
   .k-hub{fill:var(--ink)}
-  .knob-label{font-size:10.5px;font-weight:700;margin-top:5px;line-height:1.05;min-height:24px;
-    display:flex;align-items:center;justify-content:center}
-  .knob-val{font-family:var(--mono);font-size:11px;color:var(--ink2)}
-  .knob.disabled{opacity:.3;pointer-events:none}
-  .knob-row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;margin-top:10px}
+  .knob.drag .k-fill{stroke:var(--accent2)}
+  .knob-svg:focus-visible,.knob:focus-visible{outline:none}
+  .knob:focus-visible .k-body{stroke:var(--accent2)}
+  .knob-label{font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+    margin-top:4px;line-height:1.15;min-height:25px;display:flex;align-items:center;justify-content:center}
+  .knob-val{font-family:var(--mono);font-size:10.5px;color:var(--ink);background:#fff;
+    border:2px solid var(--ink);border-radius:6px 2px 6px 2px/2px 6px 2px 6px;padding:0 5px;
+    display:inline-block;min-width:38px}
+  .knob.drag .knob-val{background:var(--accent);color:#fff}
+  .knob.disabled{opacity:.28;pointer-events:none}
+  .knob-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin-top:12px}
 
   /* effect bus strips */
-  .bus{border:2.5px solid var(--ink);background:#fff;padding:11px 13px;margin:0 0 13px;
-    border-radius:12px 5px 12px 5px/5px 12px 5px 12px;box-shadow:2px 3px 0 var(--sh)}
-  .bus.inactive{opacity:.6;background:repeating-linear-gradient(45deg,#f4f4f4,#f4f4f4 7px,#ececec 7px,#ececec 14px);border-style:dashed}
+  .bus{border:3px solid var(--ink);background:#fff;padding:13px 15px 15px;margin:0 0 15px;
+    border-radius:13px 5px 13px 5px/5px 13px 5px 13px;box-shadow:3px 4px 0 var(--sh);position:relative}
+  .bus.inactive{opacity:.62;background:repeating-linear-gradient(45deg,#f5f5f5,#f5f5f5 7px,#eaeaea 7px,#eaeaea 14px);border-style:dashed}
   .bus-head{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
-  .bus-name{font-family:var(--marker);font-size:20px}
-  .bus-ch{font-size:11px;color:#fff;background:var(--ink);border-radius:6px;padding:1px 7px}
-  .bus-ann{font-size:11px;color:var(--ink2);flex:1 1 200px}
-  .bus.inactive .bus-ann{color:#b06a00;font-weight:700}
+  .bus-name{font-family:var(--marker);font-size:22px}
+  .bus-ch{font-size:11px;color:#fff;background:var(--ink);padding:2px 8px;
+    border-radius:7px 3px 7px 3px/3px 7px 3px 7px}
+  .bus-ann{font-size:11.5px;color:var(--ink2);flex:1 1 200px;line-height:1.45}
+  .bus.inactive .bus-ann{color:#a35e00;font-weight:700}
 
   /* routing declaration */
-  #fxRouting{border:2px dashed var(--ink);background:var(--paper2);border-radius:12px;padding:11px 13px;margin:0 0 16px}
-  #fxRouting .title{font-family:var(--marker);font-size:16px;margin-bottom:9px}
+  #fxRouting{border:3px dashed var(--ink);background:var(--paper2);border-radius:13px;padding:13px 15px;margin:0 0 18px}
+  #fxRouting .title{font-family:var(--marker);font-size:17px;margin-bottom:10px}
   #fxRouting .rgrid{display:flex;flex-wrap:wrap;gap:16px}
-  #fxRouting label.rlab{display:flex;align-items:center;gap:6px;font-size:12px}
-  #fxRouting .rn{color:var(--ink2);font-size:11px;margin-top:9px}
+  #fxRouting label.rlab{display:flex;align-items:center;gap:7px;font-size:12px}
+  #fxRouting .rn{color:var(--ink2);font-size:11.5px;margin-top:11px;line-height:1.5}
 
-  /* custom paper-unfold dropdown */
+  /* ---- paper-unfold dropdown: an accordion-folded strip that opens in stages ---- */
   .dd{position:relative;display:inline-block;font-family:var(--sans);vertical-align:middle}
-  .dd-trigger{display:inline-flex;align-items:center;gap:9px;font-family:var(--marker);font-size:13px;
-    background:#fff;color:var(--ink);border:2.5px solid var(--ink);border-radius:10px 4px 10px 4px/4px 10px 4px 10px;
-    box-shadow:2px 2px 0 var(--sh);padding:5px 11px;cursor:pointer;max-width:250px}
-  .dd-trigger:hover{background:var(--paper2)}
+  .dd-trigger{display:inline-flex;align-items:center;gap:10px;font-family:var(--marker);font-size:13.5px;
+    background:#fff;color:var(--ink);border:3px solid var(--ink);
+    border-radius:10px 4px 10px 4px/4px 10px 4px 10px;
+    box-shadow:2.5px 3px 0 var(--sh);padding:6px 12px;cursor:pointer;max-width:270px;
+    background-image:linear-gradient(180deg,rgba(27,18,24,.06) 0,rgba(27,18,24,0) 45%,
+      rgba(255,255,255,.92) 52%,rgba(27,18,24,0) 100%)}
+  .dd-trigger:hover{filter:brightness(.98)}
+  .dd.open .dd-trigger{box-shadow:1px 1px 0 var(--sh)}
   .dd-cur{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .dd-caret{transition:transform .2s ease;font-size:11px;color:var(--ink2)}
+  .dd-caret{transition:transform .25s ease;font-size:11px;color:var(--ink2);margin-left:auto}
   .dd.open .dd-caret{transform:rotate(180deg)}
-  .dd-panel{position:absolute;top:calc(100% + 5px);left:0;min-width:100%;z-index:60;
-    background:var(--panel);border:2.5px solid var(--ink);border-radius:4px 12px 12px 12px;
-    box-shadow:3px 6px 0 var(--sh);padding:5px;transform-origin:top center;
-    transform:perspective(750px) rotateX(-90deg);opacity:0;pointer-events:none;
-    transition:transform .22s cubic-bezier(.5,-0.2,.4,1.3), opacity .16s ease;
-    max-height:290px;overflow:auto}
-  .dd.open .dd-panel{transform:perspective(750px) rotateX(0deg);opacity:1;pointer-events:auto}
-  .dd-opt{padding:5px 11px;border-radius:6px;cursor:pointer;white-space:nowrap;font-size:13px;font-family:var(--sans)}
-  .dd-opt:hover{background:var(--paper2)}
-  .dd-opt.sel{background:var(--accent);color:#fff}
+
+  /* the panel is a transparent clip window; its padding leaves room for the sheet's ink shadow */
+  .dd-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;z-index:60;
+    padding:0 13px 15px 0;clip-path:inset(0 0 100% 0);
+    opacity:0;pointer-events:none;transition:opacity .12s ease}
+  .dd.open .dd-panel{opacity:1;pointer-events:auto;animation:ddReveal .5s cubic-bezier(.3,.9,.35,1) forwards}
+  .dd.closing .dd-panel{opacity:1;animation:ddRevealBack .17s ease forwards}
+  .dd-sheet{background:var(--panel);border:3px solid var(--ink);
+    border-radius:3px 14px 5px 12px/12px 5px 14px 3px;
+    box-shadow:4px 6px 0 var(--sh);padding:6px;max-height:300px;overflow:auto;
+    transform-origin:top center;background-attachment:local;
+    background-image:
+      repeating-linear-gradient(180deg,rgba(27,18,24,.05) 0,rgba(27,18,24,0) 42px,
+        rgba(27,18,24,0) 42px,rgba(27,18,24,.05) 84px),
+      repeating-linear-gradient(180deg,rgba(27,18,24,0) 0,rgba(27,18,24,0) 68px,
+        rgba(27,18,24,.055) 72px,rgba(27,18,24,.17) 74px,rgba(255,255,255,.95) 76.5px,
+        rgba(27,18,24,0) 84px)}
+  .dd.open .dd-sheet{animation:ddFlap .5s cubic-bezier(.3,.9,.35,1) forwards}
+  .dd.closing .dd-sheet{animation:ddFlapBack .17s ease forwards}
+  @keyframes ddReveal{
+    0%{clip-path:inset(0 0 93% 0)}  28%{clip-path:inset(0 0 68% 0)}
+    54%{clip-path:inset(0 0 42% 0)} 78%{clip-path:inset(0 0 17% 0)}
+    100%{clip-path:inset(0 0 0 0)} }
+  @keyframes ddFlap{
+    0%{transform:perspective(900px) rotateX(-86deg)}  28%{transform:perspective(900px) rotateX(-30deg)}
+    54%{transform:perspective(900px) rotateX(12deg)}  78%{transform:perspective(900px) rotateX(-5deg)}
+    100%{transform:perspective(900px) rotateX(0)} }
+  @keyframes ddRevealBack{ from{clip-path:inset(0 0 0 0)} to{clip-path:inset(0 0 94% 0)} }
+  @keyframes ddFlapBack{ from{transform:perspective(900px) rotateX(0)}
+                         to{transform:perspective(900px) rotateX(-86deg)} }
+  .dd-opt{padding:6px 12px;border-radius:7px 3px 7px 3px/3px 7px 3px 7px;cursor:pointer;
+    white-space:nowrap;font-size:13px;font-family:var(--sans)}
+  .dd-opt:hover{background:var(--paper2);box-shadow:inset 0 0 0 2px rgba(27,18,24,.18)}
+  .dd-opt.sel{background:var(--accent);color:#fff;box-shadow:2px 2px 0 var(--sh2)}
   /* LCD variant (effect selector) */
   .dd.lcd .dd-trigger{background:var(--lcd-bg);color:var(--lcd);font-family:var(--mono);font-size:12.5px;
-    box-shadow:inset 0 0 8px rgba(0,0,0,.55), 2px 2px 0 var(--sh)}
+    box-shadow:inset 0 0 10px rgba(0,0,0,.6), 2.5px 3px 0 var(--sh);
+    background-image:repeating-linear-gradient(180deg,rgba(255,255,255,.05) 0 1px,rgba(0,0,0,0) 1px 3px)}
   .dd.lcd .dd-caret{color:var(--lcd)}
-  .dd.lcd .dd-panel{background:var(--lcd-bg);border-color:var(--ink)}
+  .dd.lcd .dd-sheet{background-color:var(--lcd-bg);border-color:var(--ink);
+    background-image:
+      repeating-linear-gradient(180deg,rgba(255,255,255,.05) 0,rgba(255,255,255,0) 42px,
+        rgba(255,255,255,0) 42px,rgba(255,255,255,.05) 84px),
+      repeating-linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 68px,
+        rgba(0,0,0,.45) 73px,rgba(123,240,162,.2) 76.5px,rgba(0,0,0,0) 84px)}
   .dd.lcd .dd-opt{color:var(--lcd);font-family:var(--mono);font-size:12px}
-  .dd.lcd .dd-opt:hover{background:#173a25}
-  .dd.lcd .dd-opt.sel{background:var(--lcd);color:var(--lcd-bg)}
+  .dd.lcd .dd-opt:hover{background:#173a25;box-shadow:none}
+  .dd.lcd .dd-opt.sel{background:var(--lcd);color:var(--lcd-bg);box-shadow:none}
 
-  /* pads */
-  .padgrid{display:grid;grid-template-columns:repeat(4,minmax(64px,1fr));gap:11px;margin:12px 0;max-width:560px}
-  .pad{aspect-ratio:1/1;border:2.5px solid var(--ink);border-radius:15px 6px 15px 6px/6px 15px 6px 15px;
-    box-shadow:2px 3px 0 var(--sh2);cursor:pointer;user-select:none;touch-action:none;
-    font-family:var(--marker);color:var(--ink);display:flex;flex-direction:column;align-items:center;
+  /* pads — thick ink, flat pastel fill, hand number + little white note chip */
+  .padgrid{display:grid;grid-template-columns:repeat(4,minmax(66px,1fr));gap:12px;margin:14px 0;max-width:580px}
+  .pad{aspect-ratio:1/1;border:3.5px solid var(--ink);border-radius:15px 7px 16px 6px/6px 16px 7px 15px;
+    box-shadow:3px 4px 0 var(--sh2);cursor:pointer;user-select:none;touch-action:none;
+    font-family:var(--marker);color:var(--ink);display:flex;align-items:center;
     justify-content:center;line-height:1;position:relative}
-  .pad .num{font-size:23px}
-  .pad .nn{font-size:10px;font-family:var(--sans);color:rgba(36,24,32,.66);margin-top:4px}
-  .pad.active-key{transform:translate(2px,3px);box-shadow:0 0 0 var(--sh2);filter:brightness(1.12)}
+  .pad::after{content:'';position:absolute;inset:3px;border:1.6px solid var(--ink);opacity:.2;
+    border-radius:inherit;pointer-events:none}
+  .pad .num{font-size:31px;text-shadow:2px 2px 0 rgba(255,255,255,.55)}
+  .pad .nn{position:absolute;left:6px;bottom:6px;background:#fff;border:2px solid var(--ink);
+    border-radius:5px 2px 5px 2px/2px 5px 2px 5px;font-family:var(--mono);font-size:8.5px;
+    letter-spacing:-.2px;padding:0 4px;color:var(--ink)}
+  .pad.active-key{transform:translate(3px,4px);box-shadow:0 0 0 var(--sh2);filter:brightness(1.14)}
   .bankrow{display:flex;flex-wrap:wrap;gap:6px}
-  .bankrow .sbtn{min-width:40px;text-align:center}
+  .bankrow .sbtn{min-width:42px;text-align:center}
 
-  /* keyboards */
-  .kbd{display:flex;flex-wrap:wrap;gap:4px;margin:9px 0}
-  .key{width:40px;height:60px;border:2.5px solid var(--ink);background:#fff;border-radius:5px 5px 10px 10px;
-    box-shadow:1.5px 2.5px 0 var(--sh);font-size:10px;cursor:pointer;user-select:none;touch-action:none;
-    display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;color:var(--ink2)}
-  .key.blk{background:var(--ink);color:#fff}
-  .key.active-key{transform:translate(1px,2px);box-shadow:0 0 0 var(--sh);background:var(--accent);color:#fff}
+  /* piano keyboard */
+  .piano-case{display:inline-block;max-width:100%;overflow-x:auto;background:var(--paper2);
+    border:3px solid var(--ink);border-radius:13px 6px 13px 6px/6px 13px 6px 13px;
+    box-shadow:4px 6px 0 var(--sh);padding:12px 12px 14px;margin:8px 0 14px}
+  .piano{position:relative;display:inline-block}
+  .piano-whites{display:flex}
+  .wkey{width:38px;height:132px;flex:0 0 auto;background:#fff;border:3px solid var(--ink);
+    border-radius:3px 3px 9px 8px/3px 3px 12px 11px;margin-right:-3px;position:relative;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;
+    font-size:9px;color:var(--ink2);cursor:pointer;user-select:none;touch-action:none}
+  .wkey:last-child{margin-right:0}
+  .wkey.c-key{color:var(--accent);font-weight:800;font-size:9.5px}
+  .wkey.active-key{background:var(--accent);color:#fff;transform:translateY(3px);
+    box-shadow:inset 0 -7px 0 rgba(0,0,0,.15)}
+  .bkey{position:absolute;top:0;width:25px;height:84px;background:var(--ink);border:3px solid var(--ink);
+    border-radius:2px 2px 7px 6px/2px 2px 9px 8px;z-index:2;cursor:pointer;user-select:none;
+    touch-action:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;
+    font-size:7.5px;color:rgba(255,255,255,.7);box-shadow:2px 3px 0 rgba(27,18,24,.4)}
+  .bkey.active-key{background:var(--accent2);color:#fff;transform:translateY(3px);
+    box-shadow:0 0 0 rgba(27,18,24,.4)}
 
-  .patgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:9px;margin:12px 0;max-width:720px}
-  .patgrid .sbtn{text-align:center;padding:10px 2px;font-size:14px}
-  .looprow{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:9px 0}
+  .patgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin:14px 0;max-width:740px}
+  .patgrid .sbtn{text-align:center;padding:12px 2px;font-size:15px}
+  .looprow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0;
+    padding:11px 0;border-bottom:2px dashed rgba(27,18,24,.14)}
+  #looperRows .looprow:last-child{border-bottom:0}
 
-  /* dev tools (collapsible) */
-  details#dev{background:#fafafa;border:2px solid #999;box-shadow:none;border-radius:10px}
+  /* dev tools (collapsible — closed on load) */
+  details#dev{background:#fbfafa;border:3px solid #8d8d8d;border-radius:12px 6px 12px 6px/6px 12px 6px 12px;
+    box-shadow:4px 5px 0 rgba(0,0,0,.08)}
+  details#dev::before,details#dev::after{display:none}
   details#dev > summary{font-family:var(--marker);font-size:21px;cursor:pointer;padding:4px 2px;list-style:none}
   details#dev > summary::-webkit-details-marker{display:none}
   details#dev > summary::before{content:"▸ ";color:var(--accent)}
   details#dev[open] > summary::before{content:"▾ "}
-  .devpanel{border:1px solid #ccc;border-radius:6px;padding:10px;margin:12px 0;background:#fff}
+  .devpanel{border:2px solid #ccc;border-radius:8px;padding:11px;margin:12px 0;background:#fff}
   .devpanel h3{margin:0 0 6px;font-size:14px}
   code.hx{font-family:var(--mono);font-size:11px;background:#eee;border:1px solid #ccc;border-radius:3px;padding:1px 4px}
-  #monLog{height:280px;overflow-y:auto;border:1px solid #999;background:#fafafa;font-family:var(--mono);font-size:11px;padding:4px;white-space:pre}
+  #monLog{height:280px;overflow-y:auto;border:2px solid #999;border-radius:6px;background:#fafafa;
+    font-family:var(--mono);font-size:11px;padding:5px;white-space:pre}
   #monLog .in{color:#06529b}#monLog .out{color:#1a7a1a}#monLog .err{color:#b00}
-  .checkitem{border:1px solid #ccc;border-radius:4px;padding:8px;margin:6px 0}
+  .checkitem{border:2px solid #ccc;border-radius:7px;padding:9px;margin:7px 0}
   .checkitem textarea{width:100%;box-sizing:border-box;min-height:44px;font-size:13px}
-  .note{color:#555;font-size:12px;margin:2px 0 8px}
-  .devpanel input[type=text]{font-size:13px;padding:2px}
+  .note{color:#5b4b53;font-size:12px;margin:2px 0 8px;line-height:1.5}
+  .devpanel input[type=text]{font-size:13px;padding:3px}
 
   /* shortcut finder */
-  #scCtrls{position:sticky;top:64px;background:var(--panel);padding:9px 0;z-index:3;border-bottom:2px dashed var(--ink)}
-  #scSearch{width:250px;font-size:13px;padding:5px 8px;border:2.5px solid var(--ink);border-radius:9px 3px 9px 3px/3px 9px 3px 9px;font-family:var(--sans)}
-  #scList{margin-top:10px}
-  .sc-cat{font-family:var(--marker);font-size:18px;margin:15px 0 5px;color:var(--accent2)}
-  .sc-cat .cnt{color:#999;font-size:12px}
-  .sc-item{display:grid;grid-template-columns:220px 1fr auto;gap:11px;align-items:baseline;padding:6px 4px;border-bottom:1px solid #eadfe4}
+  #scCtrls{position:sticky;top:100px;background:var(--panel);padding:11px 0;z-index:3;
+    border-bottom:2.5px dashed var(--ink)}
+  #scSearch{width:260px;font-size:13px;padding:7px 10px;border:3px solid var(--ink);
+    border-radius:9px 3px 9px 3px/3px 9px 3px 9px;font-family:var(--sans)}
+  #scSearch:focus{outline:none;box-shadow:2.5px 3px 0 var(--accent)}
+  #scList{margin-top:12px}
+  .sc-cat{font-family:var(--marker);font-size:19px;margin:18px 0 6px;color:var(--accent2)}
+  .sc-cat .cnt{color:#a99;font-size:12px}
+  .sc-item{display:grid;grid-template-columns:230px 1fr auto;gap:12px;align-items:baseline;
+    padding:8px 6px;border-bottom:1px solid #eee0e7;border-radius:6px}
+  .sc-item:hover{background:var(--paper2)}
   .sc-combo{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-  .sc-key{font-family:var(--mono);font-size:11px;background:var(--ink);color:#fff;border-radius:4px;padding:1px 6px;white-space:nowrap}
-  .sc-plus{color:#aaa;font-size:11px}
-  .sc-name{font-weight:700}.sc-desc{color:#444;font-size:12px;margin-left:6px}
-  .sc-mode{color:#999;font-size:11px;margin-left:6px}
+  .sc-key{font-family:var(--mono);font-size:11px;background:var(--ink);color:#fff;
+    border-radius:5px 2px 5px 2px/2px 5px 2px 5px;padding:2px 7px;white-space:nowrap}
+  .sc-plus{color:#bbb;font-size:11px}
+  .sc-name{font-weight:800}.sc-desc{color:#4a3a42;font-size:12px;margin-left:6px}
+  .sc-mode{color:#9a8a92;font-size:11px;margin-left:6px}
   .sc-right{text-align:right;white-space:nowrap}
-  .sc-cap{font-size:11px;border-radius:5px;padding:1px 7px;cursor:help;border:2px solid var(--ink)}
-  .sc-cap.full{background:#c9f0cf}.sc-cap.partial{background:#fbe6b8}.sc-cap.hw{background:#e7e7e7;color:#666}
-  .sc-link{font-size:11px;margin-left:8px}
+  .sc-cap{display:inline-block;font-size:11px;padding:2px 8px;cursor:help;border:2.5px solid var(--ink);
+    border-radius:6px 2px 6px 2px/2px 6px 2px 6px}
+  .sc-cap.full{background:#bdefc6}.sc-cap.partial{background:#ffe3a8}.sc-cap.hw{background:#e9e9e9;color:#666}
+  .sc-link{font-size:11px;margin-left:8px;color:var(--accent2)}
   .sc-none{color:#888;font-style:italic;padding:8px 4px}
-  @media(max-width:640px){
-    #hero h1{font-size:40px}
+
+  @media (prefers-reduced-motion: reduce){
+    .dd.open .dd-panel,.dd.open .dd-sheet,
+    .dd.closing .dd-panel,.dd.closing .dd-sheet{animation:none!important}
+    .dd.open .dd-panel{clip-path:inset(0 0 0 0)}
+    .dd.closing .dd-panel{clip-path:inset(0 0 100% 0)}
+  }
+  @media(max-width:700px){
+    #hero h1{font-size:42px}
+    .card{padding:16px 14px 18px}
+    .card::before{display:none}
     .sc-item{grid-template-columns:1fr}
-    .knob{width:62px}
+    .knob{width:76px}
+    .knob-svg{width:68px;height:68px}
+    .patgrid{grid-template-columns:repeat(4,1fr)}
   }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <filter id="rough" x="-20%" y="-20%" width="140%" height="140%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="n"/>
-    <feDisplacementMap in="SourceGraphic" in2="n" scale="1.7" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</defs></svg>
-
 <div id="loadError"></div>
 <div id="app" hidden>
 <header id="hero">
   <h1>SP&#8209;404 <span>MKII</span></h1>
+  <svg class="squig" viewBox="0 0 400 16" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M4,11 C40,4 62,14 96,9 C132,4 152,14 190,9 C226,4 250,14 288,8 C320,3 352,13 396,7"/>
+  </svg>
   <p class="tag">a browser MIDI sketchpad · play the buttons</p>
 </header>
 
@@ -260,12 +364,23 @@
 
 <section id="keys" class="card">
   <h2><span class="n">4</span>Keys</h2>
-  <div class="sub" id="chromaDesc"></div>
-  <div class="kbd" id="chromaKbd"></div>
-  <div class="row"><span id="asoMount"></span></div>
-  <div class="sub" id="vocDesc" style="margin-top:16px"></div>
-  <div class="kbd" id="vocKbd"></div>
-  <div class="row"><span id="vocBendMount"></span><span class="note">pitch bend springs back to center on release</span></div>
+  <div class="keys-top">
+    <div class="seg" id="keysSeg">
+      <button type="button" class="seg-btn on" data-m="samples">Samples</button>
+      <button type="button" class="seg-btn" data-m="vocoder">Vocoder</button>
+    </div>
+    <span id="keyVelMount"></span>
+  </div>
+  <div id="keysSamples">
+    <div class="sub" id="chromaDesc"></div>
+    <div class="piano-case"><div class="piano" id="chromaKbd"></div></div>
+    <div class="row"><span id="asoMount"></span></div>
+  </div>
+  <div id="keysVocoder" hidden>
+    <div class="sub" id="vocDesc"></div>
+    <div class="piano-case"><div class="piano" id="vocKbd"></div></div>
+    <div class="row"><span id="vocBendMount"></span><span class="note">pitch bend springs back to center on release</span></div>
+  </div>
 </section>
 
 <section id="patterns" class="card">
@@ -403,7 +518,11 @@ function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
 function hex(bytes){ return bytes.map(b=>b.toString(16).toUpperCase().padStart(2,'0')).join(' '); }
 function noteName(n){ return ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][n%12] + (Math.floor(n/12)-1); }
 
-/* ---------- reusable paper-unfold DROPDOWN ---------- */
+/* ---------- reusable paper-unfold DROPDOWN ----------
+   .dd-panel is a transparent clip window; .dd-sheet is the paper. Opening runs two
+   synced animations: the clip window wipes downward in four steps (ddReveal) while the
+   sheet swings on its top hinge (ddFlap) — reads as a strip unfolding fold by fold.
+   The accordion crease lines are painted on the sheet's background (see CSS).        */
 const allDropdowns = [];
 function makeDropdown(opts){
   const wrap = div('dd' + (opts.className ? ' '+opts.className : ''));
@@ -411,22 +530,42 @@ function makeDropdown(opts){
   const cur = span('dd-cur'); const caret = span('dd-caret','▾');
   trigger.append(cur, caret);
   const panel = div('dd-panel');
+  const sheet = div('dd-sheet');
+  panel.appendChild(sheet);
   wrap.append(trigger, panel);
-  let options = [], current = null, open = false;
+  let options = [], current = null, open = false, closeTimer = null;
   if(opts.width) trigger.style.minWidth = opts.width;
   function label(v){ const o = options.find(x=>x.value===v); return o ? o.label : (opts.placeholder||''); }
-  function paintSel(){ [...panel.children].forEach((c,i)=> c.classList.toggle('sel', options[i] && options[i].value===current)); cur.textContent = label(current); }
+  function paintSel(){ [...sheet.children].forEach((c,i)=> c.classList.toggle('sel', options[i] && options[i].value===current)); cur.textContent = label(current); }
   function renderPanel(){
-    panel.innerHTML='';
-    options.forEach(o=>{ const it = div('dd-opt', o.label); it.addEventListener('click', ()=> choose(o.value, true)); panel.appendChild(it); });
+    sheet.innerHTML='';
+    options.forEach(o=>{ const it = div('dd-opt', o.label); it.addEventListener('click', ()=> choose(o.value, true)); sheet.appendChild(it); });
     paintSel();
   }
   function setCur(v){ current = v; paintSel(); }
   function choose(v, fire){ setCur(v); closeIt(); if(fire && opts.onChange) opts.onChange(v, options.find(x=>x.value===v)); }
-  function openIt(){ allDropdowns.forEach(d=> d!==api && d.close()); open=true; wrap.classList.add('open'); }
-  function closeIt(){ open=false; wrap.classList.remove('open'); }
+  function openIt(){
+    allDropdowns.forEach(d=> d!==api && d.close());
+    clearTimeout(closeTimer); wrap.classList.remove('closing');
+    open=true; wrap.classList.add('open');
+    const selEl = sheet.querySelector('.dd-opt.sel');
+    if(selEl) sheet.scrollTop = Math.max(0, selEl.offsetTop - 92);
+  }
+  function closeIt(){
+    if(!open) return;
+    open=false; wrap.classList.remove('open'); wrap.classList.add('closing');
+    clearTimeout(closeTimer); closeTimer = setTimeout(()=> wrap.classList.remove('closing'), 190);
+  }
   trigger.addEventListener('click', e=>{ e.stopPropagation(); open?closeIt():openIt(); });
-  trigger.addEventListener('keydown', e=>{ if(e.key==='Escape') closeIt(); });
+  trigger.addEventListener('keydown', e=>{
+    if(e.key==='Escape'){ closeIt(); return; }
+    if(e.key==='ArrowDown' || e.key==='ArrowUp'){
+      e.preventDefault();
+      const i = options.findIndex(x=>x.value===current);
+      const j = Math.max(0, Math.min(options.length-1, (i<0?0:i) + (e.key==='ArrowDown'?1:-1)));
+      if(options[j] && options[j].value !== current) choose(options[j].value, true);
+    }
+  });
   panel.addEventListener('click', e=> e.stopPropagation());
   document.addEventListener('click', ()=>{ if(open) closeIt(); });
   function setOptions(arr){
@@ -442,25 +581,84 @@ function makeDropdown(opts){
   return api;
 }
 
-/* ---------- reusable flat SVG KNOB ---------- */
+/* ---------- hand-ink SVG geometry helpers ----------
+   Real wobbly paths instead of an feDisplacementMap: the displacement filter blurred
+   every stroke, which is what made the old knobs look mushy. A seeded PRNG keeps each
+   knob's wobble stable across repaints while giving every knob its own hand.        */
+function rngFrom(seed){
+  let s = seed>>>0;
+  return function(){
+    s = (s + 0x6D2B79F5)|0;
+    let t = Math.imul(s ^ (s>>>15), 1|s);
+    t = (t + Math.imul(t ^ (t>>>7), 61|t)) ^ t;
+    return ((t ^ (t>>>14))>>>0) / 4294967296;
+  };
+}
+/* closed catmull-rom "circle" with per-vertex radius jitter → an inked ring */
+function inkBlob(cx, cy, r, seed, amp, n){
+  const rnd = rngFrom(seed); n = n || 18; amp = amp==null ? 1.4 : amp;
+  const p = [];
+  for(let i=0;i<n;i++){
+    const a = (i/n)*Math.PI*2 + (rnd()-.5)*0.06;
+    const rr = r + (rnd()-.5)*amp;
+    p.push([cx + Math.cos(a)*rr, cy + Math.sin(a)*rr]);
+  }
+  const f = v => v.toFixed(2);
+  let d = 'M'+f(p[0][0])+','+f(p[0][1]);
+  for(let i=0;i<n;i++){
+    const p0=p[(i-1+n)%n], p1=p[i], p2=p[(i+1)%n], p3=p[(i+2)%n];
+    d += 'C'+f(p1[0]+(p2[0]-p0[0])/6)+','+f(p1[1]+(p2[1]-p0[1])/6)
+       + ' '+f(p2[0]-(p3[0]-p1[0])/6)+','+f(p2[1]-(p3[1]-p1[1])/6)
+       + ' '+f(p2[0])+','+f(p2[1]);
+  }
+  return d+'Z';
+}
+
+/* ---------- reusable hand-inked SVG KNOB ---------- */
+let knobSeed = 20250725;
 function makeKnob(opts){
   const min = opts.min!=null?opts.min:0, max = opts.max!=null?opts.max:127;
   let value = opts.value!=null?opts.value:min;
   const def = opts.defaultVal!=null?opts.defaultVal:value;
   const fmt = opts.format || (v=>String(Math.round(v)));
   const step = opts.step || 1;
+  const seed = (knobSeed = (Math.imul(knobSeed, 1103515) + 12345) & 0x7fffffff);
+
+  /* viewBox 0 0 100 100. Gauge sweeps -225°..45° (SVG degrees) = lower-left → top → lower-right */
+  const CX=50, CY=50, TR=40, A0=-225, A1=45, STEPS=80;
+  const wob = []; { const r = rngFrom(seed ^ 0x5bf03635); for(let i=0;i<=STEPS;i++) wob.push((r()-.5)*1.2); }
+  function arcPath(aEnd){
+    aEnd = Math.max(A0, Math.min(A1, aEnd));
+    const stp = (A1-A0)/STEPS, pts = [];
+    for(let i=0;;i++){
+      const a = Math.min(A0 + i*stp, aEnd), rad = a*Math.PI/180, rr = TR + wob[Math.min(i, STEPS)];
+      pts.push((CX+Math.cos(rad)*rr).toFixed(2)+','+(CY+Math.sin(rad)*rr).toFixed(2));
+      if(a >= aEnd - 1e-9) break;
+    }
+    if(pts.length === 1) pts.push(pts[0]);   // single point + round cap = a dot at minimum
+    return 'M'+pts[0]+pts.slice(1).map(p=>'L'+p).join('');
+  }
+  let ticks = '';
+  [A0, -90, A1].forEach(a=>{ const rad = a*Math.PI/180;
+    ticks += '<path d="M'+(CX+Math.cos(rad)*43.5).toFixed(2)+','+(CY+Math.sin(rad)*43.5).toFixed(2)
+           + 'L'+(CX+Math.cos(rad)*47.5).toFixed(2)+','+(CY+Math.sin(rad)*47.5).toFixed(2)+'"/>'; });
+
   const root = div('knob'); root.tabIndex = 0;
   root.innerHTML =
-    '<svg viewBox="0 0 64 64" class="knob-svg">'
-    + '<circle cx="32" cy="32" r="24" class="k-face"/>'
-    + '<line x1="32" y1="4" x2="32" y2="8" class="k-ticks"/>'
-    + '<line x1="9" y1="45" x2="12" y2="43" class="k-ticks"/>'
-    + '<line x1="55" y1="45" x2="52" y2="43" class="k-ticks"/>'
-    + '<g class="k-rot"><line x1="32" y1="32" x2="32" y2="12" class="k-ptr"/></g>'
-    + '<circle cx="32" cy="32" r="2.6" class="k-hub"/></svg>'
+    '<svg viewBox="0 0 100 100" class="knob-svg">'
+    + '<path class="k-shadow" d="'+inkBlob(53.5, 55, 31, seed+91, 1.7, 18)+'"/>'
+    + '<path class="k-track" d="'+arcPath(A1)+'"/>'
+    + '<path class="k-fill" d=""/>'
+    + '<g class="k-tick">'+ticks+'</g>'
+    + '<path class="k-body" d="'+inkBlob(50, 50, 31, seed, 1.5, 18)+'"/>'
+    + '<path class="k-body2" d="'+inkBlob(50, 50, 26.5, seed+41, 1.1, 16)+'"/>'
+    + '<g class="k-rot"><path class="k-ptr" d="M50,44L50,26.5"/></g>'
+    + '<circle class="k-hub" cx="50" cy="50" r="5.2"/>'
+    + '</svg>'
     + '<div class="knob-label"></div><div class="knob-val"></div>';
   const svg = root.querySelector('.knob-svg');
   const gRot = root.querySelector('.k-rot');
+  const fillEl = root.querySelector('.k-fill');
   const labEl = root.querySelector('.knob-label');
   const valEl = root.querySelector('.knob-val');
   labEl.textContent = opts.label||'';
@@ -468,7 +666,8 @@ function makeKnob(opts){
   const clamp = v => Math.max(min, Math.min(max, v));
   function paint(){
     const frac = (value-min)/((max-min)||1);
-    gRot.setAttribute('transform', 'rotate('+(-135+frac*270)+' 32 32)');
+    gRot.setAttribute('transform', 'rotate('+(-135+frac*270).toFixed(2)+' 50 50)');
+    fillEl.setAttribute('d', arcPath(A0 + frac*(A1-A0)));
     valEl.textContent = fmt(value);
   }
   function setV(v, silent){
@@ -478,13 +677,32 @@ function makeKnob(opts){
     if(!silent && opts.onChange) opts.onChange(value);
   }
   paint();
-  let dragging=false, startY=0, startVal=0;
-  svg.addEventListener('pointerdown', e=>{ if(!enabled) return; e.preventDefault(); dragging=true; startY=e.clientY; startVal=value; try{svg.setPointerCapture(e.pointerId);}catch(_){}});
-  svg.addEventListener('pointermove', e=>{ if(!dragging) return; setV(startVal + (startY-e.clientY)*((max-min)/200)); });
-  const endDrag = e=>{ if(!dragging) return; dragging=false; try{svg.releasePointerCapture(e.pointerId);}catch(_){} if(opts.springBack) setV(def); };
+  /* drag accumulates in float space so toggling Shift mid-drag never jumps the value */
+  let dragging=false, lastY=0, acc=0;
+  svg.addEventListener('pointerdown', e=>{
+    if(!enabled) return; e.preventDefault();
+    dragging=true; lastY=e.clientY; acc=value; root.classList.add('drag');
+    try{svg.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  svg.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const sens = (max-min)/(e.shiftKey ? 800 : 200);      // shift = fine
+    acc = clamp(acc + (lastY - e.clientY)*sens); lastY = e.clientY;
+    setV(acc);
+  });
+  const endDrag = e=>{
+    if(!dragging) return;
+    dragging=false; root.classList.remove('drag');
+    try{svg.releasePointerCapture(e.pointerId);}catch(_){}
+    if(opts.springBack) setV(def);
+  };
   svg.addEventListener('pointerup', endDrag);
   svg.addEventListener('pointercancel', endDrag);
-  svg.addEventListener('wheel', e=>{ if(!enabled) return; e.preventDefault(); setV(value + (e.deltaY<0?step:-step)); }, {passive:false});
+  svg.addEventListener('wheel', e=>{
+    if(!enabled) return; e.preventDefault();
+    const s = e.shiftKey ? step : step*4;                 // shift = fine, matching drag
+    setV(value + (e.deltaY<0 ? s : -s));
+  }, {passive:false});
   root.addEventListener('dblclick', ()=>{ if(enabled) setV(def); });
   root.addEventListener('keydown', e=>{ if(!enabled) return;
     if(e.key==='ArrowUp'||e.key==='ArrowRight'){ e.preventDefault(); setV(value+step); }
@@ -746,10 +964,14 @@ const padVelKnob = makeKnob({ label:'VELOCITY', min:1, max:127, value:100, defau
 $('padVelMount').appendChild(padVelKnob.el);
 const padCh = ()=> padBank;
 const padVel = ()=> padVelKnob.get();
+/* flat pastel set lifted from the reference sketch's pad colours */
+const PAD_COLORS = ['#8fe3a6','#f7a8d0','#ffd977','#ffb287','#c0a8ef','#8fd8ef','#f79fb4','#a9e6c4',
+                    '#ffcf6b','#eda6ea','#9fc9f5','#b8e88c','#ffab9e','#cdb2f2','#7fdfd0','#ffc2da'];
 for(let pad=1; pad<=16; pad++){
   const note = padToNote[pad];
-  const p = div('pad'); p.style.background = 'hsl('+(((pad-1)*23)%360)+',62%,66%)';
-  p.append(span('num', String(pad)), span('nn', noteName(note)+' · '+note));
+  const p = div('pad'); p.style.background = PAD_COLORS[(pad-1) % PAD_COLORS.length];
+  p.title = 'Pad '+pad+' — '+noteName(note)+' (note '+note+')';
+  p.append(span('num', String(pad)), span('nn', noteName(note)));
   pressable(p, padCh, note, padVel);
   $('padGrid').appendChild(p);
 }
@@ -767,16 +989,56 @@ $('extDesc').textContent = MAP.ext_source_control.description;
   extBtn.addEventListener('pointerup', up); extBtn.addEventListener('pointerleave', up); extBtn.addEventListener('pointercancel', up);
 }
 
-/* ---------- KEYS ---------- */
-function buildKeyboard(container, ch, lo, hi){
-  for(let n=lo; n<=hi; n++){ const k = div('key'+([1,3,6,8,10].includes(n%12)?' blk':''), noteName(n)); pressable(k, ()=>ch, n, ()=>100); container.appendChild(k); }
+/* ---------- KEYS — real piano layout, one mode at a time ---------- */
+const keyVelKnob = makeKnob({ label:'VELOCITY', min:1, max:127, value:100, defaultVal:100 });
+keyVelKnob.setTitle('Note-on velocity for both keyboards');
+$('keyVelMount').appendChild(keyVelKnob.el);
+const keyVel = ()=> keyVelKnob.get();
+
+/* white keys advance 35px (38px wide, 3px of shared ink overlap); blacks straddle the seam */
+const BLACK_PC = [1,3,6,8,10];
+const W_ADV = 35, W_WIDTH = 38, B_WIDTH = 25;
+function buildPiano(container, ch, lo, hi){
+  container.innerHTML = '';
+  const whites = div('piano-whites');
+  container.appendChild(whites);
+  let wIdx = 0;
+  for(let n=lo; n<=hi; n++){
+    const isBlack = BLACK_PC.includes(((n%12)+12)%12);
+    const k = div(isBlack ? 'bkey' : 'wkey', noteName(n));
+    k.title = noteName(n)+' · note '+n+' · ch'+ch;
+    pressable(k, ()=>ch, n, keyVel);
+    if(isBlack){ k.style.left = (wIdx*W_ADV - B_WIDTH/2 + 1.5)+'px'; container.appendChild(k); }
+    else{ if(n%12===0) k.classList.add('c-key'); whites.appendChild(k); wIdx++; }
+  }
+  container.style.width = (wIdx ? (wIdx-1)*W_ADV + W_WIDTH : 0)+'px';
 }
 $('chromaDesc').textContent = 'ch'+CHROMA_CH+' — '+PADS.chromatic.notes;
-buildKeyboard($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI);
+buildPiano($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI);
 { const aso = sbtn('All Sound Off (CC120)','sm'); aso.addEventListener('click', ()=> sendCC(CHROMA_CH, 120, 0, null)); $('asoMount').appendChild(aso); }
 $('vocDesc').textContent = 'ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)];
-buildKeyboard($('vocKbd'), VOC_CH, 48, 72);
+buildPiano($('vocKbd'), VOC_CH, 36, 72);
 { const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256, springBack:true, format:v=>(v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) }); $('vocBendMount').appendChild(bendKnob.el); }
+
+/* Samples / Vocoder switch — samples is the default, only one keyboard is mounted at a time */
+{
+  const seg = $('keysSeg');
+  const panes = { samples:{el:$('keysSamples'), ch:CHROMA_CH}, vocoder:{el:$('keysVocoder'), ch:VOC_CH} };
+  let mode = 'samples';
+  [...seg.querySelectorAll('.seg-btn')].forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const next = b.dataset.m;
+      if(next === mode) return;
+      /* release anything held on the keyboard we're leaving */
+      const leaving = panes[mode];
+      leaving.el.querySelectorAll('.active-key').forEach(k=>k.classList.remove('active-key'));
+      sendCC(leaving.ch, 123, 0, null);
+      mode = next;
+      [...seg.querySelectorAll('.seg-btn')].forEach(x=>x.classList.toggle('on', x===b));
+      Object.entries(panes).forEach(([k,p])=> p.el.hidden = (k !== mode));
+    });
+  });
+}
 
 /* ---------- PATTERNS ---------- */
 $('patDesc').textContent = PADS.pattern_launch.message+'. '+PADS.pattern_launch.mapping;
@@ -940,7 +1202,12 @@ async function runTestB(){
 
 /* ---------- jump menu ---------- */
 const navBtns = [...document.querySelectorAll('#nav button')];
-navBtns.forEach(b=> b.addEventListener('click', ()=>{ const t = $(b.dataset.t); if(t){ if(t.tagName==='DETAILS') t.open = true; t.scrollIntoView({behavior:'smooth', block:'start'}); } }));
+navBtns.forEach(b=> b.addEventListener('click', ()=>{
+  const t = $(b.dataset.t); if(!t) return;
+  /* Dev is a <details>: it stays collapsed on load, and the nav button toggles it */
+  if(t.tagName === 'DETAILS'){ t.open = !t.open; if(!t.open) return; }
+  t.scrollIntoView({behavior:'smooth', block:'start'});
+}));
 if('IntersectionObserver' in window){
   const byId = {}; navBtns.forEach(b=> byId[b.dataset.t] = b);
   const obs = new IntersectionObserver(entries=>{ entries.forEach(en=>{ if(en.isIntersecting){ navBtns.forEach(x=>x.classList.remove('active')); const b = byId[en.target.id]; if(b) b.classList.add('active'); } }); }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
@@ -948,6 +1215,7 @@ if('IntersectionObserver' in window){
 }
 
 /* ---------- go ---------- */
+$('dev').open = false;     // developer tools always start collapsed
 updateSuppressed();
 initMIDI();
 
