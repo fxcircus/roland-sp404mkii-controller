@@ -1,6 +1,8 @@
 # CLAUDE.md — roland-sp404mkii-controller
 
-Single-file Web MIDI diagnostic harness for the Roland SP-404MK2. No build step, no dependencies, Chrome/Edge only.
+Single-file Web MIDI diagnostic harness for the Roland SP-404MK2. No build step, Chrome/Edge only.
+
+Only external dependency: two Google Fonts (`Permanent Marker` for headings/buttons/labels, `Patrick Hand` for body/help text), loaded via `<link>` in `<head>`. Local fallbacks are declared, so the app still works offline — it just loses the hand-drawn lettering. Everything else is self-contained.
 
 ## Run locally
 ```
