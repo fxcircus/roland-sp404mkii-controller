@@ -195,7 +195,7 @@
   /* never display:none — a transition can't fire leaving display:none, so the
      fold would snap. Gated on visibility+opacity, held through .closing. */
   .dd-panel{display:none;position:absolute;z-index:40;top:calc(100% + 7px);left:0;min-width:100%;
-    max-width:calc(100vw - 26px);
+    max-width:calc(100vw - 26px);max-height:min(58vh,430px);overflow-y:auto;overflow-x:hidden;
     perspective:560px;perspective-origin:50% -20px;transform-style:preserve-3d;
     visibility:hidden;pointer-events:none;opacity:0}
   .dd.open .dd-panel,.dd.closing .dd-panel{visibility:visible;opacity:1}
@@ -208,11 +208,7 @@
   .dd-fold-b{transform:rotateX(-88deg)}
   .dd-fold-c{transform:rotateX(88deg)}
   .dd.open .dd-fold{transform:rotateX(0deg)}
-  .dd.open .dd-fold-b{transition-delay:65ms}
-  .dd.open .dd-fold-c{transition-delay:130ms}
   .dd.closing .dd-fold{transition:transform .3s cubic-bezier(.55,.06,.68,.19)}
-  .dd.closing .dd-fold-b{transition-delay:70ms}
-  .dd.closing .dd-fold-a{transition-delay:140ms}
   .dd-leaf{position:relative;overflow:hidden;background:var(--white);border:var(--bd) solid var(--ink);
     border-top-width:0;border-bottom-width:0;transform-style:preserve-3d}
   .dd-leaf.first{border-top-width:var(--bd);border-radius:var(--r-sheet) var(--r-sheet) 0 0}
@@ -220,12 +216,8 @@
     box-shadow:var(--off) var(--off) 0 var(--shadow)}
   .dd-fold-b > .dd-leaf,.dd-fold-c > .dd-leaf{border-top-width:var(--bd)}
   .dd-leaf::before{content:'';position:absolute;inset:0;background:var(--ink);opacity:.12;
-    transition:opacity .3s ease;pointer-events:none;z-index:2}
+    transition:opacity .3s ease;transition-delay:var(--leaf-delay,0ms);pointer-events:none;z-index:2}
   .dd.open .dd-leaf::before{opacity:0}
-  .dd.open .dd-fold-b > .dd-leaf::before{transition-delay:65ms}
-  .dd.open .dd-fold-c > .dd-leaf::before{transition-delay:130ms}
-  .dd.closing .dd-fold-b > .dd-leaf::before{transition-delay:70ms}
-  .dd.closing .dd-fold-a > .dd-leaf::before{transition-delay:140ms}
   .dd-opt{display:flex;align-items:center;gap:9px;width:100%;font:inherit;text-align:left;
     color:var(--ink);background:transparent;border:0;padding:10px 14px;cursor:pointer;
     min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
@@ -347,7 +339,11 @@
     #nav button{font-size:12px;padding:4px 9px}
     .card{padding:22px 11px 26px}
     .card > h2{left:12px;font-size:12px;padding:4px 10px 5px}
-    .sc-item{grid-template-columns:1fr}
+    /* stacked: combo, then name/desc, then badge + manual flush right */
+    .sc-item{grid-template-columns:1fr;gap:5px;padding:9px 6px}
+    .sc-right{display:flex;justify-content:flex-end;align-items:center;gap:10px;width:100%}
+    .sc-link{margin-left:0}
+    .sc-desc,.sc-mode{display:block;margin-left:0}
     .knob{width:88px}
     .knob-svg{width:88px;height:83px}
     .knob-row{gap:10px}
@@ -633,17 +629,23 @@ function makeDropdown(opts){
   function label(v){ const o = options.find(x=>x.value===v); return o ? o.label : (opts.placeholder||''); }
   function allOpts(){ return [...panel.querySelectorAll('.dd-opt')]; }
   function paintSel(){ allOpts().forEach((c,i)=> c.classList.toggle('sel', options[i] && options[i].value===current)); cur.textContent = label(current); }
+  /* One crease every LEAF_SIZE options. Splitting a long list into a fixed
+     three leaves makes each leaf hundreds of px tall, and an 88deg rotation of
+     a slab that size projects to thousands of px — it reads as one wall
+     swinging at the camera instead of paper folding. Short leaves keep it
+     paper no matter how many options there are. */
+  const LEAF_SIZE = 3;
+  let folds = [];
   function renderPanel(){
-    panel.innerHTML='';
-    /* at most 3 leaves — one per crease */
-    const per = options.length <= 2 ? options.length : Math.ceil(options.length/3);
+    panel.innerHTML=''; folds = [];
+    const per = Math.max(1, LEAF_SIZE);
     const groups = [];
-    for(let i=0; i<options.length; i+=(per||1)) groups.push(options.slice(i, i+(per||1)));
+    for(let i=0; i<options.length; i+=per) groups.push(options.slice(i, i+per));
     if(!groups.length) groups.push([]);
     const names = ['a','b','c'];
     let node = null;
     for(let i=groups.length-1; i>=0; i--){
-      const fold = div('dd-fold dd-fold-'+names[Math.min(i,2)]);
+      const fold = div('dd-fold dd-fold-'+names[i%3]);
       const leaf = div('dd-leaf'+(i===0?' first':'')+(i===groups.length-1?' last':''));
       groups[i].forEach(o=>{
         const it = el('button','dd-opt', o.label); it.type='button';
@@ -652,10 +654,22 @@ function makeDropdown(opts){
       });
       fold.appendChild(leaf);
       if(node) fold.appendChild(node);
-      node = fold;
+      node = fold; folds.unshift(fold);
     }
     panel.appendChild(node);
     paintSel();
+  }
+  /* Stagger has to stay inside the ~440ms close window however many creases
+     there are, so the step shrinks as the list grows. */
+  function setDelays(reverse){
+    const n = folds.length || 1;
+    const step = Math.min(65, Math.max(12, Math.round(260 / n)));
+    folds.forEach((f, i)=>{
+      const d = (reverse ? (n - 1 - i) : i) * step;
+      f.style.transitionDelay = d + 'ms';
+      const leaf = f.firstElementChild;
+      if(leaf) leaf.style.setProperty('--leaf-delay', d + 'ms');
+    });
   }
   function setCur(v){ current = v; paintSel(); }
   function choose(v, fire){ setCur(v); closeIt(); if(fire && opts.onChange) opts.onChange(v, options.find(x=>x.value===v)); }
@@ -668,13 +682,14 @@ function makeDropdown(opts){
     allDropdowns.forEach(d=> d!==api && d.close());
     clearTimeout(closeTimer); wrap.classList.remove('closing');
     open=true;
+    setDelays(false);
     panel.style.display='block';
     void panel.offsetHeight;
     requestAnimationFrame(()=>{ if(open) wrap.classList.add('open'); });
   }
   function closeIt(){
     if(!open) return;
-    open=false; wrap.classList.remove('open'); wrap.classList.add('closing');
+    open=false; setDelays(true); wrap.classList.remove('open'); wrap.classList.add('closing');
     clearTimeout(closeTimer);
     closeTimer = setTimeout(()=>{ wrap.classList.remove('closing'); panel.style.display='none'; }, CLOSE_MS);
   }
