@@ -161,6 +161,11 @@
   .knob.disabled{opacity:.28;pointer-events:none}
   .knob-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-top:10px}
 
+  .zn-target{display:inline-block;font-family:var(--mono);font-size:var(--s-value);font-weight:700;
+    letter-spacing:.6px;color:var(--white);background-color:var(--ink);background-image:var(--hatch);
+    border:var(--bd) solid var(--ink);border-radius:var(--r-display);padding:5px 12px 6px;min-width:130px;text-align:center}
+  .chroma-auto{display:inline-flex;align-items:center;gap:6px;font-family:var(--hand);font-size:14px;color:var(--ink2)}
+
   /* effect bus strips */
   .bus{position:relative;border:var(--bd) solid var(--ink);background:var(--white);
     padding:12px 15px;margin:0 0 12px;border-radius:var(--r-btn);box-shadow:var(--off) var(--off) 0 var(--shadow)}
@@ -442,6 +447,11 @@
     <span id="keyVelMount"></span>
   </div>
   <div id="keysSamples">
+    <div class="row">
+      <b class="mini">Plays</b><span class="zn-target" id="chromaTarget">—</span>
+      <button class="sbtn sm" id="chromaSelect" type="button">Select pad</button>
+      <label class="chroma-auto"><input type="checkbox" id="chromaAuto" checked> auto-select</label>
+    </div>
     <div class="piano-case"><div class="piano" id="chromaKbd"></div></div>
     <div class="row"><span id="asoMount"></span></div>
   </div>
@@ -1085,9 +1095,9 @@ if(ROUTING && Array.isArray(ROUTING.params)){
 }
 
 /* ---------- pressable key helper ---------- */
-function pressable(node, getCh, note, getVel){
+function pressable(node, getCh, note, getVel, beforeNote){
   let downCh = null;
-  node.addEventListener('pointerdown', e=>{ e.preventDefault(); downCh = getCh(); node.classList.add('active-key'); sendOn(downCh, note, getVel()); });
+  node.addEventListener('pointerdown', e=>{ e.preventDefault(); if(beforeNote) beforeNote(); downCh = getCh(); node.classList.add('active-key'); sendOn(downCh, note, getVel()); });
   const up = ()=>{ if(downCh === null) return; sendOff(downCh, note); downCh = null; node.classList.remove('active-key'); };
   node.addEventListener('pointerup', up);
   node.addEventListener('pointerleave', up);
@@ -1102,12 +1112,22 @@ const bankBtns = [];
 for(let i=0;i<10;i++){
   const b = sbtn(BANK_LETTERS[i], 'sm'); if(i===0) b.classList.add('on');
   b.title = 'Bank '+BANK_LETTERS[i]+' (ch'+(i+1)+')';
-  b.addEventListener('click', ()=>{ padBank = i+1; bankBtns.forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
+  b.addEventListener('click', ()=>{ padBank = i+1; bankBtns.forEach(x=>x.classList.remove('on')); b.classList.add('on'); refreshChromaTarget(); });
   bankBtns.push(b); $('padBanks').appendChild(b);
 }
 const padVelKnob = makeKnob({ label:'VELOCITY', min:1, max:127, value:100, defaultVal:100 });
 $('padVelMount').appendChild(padVelKnob.el);
 const padCh = ()=> padBank;
+/* Chromatic mode plays whatever sample the SP last had SELECTED, and the only
+   way to select one is to press its pad (manual p.25 step 1) — there is no
+   select-without-playing message. So remember the last pad pressed per bank
+   and let the Keys section point the SP at it. */
+const lastPadByBank = {};
+let selectedOnSP = null;          // what we last told the SP to select
+function noteBankLabel(){
+  const pad = lastPadByBank[padBank];
+  return pad ? 'BANK '+BANK_LETTERS[padBank-1]+' / PAD '+pad : 'BANK '+BANK_LETTERS[padBank-1]+' / —';
+}
 const padVel = ()=> padVelKnob.get();
 /* candy set lifted from the reference sketch's pad colours, saturation +15% */
 const PAD_COLORS = ['#89e9a3','#fda2d0','#ffd977','#ffb287','#bea3f4','#88dcf6','#fe98b1','#a4ebc3',
@@ -1117,6 +1137,7 @@ for(let pad=1; pad<=16; pad++){
   const p = div('pad'); p.style.background = PAD_COLORS[(pad-1) % PAD_COLORS.length];
   p.title = 'Pad '+pad+' — '+noteName(note)+' (note '+note+')';
   p.append(span('num', String(pad)));
+  p.addEventListener('pointerdown', ()=>{ lastPadByBank[padBank] = pad; selectedOnSP = {bank:padBank, pad}; refreshChromaTarget(); });
   pressable(p, padCh, note, padVel);
   $('padGrid').appendChild(p);
 }
@@ -1155,7 +1176,7 @@ const keyVel = ()=> keyVelKnob.get();
 const BLACK_PC = [1,3,6,8,10];
 /* V2 piano metrics: 42px whites with a 3px gap -> 45px advance, seam at -1.5 */
 const W_ADV = 45, W_WIDTH = 42, B_WIDTH = 28, SEAM = -1.5;
-function buildPiano(container, ch, lo, hi){
+function buildPiano(container, ch, lo, hi, beforeNote){
   container.innerHTML = '';
   const whites = div('piano-whites');
   container.appendChild(whites);
@@ -1164,16 +1185,43 @@ function buildPiano(container, ch, lo, hi){
     const isBlack = BLACK_PC.includes(((n%12)+12)%12);
     const k = div(isBlack ? 'bkey' : 'wkey', noteName(n));
     k.title = noteName(n)+' · note '+n+' · ch'+ch;
-    pressable(k, ()=>ch, n, keyVel);
+    pressable(k, ()=>ch, n, keyVel, beforeNote);
     if(isBlack){ k.style.left = (wIdx*W_ADV + SEAM - B_WIDTH/2)+'px'; container.appendChild(k); }
     else{ if(n%12===0) k.classList.add('c-key'); whites.appendChild(k); wIdx++; }
   }
   container.style.width = (wIdx ? (wIdx-1)*W_ADV + W_WIDTH : 0)+'px';
 }
 const KEYS_HINT_A = 'Samples: ch'+CHROMA_CH+' — '+PADS.chromatic.notes;
-buildPiano($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI);
+/* Selecting a sample means pressing its pad, which also sounds it once — same
+   as on the hardware. So auto-select fires only when the target has actually
+   changed since we last selected, not on every key press. */
+function refreshChromaTarget(){
+  const t = $('chromaTarget'); if(!t) return;
+  t.textContent = noteBankLabel();
+  const pad = lastPadByBank[padBank];
+  $('chromaSelect').disabled = !pad;
+}
+function selectChromaPad(force){
+  const pad = lastPadByBank[padBank];
+  if(!pad) return false;
+  if(!force && selectedOnSP && selectedOnSP.bank === padBank && selectedOnSP.pad === pad) return false;
+  sendOn(padBank, padToNote[pad], padVel());
+  selectedOnSP = { bank: padBank, pad };
+  refreshChromaTarget();
+  return true;
+}
+buildPiano($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI, ()=>{
+  if($('chromaAuto').checked) selectChromaPad(false);
+});
+$('chromaSelect').addEventListener('click', ()=> selectChromaPad(true));
+refreshChromaTarget();
 { const aso = sbtn('All Sound Off (CC120)','sm'); aso.addEventListener('click', ()=> sendCC(CHROMA_CH, 120, 0, null)); $('asoMount').appendChild(aso); }
-hint('keys', KEYS_HINT_A+'  |  Vocoder: ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)]+' Pitch bend springs back to centre on release.');
+hint('keys', KEYS_HINT_A
+  + ' Chromatic plays whichever sample the SP currently has selected, and the only way to select one is to press its pad'
+  + ' (manual p.25) — there is no select-without-playing message, so selecting sounds the sample once, exactly as on the unit.'
+  + ' "Plays" follows the bank chosen in Pads and the last pad you pressed in that bank; auto-select points the SP at it'
+  + ' on your next key press, and only when the target actually changed.'
+  + '  |  Vocoder: ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)]+' Pitch bend springs back to centre on release.');
 buildPiano($('vocKbd'), VOC_CH, 36, 72);
 { const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256, springBack:true, format:v=>(v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) }); $('vocBendMount').appendChild(bendKnob.el); }
 
