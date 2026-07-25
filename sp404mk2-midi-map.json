@@ -62,6 +62,40 @@
       "B0 10 00 = BUS1 Ctrl1 min"
     ]
   },
+  "audio_routing": {
+    "description": "Hardware-only signal routing configured on the SP via the EFX SETTING screen. NOT MIDI-controllable and NOT readable (no SysEx either way). The app always sends effect CCs on channels 1-5 regardless of these settings; whether a given bus is AUDIBLE depends on them, so the user declares the current routing in the UI and the app annotates the bus columns accordingly. Verified against manual pp.30-31 (Bus routings), p.113-114 (Configuring the bus routing), p.141 (EFX SETTING).",
+    "params": [
+      {
+        "key": "bus12",
+        "label": "BUS 1/2 routing",
+        "options": ["TYPE A (serial)", "TYPE B (parallel)"],
+        "ui_default": "TYPE A (serial)",
+        "note": "TYPE A = BUS 1 feeds BUS 2 in series; TYPE B = BUS 1 and BUS 2 run in parallel (independent)."
+      },
+      {
+        "key": "favorite",
+        "label": "FAVORITE (BUS 3/4)",
+        "options": ["Bypass", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"],
+        "ui_default": "Bypass",
+        "note": "BUS 3 and BUS 4 effects are DISABLED (inaudible) when FAVORITE = Bypass; set 1-16 to enable them. BUS 1/2 feed BUS 3/4 in series (master effects at the end of the chain)."
+      },
+      {
+        "key": "inputBus",
+        "label": "Input Bus",
+        "options": ["DRY", "BUS 1", "BUS 2"],
+        "ui_default": "BUS 1",
+        "note": "Where INPUT / LINE IN audio flows after INPUT FX (ch5). 'DRY' skips the BUS 1/2 insert effects."
+      },
+      {
+        "key": "dryRouting",
+        "label": "DRY routing",
+        "options": ["after BUS 4", "before BUS 3"],
+        "ui_default": "after BUS 4",
+        "note": "'before BUS 3' sends the DRY bus through the BUS 3/4 master effects; 'after BUS 4' keeps it dry."
+      }
+    ],
+    "note": "ui_default is only the app's starting guess for the declaration UI, not a claim about the SP's factory default — set each control to match your unit."
+  },
   "cc83_effect_tables": {
     "bus_1_2": {
       "0": "(OFF)",

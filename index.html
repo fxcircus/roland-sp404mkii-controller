@@ -15,8 +15,16 @@
   select,input[type=number],input[type=text]{font-size:13px;padding:2px}
   .row{display:flex;align-items:center;gap:6px;margin:3px 0;flex-wrap:wrap}
   .cols{display:flex;gap:14px;flex-wrap:wrap}
-  .fxcol{border:1px solid #ccc;border-radius:4px;padding:8px;min-width:250px;flex:1}
-  .fxcol h3{margin:0 0 6px;font-size:14px}
+  .fxcol{border:1px solid #ccc;border-radius:4px;padding:8px;min-width:250px;flex:1;position:relative}
+  .fxcol h3{margin:0 0 2px;font-size:14px}
+  .fx-ann{font-size:11px;color:#555;margin:0 0 6px;min-height:14px}
+  .fxcol.fx-inactive{background:#f6f6f6;border-style:dashed;border-color:#bbb}
+  .fxcol.fx-inactive h3{color:#999}
+  .fxcol.fx-inactive .fx-ann{color:#b06a00;font-weight:bold}
+  #fxRouting{border:1px solid #ccd;background:#f4f6fb;border-radius:4px;padding:8px;margin:0 0 10px}
+  #fxRouting .title{font-weight:bold;font-size:13px;margin-bottom:4px}
+  #fxRouting label{margin-right:12px;font-size:12px}
+  #fxRouting .rn{color:#555;font-size:11px;margin-top:5px}
   .slrow{display:grid;grid-template-columns:1fr auto auto;gap:4px;align-items:center;margin:3px 0}
   .slrow .lbl{font-size:12px}
   .slrow input[type=range]{width:100%;grid-column:1/2}
@@ -77,6 +85,7 @@
 
 <fieldset id="pFx"><legend>2 · Effects test (CC per bus channel)</legend>
   <div class="note" id="fxDesc"></div>
+  <div id="fxRouting"></div>
   <div class="cols" id="fxCols"></div>
 </fieldset>
 
@@ -471,6 +480,7 @@ $('fxDesc').textContent = MAP.effects_control.description+' EFX switch = CC'+CC_
 BUSES.forEach(bus=>{
   const col = document.createElement('div'); col.className = 'fxcol';
   const h = document.createElement('h3'); h.textContent = bus.label+' — ch'+bus.ch+' ('+bus.table+')'; col.appendChild(h);
+  const ann = document.createElement('div'); ann.className = 'fx-ann'; col.appendChild(ann);
 
   const swRow = document.createElement('div'); swRow.className = 'row';
   const swLabel = document.createElement('label');
@@ -529,8 +539,71 @@ BUSES.forEach(bus=>{
   sel.addEventListener('change', ()=>{ sendCC(bus.ch, CC_SEL, +sel.value, selHex); applyParams(); });
   applyParams();
   bus.selEl = sel; bus.swEl = sw; bus.swHex = swHex; bus.selHex = selHex; bus.applyParams = applyParams;
+  bus.colEl = col; bus.annEl = ann;
   $('fxCols').appendChild(col);
 });
+
+/* ---------- declared audio routing (hardware-only, not MIDI-readable) drives per-column state ---------- */
+const ROUTING = MAP.audio_routing;
+if(ROUTING && Array.isArray(ROUTING.params)){
+  const routeState = (function(){
+    let saved = {};
+    try{ saved = JSON.parse(lsGet('sp404_routing')) || {}; }catch(e){}
+    const st = {};
+    ROUTING.params.forEach(p=>{ st[p.key] = (p.options.includes(saved[p.key]) ? saved[p.key] : p.ui_default); });
+    return st;
+  })();
+  const paramByKey = {}; ROUTING.params.forEach(p=> paramByKey[p.key] = p);
+
+  const wrap = $('fxRouting');
+  const title = document.createElement('div'); title.className = 'title';
+  title.textContent = 'Your SP audio routing (declare it — the app can’t read it; it always sends on ch1-5)';
+  wrap.appendChild(title);
+  const ctrls = document.createElement('div');
+  ROUTING.params.forEach(p=>{
+    const lab = document.createElement('label');
+    lab.appendChild(document.createTextNode(p.label+' '));
+    const sel = document.createElement('select');
+    p.options.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; sel.appendChild(op); });
+    sel.value = routeState[p.key];
+    if(p.note) sel.title = p.note;
+    sel.addEventListener('change', ()=>{ routeState[p.key] = sel.value; lsSet('sp404_routing', JSON.stringify(routeState)); applyRouting(); });
+    lab.appendChild(sel);
+    ctrls.appendChild(lab);
+  });
+  wrap.appendChild(ctrls);
+  const rnote = document.createElement('div'); rnote.className = 'rn'; wrap.appendChild(rnote);
+
+  function applyRouting(){
+    const serial = /TYPE A/i.test(routeState.bus12);
+    const favOff = /bypass/i.test(routeState.favorite);
+    const inputBus = routeState.inputBus;
+    const dryThroughMaster = /before BUS 3/i.test(routeState.dryRouting);
+
+    BUSES.forEach(bus=>{
+      if(!bus.annEl) return;
+      bus.colEl.classList.remove('fx-inactive');
+      if(bus.ch === 1) bus.annEl.textContent = serial ? 'Insert FX · serial → feeds BUS 2' : 'Insert FX · parallel (independent)';
+      else if(bus.ch === 2) bus.annEl.textContent = serial ? 'Insert FX · serial ← receives BUS 1' : 'Insert FX · parallel (independent)';
+      else if(bus.ch === 3 || bus.ch === 4){
+        if(favOff){
+          bus.colEl.classList.add('fx-inactive');
+          bus.annEl.textContent = '⚠ INACTIVE — FAVORITE = Bypass · CC still sends, not audible';
+        }else{
+          bus.annEl.textContent = 'Master FX · FAVORITE ' + routeState.favorite + (bus.ch===3 && dryThroughMaster ? ' · DRY runs through here' : '');
+        }
+      }else if(bus.ch === 5){
+        bus.annEl.textContent = 'External input → feeds ' + inputBus + (inputBus === 'DRY' ? ' (skips BUS 1/2 insert FX)' : '');
+      }
+    });
+    rnote.textContent = 'Signal: '
+      + (serial ? 'BUS1→BUS2' : 'BUS1 ∥ BUS2') + ' → '
+      + (favOff ? '(BUS3/4 bypassed)' : 'BUS3→BUS4') + ' → OUT'
+      + ' · DRY ' + routeState.dryRouting + ' · INPUT→' + inputBus
+      + '.  These are hardware-only settings; nothing here is sent over MIDI.';
+  };
+  applyRouting();
+}
 
 /* ---------- panel 3: looper (rows generated from the JSON values strings) ---------- */
 $('looperDesc').textContent = LOOP.description+' All CCs on ch'+LOOP.channel+'.';
