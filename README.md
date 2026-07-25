@@ -1,14 +1,16 @@
-# SP-404MK2 MIDI Test Harness
+# SP-404 MKII · Browser MIDI Sketchpad
 
-A single-file Web MIDI diagnostic UI to hardware-test every receivable MIDI function of the Roland SP-404MK2. No build step, no dependencies. Everything (effect tables, parameter names, CC numbers, note ranges) is loaded at runtime from `sp404mk2-midi-map.json` — the map is the single source of truth.
+A single-file Web MIDI controller for the Roland SP-404MK2 with a hand-drawn "record sleeve" look. No build step, no dependencies. Everything (effect tables, parameter names, CC numbers, note ranges, button-combo reference) is loaded at runtime from `sp404mk2-midi-map.json` and `sp404mk2-shortcuts.json` — those JSON files are the single source of truth.
 
-## Run
+**Live:** https://fxcircus.github.io/roland-sp404mkii-controller/ (open in **Chrome or Edge** — Web MIDI required)
+
+## Run locally
 
 ```
 python3 -m http.server 8404
 ```
 
-Then open http://localhost:8404/ in **Chrome or Edge** (Web MIDI required; `file://` won't work because the app fetches the JSON map).
+Then open http://localhost:8404/ in **Chrome or Edge** (`file://` won't work because the app fetches the JSON files).
 
 ## UI
 
@@ -26,10 +28,11 @@ A sketch / record-sleeve style single page with a sticky jump-menu across the to
 
 **Developer tools** (collapsed at the bottom, toggle open) — the diagnostic panels kept for later: **MIDI monitor** (timestamped IN/OUT log with hex + JSON-resolved decode, filter, clear), **Raw sender** (three hex byte fields), and the **Verification checklist** (the two manual-resolved hardware questions with scripted Test buttons). Every message still shows its hex in the monitor.
 
-## Reference material
+## Repo layout
 
-- `sp404mk2-midi-map.json` — the runtime MIDI map; single source of truth for the test panels.
-- `sp404mk2-shortcuts.json` — the runtime data for the Shortcut Finder (panel 13).
-- `MIDI-VERIFICATION.md` — cross-check of every map value against the official manual (what was verified, the one error fixed).
-- `manual-v550-text.txt` + `manual-index.md` — full searchable manual text with a section/page index.
-- `SP-404mk2_v550_reference_eng04_W.pdf` — the original manual.
+Tracked (the app):
+- `index.html` — the whole app.
+- `sp404mk2-midi-map.json` — runtime MIDI map; single source of truth for the control panels.
+- `sp404mk2-shortcuts.json` — runtime data for the Shortcut Finder.
+
+Reference & planning material lives in a **local-only `plans/` folder** (git-ignored, never pushed): the extracted manual text + index, `MIDI-VERIFICATION.md` (cross-check of every map value against the official manual), `FUTURE-PLANS.md`, the design reference image, and the original Roland PDF. Keep adding anything you don't want uploaded there.

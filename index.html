@@ -6,9 +6,10 @@
 <title>SP-404 MKII · MIDI Sketchpad</title>
 <style>
   :root{
-    --paper:#f5c4d3; --paper2:#fce2ea; --panel:#fff6f9;
-    --ink:#191016; --ink2:#5a4650; --accent:#e6438a; --accent2:#7b52d6;
-    --lcd-bg:#0c1a12; --lcd:#79f6a2;
+    --paper:#f9dee9; --paper2:#fdeef4; --panel:#fffbfd;
+    --ink:#241820; --ink2:#7a6570; --accent:#ef5aa0; --accent2:#8a63e0;
+    --lcd-bg:#0e1f14; --lcd:#7bf0a2;
+    --sh:rgba(36,24,32,.14); --sh2:rgba(36,24,32,.22);
     --marker:'Permanent Marker','Marker Felt','Comic Sans MS','Chalkboard SE','Segoe Print',cursive;
     --sans:system-ui,-apple-system,'Segoe UI',sans-serif;
     --mono:ui-monospace,Menlo,Consolas,monospace;
@@ -17,143 +18,165 @@
   body{
     font-family:var(--sans); font-size:14px; color:var(--ink); margin:0;
     background:var(--paper);
-    background-image:radial-gradient(rgba(25,16,22,.06) 1.1px, transparent 1.1px);
-    background-size:9px 9px;
+    background-image:radial-gradient(rgba(36,24,32,.045) 1px, transparent 1px);
+    background-size:11px 11px;
   }
-  #loadError{color:#a00;font-weight:bold;font-family:var(--sans);padding:16px}
-  #wrap{max-width:1180px;margin:0 auto;padding:0 14px 60px}
+  #loadError{color:#a00;font-weight:bold;padding:16px}
+  #wrap{max-width:1120px;margin:0 auto;padding:0 16px 70px}
 
   /* hero */
-  #hero{text-align:center;padding:22px 10px 8px}
+  #hero{text-align:center;padding:24px 10px 6px}
   #hero h1{font-family:var(--marker);font-size:52px;margin:0;letter-spacing:1px;line-height:.95;
-    text-shadow:3px 3px 0 #fff, 5px 5px 0 rgba(25,16,22,.85);transform:rotate(-1.4deg)}
+    text-shadow:2px 2px 0 #fff;transform:rotate(-1.4deg)}
   #hero h1 span{color:var(--accent)}
-  #hero .tag{font-family:var(--marker);font-size:15px;color:var(--ink2);margin:10px 0 0;transform:rotate(-.6deg)}
+  #hero .tag{font-family:var(--marker);font-size:15px;color:var(--ink2);margin:10px 0 0;transform:rotate(-.5deg)}
 
-  /* sticky jump menu */
-  #nav{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;align-items:center;gap:6px;
-    padding:8px;margin:6px 0 18px;background:var(--paper);
-    border:2.5px solid var(--ink);border-radius:16px 6px 16px 6px/6px 16px 6px 16px;
-    box-shadow:4px 4px 0 rgba(25,16,22,.8)}
+  /* sticky jump menu — centered */
+  #nav{position:sticky;top:0;z-index:40;display:flex;flex-direction:column;align-items:center;gap:7px;
+    padding:9px 12px;margin:8px auto 22px;max-width:1120px;background:var(--paper2);
+    border:2.5px solid var(--ink);border-radius:16px 7px 16px 7px/7px 16px 7px 16px;
+    box-shadow:3px 4px 0 var(--sh)}
+  #nav .navrow{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}
   #nav button{font-family:var(--marker);font-size:14px;background:#fff;color:var(--ink);
-    border:2px solid var(--ink);border-radius:9px 3px 9px 3px/3px 9px 3px 9px;padding:3px 10px;cursor:pointer}
-  #nav button:hover{background:var(--paper2)}
+    border:2px solid var(--ink);border-radius:9px 3px 9px 3px/3px 9px 3px 9px;padding:4px 12px;cursor:pointer;
+    box-shadow:1.5px 1.5px 0 var(--sh)}
+  #nav button:hover{background:var(--paper)}
   #nav button.active{background:var(--ink);color:#fff}
-  #nav .status{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);
-    font-family:var(--sans);max-width:46%}
-  #connStatus{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .lamp{display:inline-block;width:13px;height:13px;border-radius:50%;background:#c0324a;
+  #nav .status{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);max-width:100%}
+  #connStatus{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}
+  .lamp{display:inline-block;width:13px;height:13px;border-radius:50%;background:#d15;
     border:2px solid var(--ink);flex:0 0 auto}
   .lamp.on{background:#46c46e}
 
   /* cards */
-  .card{background:var(--panel);border:2.5px solid var(--ink);padding:14px 16px 16px;margin:0 0 22px;
-    box-shadow:5px 5px 0 rgba(25,16,22,.82);position:relative;scroll-margin-top:64px;
-    border-radius:255px 14px 225px 14px/14px 225px 14px 255px}
-  .card:nth-of-type(even){border-radius:14px 225px 14px 255px/225px 14px 255px 14px}
-  .card > h2{font-family:var(--marker);font-size:26px;margin:0 0 4px;transform:rotate(-.5deg)}
-  .card > h2 .n{color:var(--accent);font-size:18px;vertical-align:super;margin-right:4px}
-  .card .sub{color:var(--ink2);font-size:12px;margin:0 0 12px;font-family:var(--sans)}
-  .row{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}
+  .card{background:var(--panel);border:2.5px solid var(--ink);padding:16px 18px 18px;margin:0 0 24px;
+    box-shadow:3px 5px 0 var(--sh);position:relative;scroll-margin-top:72px;
+    border-radius:230px 14px 230px 14px/14px 230px 14px 230px}
+  .card:nth-of-type(even){border-radius:14px 230px 14px 230px/230px 14px 230px 14px}
+  .card > h2{font-family:var(--marker);font-size:27px;margin:0 0 4px;transform:rotate(-.5deg)}
+  .card > h2 .n{color:var(--accent);font-size:18px;vertical-align:super;margin-right:5px}
+  .card .sub{color:var(--ink2);font-size:12px;margin:0 0 14px}
+  .row{display:flex;align-items:center;gap:9px;margin:7px 0;flex-wrap:wrap}
+  b.mini{font-family:var(--marker);font-size:15px}
 
   /* sketch buttons */
   .sbtn{font-family:var(--marker);font-size:14px;background:#fff;color:var(--ink);
     border:2.5px solid var(--ink);border-radius:11px 4px 12px 5px/5px 12px 4px 11px;
-    box-shadow:3px 3px 0 rgba(25,16,22,.8);padding:6px 12px;cursor:pointer;user-select:none;line-height:1.1}
+    box-shadow:2px 2px 0 var(--sh2);padding:6px 13px;cursor:pointer;user-select:none;line-height:1.1}
   .sbtn:hover{background:var(--paper2)}
-  .sbtn:active,.sbtn.held{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(25,16,22,.8)}
+  .sbtn:active,.sbtn.held{transform:translate(2px,2px);box-shadow:0 0 0 var(--sh2)}
   .sbtn.on{background:var(--accent);color:#fff}
-  .sbtn.accent2.on{background:var(--accent2)}
-  .sbtn.sm{font-size:12px;padding:4px 9px;box-shadow:2px 2px 0 rgba(25,16,22,.8)}
-  .sbtn.danger{background:#ffe3e3;color:#a00;border-color:#a00}
+  .sbtn.accent2.on,.sbtn.accent2.held{background:var(--accent2);color:#fff}
+  .sbtn.sm{font-size:12px;padding:4px 9px}
+  .sbtn.danger{background:#ffe6ec;color:#b0143c;border-color:#b0143c}
   .sbtn[disabled]{opacity:.4;pointer-events:none}
 
-  /* knobs */
-  .knob{width:66px;text-align:center;user-select:none;font-family:var(--sans)}
-  .knob-dial{width:54px;height:54px;margin:0 auto;border-radius:50%;position:relative;cursor:ns-resize;
-    touch-action:none;background:radial-gradient(circle at 38% 32%,#ffffff,#e7d6de 70%,#d7c2cc);
-    border:2.5px solid var(--ink);box-shadow:3px 3px 0 rgba(25,16,22,.7)}
-  .knob-dial::after{content:"";position:absolute;inset:6px;border-radius:50%;border:1.5px dashed rgba(25,16,22,.28)}
-  .knob-ind{position:absolute;width:4px;height:21px;background:var(--ink);left:calc(50% - 2px);top:5px;
-    border-radius:2px;transform-origin:50% 22px}
-  .knob-label{font-size:10.5px;font-weight:700;margin-top:4px;line-height:1.05;min-height:24px;
+  /* FLAT hand-drawn knobs (SVG + rough filter) */
+  .knob{width:70px;text-align:center;user-select:none}
+  .knob-svg{width:58px;height:58px;display:block;margin:0 auto;overflow:visible;cursor:ns-resize;touch-action:none;
+    filter:url(#rough)}
+  .k-face{fill:rgba(255,255,255,.45);stroke:var(--ink);stroke-width:2}
+  .k-ticks{stroke:var(--ink2);stroke-width:1.4;stroke-linecap:round}
+  .k-ptr{stroke:var(--ink);stroke-width:2.6;stroke-linecap:round}
+  .k-hub{fill:var(--ink)}
+  .knob-label{font-size:10.5px;font-weight:700;margin-top:5px;line-height:1.05;min-height:24px;
     display:flex;align-items:center;justify-content:center}
   .knob-val{font-family:var(--mono);font-size:11px;color:var(--ink2)}
-  .knob.disabled{opacity:.32;pointer-events:none}
-  .knob-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin-top:8px}
+  .knob.disabled{opacity:.3;pointer-events:none}
+  .knob-row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;margin-top:10px}
 
   /* effect bus strips */
-  .bus{border:2.5px solid var(--ink);background:#fff;padding:10px 12px;margin:0 0 12px;
-    border-radius:12px 5px 12px 5px/5px 12px 5px 12px;box-shadow:3px 3px 0 rgba(25,16,22,.55)}
-  .bus.inactive{opacity:.62;background:repeating-linear-gradient(45deg,#f3f3f3,#f3f3f3 7px,#ececec 7px,#ececec 14px);
-    border-style:dashed}
-  .bus-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .bus-name{font-family:var(--marker);font-size:19px}
-  .bus-ch{font-size:11px;color:#fff;background:var(--ink);border-radius:6px;padding:1px 6px}
+  .bus{border:2.5px solid var(--ink);background:#fff;padding:11px 13px;margin:0 0 13px;
+    border-radius:12px 5px 12px 5px/5px 12px 5px 12px;box-shadow:2px 3px 0 var(--sh)}
+  .bus.inactive{opacity:.6;background:repeating-linear-gradient(45deg,#f4f4f4,#f4f4f4 7px,#ececec 7px,#ececec 14px);border-style:dashed}
+  .bus-head{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .bus-name{font-family:var(--marker);font-size:20px}
+  .bus-ch{font-size:11px;color:#fff;background:var(--ink);border-radius:6px;padding:1px 7px}
   .bus-ann{font-size:11px;color:var(--ink2);flex:1 1 200px}
   .bus.inactive .bus-ann{color:#b06a00;font-weight:700}
-  .lcd{background:var(--lcd-bg);border:2.5px solid var(--ink);border-radius:6px;padding:2px 4px;
-    box-shadow:inset 0 0 8px rgba(0,0,0,.6)}
-  .lcd select{background:transparent;color:var(--lcd);border:0;font-family:var(--mono);font-size:12.5px;
-    padding:2px;max-width:190px;outline:none}
-  .lcd select option{color:#111}
 
   /* routing declaration */
-  #fxRouting{border:2px dashed var(--ink);background:var(--paper2);border-radius:10px;padding:9px 11px;margin:0 0 14px}
-  #fxRouting .title{font-family:var(--marker);font-size:15px;margin-bottom:6px}
-  #fxRouting label{margin-right:14px;font-size:12px}
-  #fxRouting select{font-family:var(--sans);font-size:12px;border:2px solid var(--ink);border-radius:6px;padding:2px 4px;background:#fff}
-  #fxRouting .rn{color:var(--ink2);font-size:11px;margin-top:7px}
+  #fxRouting{border:2px dashed var(--ink);background:var(--paper2);border-radius:12px;padding:11px 13px;margin:0 0 16px}
+  #fxRouting .title{font-family:var(--marker);font-size:16px;margin-bottom:9px}
+  #fxRouting .rgrid{display:flex;flex-wrap:wrap;gap:16px}
+  #fxRouting label.rlab{display:flex;align-items:center;gap:6px;font-size:12px}
+  #fxRouting .rn{color:var(--ink2);font-size:11px;margin-top:9px}
+
+  /* custom paper-unfold dropdown */
+  .dd{position:relative;display:inline-block;font-family:var(--sans);vertical-align:middle}
+  .dd-trigger{display:inline-flex;align-items:center;gap:9px;font-family:var(--marker);font-size:13px;
+    background:#fff;color:var(--ink);border:2.5px solid var(--ink);border-radius:10px 4px 10px 4px/4px 10px 4px 10px;
+    box-shadow:2px 2px 0 var(--sh);padding:5px 11px;cursor:pointer;max-width:250px}
+  .dd-trigger:hover{background:var(--paper2)}
+  .dd-cur{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dd-caret{transition:transform .2s ease;font-size:11px;color:var(--ink2)}
+  .dd.open .dd-caret{transform:rotate(180deg)}
+  .dd-panel{position:absolute;top:calc(100% + 5px);left:0;min-width:100%;z-index:60;
+    background:var(--panel);border:2.5px solid var(--ink);border-radius:4px 12px 12px 12px;
+    box-shadow:3px 6px 0 var(--sh);padding:5px;transform-origin:top center;
+    transform:perspective(750px) rotateX(-90deg);opacity:0;pointer-events:none;
+    transition:transform .22s cubic-bezier(.5,-0.2,.4,1.3), opacity .16s ease;
+    max-height:290px;overflow:auto}
+  .dd.open .dd-panel{transform:perspective(750px) rotateX(0deg);opacity:1;pointer-events:auto}
+  .dd-opt{padding:5px 11px;border-radius:6px;cursor:pointer;white-space:nowrap;font-size:13px;font-family:var(--sans)}
+  .dd-opt:hover{background:var(--paper2)}
+  .dd-opt.sel{background:var(--accent);color:#fff}
+  /* LCD variant (effect selector) */
+  .dd.lcd .dd-trigger{background:var(--lcd-bg);color:var(--lcd);font-family:var(--mono);font-size:12.5px;
+    box-shadow:inset 0 0 8px rgba(0,0,0,.55), 2px 2px 0 var(--sh)}
+  .dd.lcd .dd-caret{color:var(--lcd)}
+  .dd.lcd .dd-panel{background:var(--lcd-bg);border-color:var(--ink)}
+  .dd.lcd .dd-opt{color:var(--lcd);font-family:var(--mono);font-size:12px}
+  .dd.lcd .dd-opt:hover{background:#173a25}
+  .dd.lcd .dd-opt.sel{background:var(--lcd);color:var(--lcd-bg)}
 
   /* pads */
-  .padgrid{display:grid;grid-template-columns:repeat(4,minmax(64px,1fr));gap:10px;margin:10px 0;max-width:560px}
-  .pad{aspect-ratio:1/1;border:2.5px solid var(--ink);border-radius:14px 6px 14px 6px/6px 14px 6px 14px;
-    box-shadow:3px 3px 0 rgba(25,16,22,.8);cursor:pointer;user-select:none;touch-action:none;
+  .padgrid{display:grid;grid-template-columns:repeat(4,minmax(64px,1fr));gap:11px;margin:12px 0;max-width:560px}
+  .pad{aspect-ratio:1/1;border:2.5px solid var(--ink);border-radius:15px 6px 15px 6px/6px 15px 6px 15px;
+    box-shadow:2px 3px 0 var(--sh2);cursor:pointer;user-select:none;touch-action:none;
     font-family:var(--marker);color:var(--ink);display:flex;flex-direction:column;align-items:center;
     justify-content:center;line-height:1;position:relative}
-  .pad .num{font-size:22px}
-  .pad .nn{font-size:10px;font-family:var(--sans);color:rgba(25,16,22,.7);margin-top:3px}
-  .pad.active-key{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(25,16,22,.8);filter:brightness(1.15)}
-  .bankrow{display:flex;flex-wrap:wrap;gap:5px}
+  .pad .num{font-size:23px}
+  .pad .nn{font-size:10px;font-family:var(--sans);color:rgba(36,24,32,.66);margin-top:4px}
+  .pad.active-key{transform:translate(2px,3px);box-shadow:0 0 0 var(--sh2);filter:brightness(1.12)}
+  .bankrow{display:flex;flex-wrap:wrap;gap:6px}
   .bankrow .sbtn{min-width:40px;text-align:center}
 
   /* keyboards */
-  .kbd{display:flex;flex-wrap:wrap;gap:3px;margin:8px 0}
-  .key{width:40px;height:58px;border:2.5px solid var(--ink);background:#fff;border-radius:5px 5px 9px 9px;
-    box-shadow:2px 3px 0 rgba(25,16,22,.7);font-size:10px;font-family:var(--sans);cursor:pointer;
-    user-select:none;touch-action:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;color:var(--ink2)}
+  .kbd{display:flex;flex-wrap:wrap;gap:4px;margin:9px 0}
+  .key{width:40px;height:60px;border:2.5px solid var(--ink);background:#fff;border-radius:5px 5px 10px 10px;
+    box-shadow:1.5px 2.5px 0 var(--sh);font-size:10px;cursor:pointer;user-select:none;touch-action:none;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;color:var(--ink2)}
   .key.blk{background:var(--ink);color:#fff}
-  .key.active-key{transform:translate(1px,2px);box-shadow:1px 1px 0 rgba(25,16,22,.7);background:var(--accent);color:#fff}
+  .key.active-key{transform:translate(1px,2px);box-shadow:0 0 0 var(--sh);background:var(--accent);color:#fff}
 
-  .patgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin:10px 0;max-width:720px}
-  .patgrid .sbtn{text-align:center;padding:9px 2px;font-size:13px}
-
-  .looprow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+  .patgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:9px;margin:12px 0;max-width:720px}
+  .patgrid .sbtn{text-align:center;padding:10px 2px;font-size:14px}
+  .looprow{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:9px 0}
 
   /* dev tools (collapsible) */
-  details#dev{background:#fafafa;border:2px solid #999;box-shadow:none;font-family:var(--sans);border-radius:8px}
-  details#dev > summary{font-family:var(--marker);font-size:20px;cursor:pointer;padding:4px 2px;list-style:none}
+  details#dev{background:#fafafa;border:2px solid #999;box-shadow:none;border-radius:10px}
+  details#dev > summary{font-family:var(--marker);font-size:21px;cursor:pointer;padding:4px 2px;list-style:none}
   details#dev > summary::-webkit-details-marker{display:none}
   details#dev > summary::before{content:"▸ ";color:var(--accent)}
   details#dev[open] > summary::before{content:"▾ "}
   .devpanel{border:1px solid #ccc;border-radius:6px;padding:10px;margin:12px 0;background:#fff}
-  .devpanel h3{margin:0 0 6px;font-size:14px;font-family:var(--sans)}
+  .devpanel h3{margin:0 0 6px;font-size:14px}
   code.hx{font-family:var(--mono);font-size:11px;background:#eee;border:1px solid #ccc;border-radius:3px;padding:1px 4px}
   #monLog{height:280px;overflow-y:auto;border:1px solid #999;background:#fafafa;font-family:var(--mono);font-size:11px;padding:4px;white-space:pre}
   #monLog .in{color:#06529b}#monLog .out{color:#1a7a1a}#monLog .err{color:#b00}
   .checkitem{border:1px solid #ccc;border-radius:4px;padding:8px;margin:6px 0}
   .checkitem textarea{width:100%;box-sizing:border-box;min-height:44px;font-size:13px}
   .note{color:#555;font-size:12px;margin:2px 0 8px}
-  .devpanel input[type=text],.devpanel select{font-size:13px;padding:2px}
+  .devpanel input[type=text]{font-size:13px;padding:2px}
 
   /* shortcut finder */
-  #scCtrls{position:sticky;top:60px;background:var(--panel);padding:8px 0;z-index:2;border-bottom:2px dashed var(--ink)}
-  #scSearch{width:260px;font-size:13px;padding:4px;border:2px solid var(--ink);border-radius:6px}
-  #scCat,#scCap{font-size:13px;border:2px solid var(--ink);border-radius:6px;padding:2px}
-  #scList{margin-top:8px}
-  .sc-cat{font-family:var(--marker);font-size:17px;margin:14px 0 4px;color:var(--accent2)}
+  #scCtrls{position:sticky;top:64px;background:var(--panel);padding:9px 0;z-index:3;border-bottom:2px dashed var(--ink)}
+  #scSearch{width:250px;font-size:13px;padding:5px 8px;border:2.5px solid var(--ink);border-radius:9px 3px 9px 3px/3px 9px 3px 9px;font-family:var(--sans)}
+  #scList{margin-top:10px}
+  .sc-cat{font-family:var(--marker);font-size:18px;margin:15px 0 5px;color:var(--accent2)}
   .sc-cat .cnt{color:#999;font-size:12px}
-  .sc-item{display:grid;grid-template-columns:220px 1fr auto;gap:10px;align-items:baseline;padding:6px 4px;border-bottom:1px solid #eadfe4}
+  .sc-item{display:grid;grid-template-columns:220px 1fr auto;gap:11px;align-items:baseline;padding:6px 4px;border-bottom:1px solid #eadfe4}
   .sc-combo{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
   .sc-key{font-family:var(--mono);font-size:11px;background:var(--ink);color:#fff;border-radius:4px;padding:1px 6px;white-space:nowrap}
   .sc-plus{color:#aaa;font-size:11px}
@@ -167,11 +190,18 @@
   @media(max-width:640px){
     #hero h1{font-size:40px}
     .sc-item{grid-template-columns:1fr}
-    .knob{width:60px}
+    .knob{width:62px}
   }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="rough" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="1.7" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</defs></svg>
+
 <div id="loadError"></div>
 <div id="app" hidden>
 <header id="hero">
@@ -180,25 +210,27 @@
 </header>
 
 <nav id="nav">
-  <button data-t="setup">Setup</button>
-  <button data-t="fx">Effects</button>
-  <button data-t="pads">Pads</button>
-  <button data-t="keys">Keys</button>
-  <button data-t="patterns">Patterns</button>
-  <button data-t="looper">Looper</button>
-  <button data-t="transport">Transport</button>
-  <button data-t="dj">DJ</button>
-  <button data-t="shortcuts">Shortcuts</button>
-  <button data-t="dev">Dev</button>
-  <span class="status"><span class="lamp" id="lamp"></span><span id="connStatus">starting…</span></span>
+  <div class="navrow">
+    <button data-t="setup">Setup</button>
+    <button data-t="fx">Effects</button>
+    <button data-t="pads">Pads</button>
+    <button data-t="keys">Keys</button>
+    <button data-t="patterns">Patterns</button>
+    <button data-t="looper">Looper</button>
+    <button data-t="transport">Transport</button>
+    <button data-t="dj">DJ</button>
+    <button data-t="shortcuts">Shortcuts</button>
+    <button data-t="dev">Dev</button>
+  </div>
+  <div class="status"><span class="lamp" id="lamp"></span><span id="connStatus">starting…</span></div>
 </nav>
 
 <div id="wrap">
 
 <section id="setup" class="card">
   <h2><span class="n">1</span>Setup</h2>
-  <div class="row"><label>Output <select id="outSel"></select></label>
-    <label>Input <select id="inSel"></select></label>
+  <div class="row"><b class="mini">Output</b><span id="outMount"></span>
+    <b class="mini">Input</b><span id="inMount"></span>
     <button id="rescanBtn" class="sbtn sm" type="button">Rescan</button></div>
   <div class="row">
     <button id="panicBtn" class="sbtn danger" type="button">⏻ Panic — all notes / sound off</button>
@@ -216,10 +248,10 @@
 <section id="pads" class="card">
   <h2><span class="n">3</span>Pads</h2>
   <div class="sub" id="padDesc"></div>
-  <div class="row"><b>Bank</b><div class="bankrow" id="padBanks"></div></div>
-  <div class="row"><span id="padVelMount"></span></div>
+  <div class="row"><b class="mini">Bank</b><div class="bankrow" id="padBanks"></div></div>
+  <div class="row" id="padVelRow"><span id="padVelMount"></span></div>
   <div class="padgrid" id="padGrid"></div>
-  <div class="row" id="extRow">
+  <div class="row">
     <span id="extMount"></span>
     <button class="sbtn sm" id="extModeToggle" type="button">mode: toggle</button>
   </div>
@@ -231,7 +263,7 @@
   <div class="sub" id="chromaDesc"></div>
   <div class="kbd" id="chromaKbd"></div>
   <div class="row"><span id="asoMount"></span></div>
-  <div class="sub" id="vocDesc" style="margin-top:14px"></div>
+  <div class="sub" id="vocDesc" style="margin-top:16px"></div>
   <div class="kbd" id="vocKbd"></div>
   <div class="row"><span id="vocBendMount"></span><span class="note">pitch bend springs back to center on release</span></div>
 </section>
@@ -239,7 +271,7 @@
 <section id="patterns" class="card">
   <h2><span class="n">5</span>Patterns</h2>
   <div class="sub" id="patDesc"></div>
-  <div class="row"><b>Bank</b><div class="bankrow" id="patBanks"></div></div>
+  <div class="row"><b class="mini">Bank</b><div class="bankrow" id="patBanks"></div></div>
   <div class="patgrid" id="patGrid"></div>
 </section>
 
@@ -267,14 +299,8 @@
   <div class="sub" id="scDesc"></div>
   <div id="scCtrls" class="row">
     <input type="text" id="scSearch" placeholder="Search combos, names, descriptions…">
-    <label>Category <select id="scCat"><option value="">All</option></select></label>
-    <label>Show <select id="scCap">
-      <option value="">All</option>
-      <option value="app">App can do it</option>
-      <option value="full">App: full</option>
-      <option value="partial">App: partial</option>
-      <option value="hw">Hardware only</option>
-    </select></label>
+    <b class="mini">Category</b><span id="scCatMount"></span>
+    <b class="mini">Show</b><span id="scCapMount"></span>
     <span class="note" id="scCount"></span>
   </div>
   <div id="scList"></div>
@@ -282,7 +308,6 @@
 
 <details id="dev" class="card">
   <summary>Developer tools — MIDI monitor · raw sender · verification checklist</summary>
-
   <div class="devpanel" id="pMon">
     <h3>MIDI monitor</h3>
     <div class="row">
@@ -293,7 +318,6 @@
     </div>
     <div id="monLog"></div>
   </div>
-
   <div class="devpanel">
     <h3>Raw sender</h3>
     <div class="row">
@@ -305,7 +329,6 @@
       <span id="rawErr" style="color:#b00"></span>
     </div>
   </div>
-
   <div class="devpanel">
     <h3>Verification checklist (open hardware questions)</h3>
     <div id="checkItems"></div>
@@ -319,7 +342,7 @@
 'use strict';
 (async function(){
 
-/* ---------- load the MIDI map: the JSON is the single source of truth ---------- */
+/* ---------- load the MIDI map ---------- */
 let MAP;
 try{
   const r = await fetch('sp404mk2-midi-map.json');
@@ -332,16 +355,16 @@ try{
 }
 document.getElementById('app').hidden = false;
 
-/* ---------- tiny DOM helpers ---------- */
+/* ---------- DOM helpers ---------- */
 const $ = id => document.getElementById(id);
 const el = (t,c,x)=>{ const e=document.createElement(t); if(c)e.className=c; if(x!=null)e.textContent=x; return e; };
 const div=(c,x)=>el('div',c,x), span=(c,x)=>el('span',c,x);
 const sbtn=(x,c)=>{ const b=el('button','sbtn'+(c?' '+c:''),x); b.type='button'; return b; };
 
-/* ---------- derive constants from the map ---------- */
+/* ---------- constants from the map ---------- */
 const FXCC = MAP.effects_control.cc;
 let CC_SW = null, CC_SEL = null;
-const CTRL_CCS = [];                       // index 0..5 → CC for Ctrl 1..6
+const CTRL_CCS = [];
 for(const [num, def] of Object.entries(FXCC)){
   if(/^EFX switch/i.test(def.function)) CC_SW = +num;
   else if(/^EFX select/i.test(def.function)) CC_SEL = +num;
@@ -350,18 +373,15 @@ for(const [num, def] of Object.entries(FXCC)){
 const TABLES = MAP.cc83_effect_tables;
 const PARAMS = MAP.effects_parameters;
 const BUSES = [
-  {label:'BUS 1', ch:1, table:'bus_1_2'},
-  {label:'BUS 2', ch:2, table:'bus_1_2'},
-  {label:'BUS 3', ch:3, table:'bus_3_4'},
-  {label:'BUS 4', ch:4, table:'bus_3_4'},
+  {label:'BUS 1', ch:1, table:'bus_1_2'}, {label:'BUS 2', ch:2, table:'bus_1_2'},
+  {label:'BUS 3', ch:3, table:'bus_3_4'}, {label:'BUS 4', ch:4, table:'bus_3_4'},
   {label:'INPUT', ch:5, table:'input_fx'},
 ];
 const busByCh = {}; BUSES.forEach(b=>busByCh[b.ch]=b);
 const busEffect = {};
-
 const LOOP = MAP.looper_mode;
 const PADS = MAP.pads_and_patterns;
-const PAD_MAP = PADS.midi_mode_A.pad_note_map;      // authoritative note<->pad table
+const PAD_MAP = PADS.midi_mode_A.pad_note_map;
 const padNumForNote = {}; PAD_MAP.forEach(p=> padNumForNote[p.note] = p.pad);
 const padToNote = {}; PAD_MAP.forEach(p=> padToNote[p.pad] = p.note);
 const EXT_NOTE = MAP.ext_source_control.note_mode_A;
@@ -374,7 +394,7 @@ const VOC_CH = +(Object.keys(MAP.channel_map).find(k=>/vocoder/i.test(MAP.channe
 const BANK_LETTERS = 'ABCDEFGHIJ';
 const DJ_REC = MAP.dj_mode.recognized;
 const DJ_TX  = MAP.dj_mode.transmit_only;
-const DJ_ROWS = [ {cc:7, ch:1}, {cc:7, ch:2}, {cc:7, ch:3}, {cc:8, ch:1} ];   // CC7 ch1-3, CC8 ch1
+const DJ_ROWS = [ {cc:7, ch:1}, {cc:7, ch:2}, {cc:7, ch:3}, {cc:8, ch:1} ];
 
 /* ---------- MIDI plumbing ---------- */
 let midiAccess = null, midiOut = null, midiIn = null;
@@ -383,62 +403,141 @@ function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
 function hex(bytes){ return bytes.map(b=>b.toString(16).toUpperCase().padStart(2,'0')).join(' '); }
 function noteName(n){ return ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][n%12] + (Math.floor(n/12)-1); }
 
+/* ---------- reusable paper-unfold DROPDOWN ---------- */
+const allDropdowns = [];
+function makeDropdown(opts){
+  const wrap = div('dd' + (opts.className ? ' '+opts.className : ''));
+  const trigger = el('button','dd-trigger'); trigger.type='button';
+  const cur = span('dd-cur'); const caret = span('dd-caret','▾');
+  trigger.append(cur, caret);
+  const panel = div('dd-panel');
+  wrap.append(trigger, panel);
+  let options = [], current = null, open = false;
+  if(opts.width) trigger.style.minWidth = opts.width;
+  function label(v){ const o = options.find(x=>x.value===v); return o ? o.label : (opts.placeholder||''); }
+  function paintSel(){ [...panel.children].forEach((c,i)=> c.classList.toggle('sel', options[i] && options[i].value===current)); cur.textContent = label(current); }
+  function renderPanel(){
+    panel.innerHTML='';
+    options.forEach(o=>{ const it = div('dd-opt', o.label); it.addEventListener('click', ()=> choose(o.value, true)); panel.appendChild(it); });
+    paintSel();
+  }
+  function setCur(v){ current = v; paintSel(); }
+  function choose(v, fire){ setCur(v); closeIt(); if(fire && opts.onChange) opts.onChange(v, options.find(x=>x.value===v)); }
+  function openIt(){ allDropdowns.forEach(d=> d!==api && d.close()); open=true; wrap.classList.add('open'); }
+  function closeIt(){ open=false; wrap.classList.remove('open'); }
+  trigger.addEventListener('click', e=>{ e.stopPropagation(); open?closeIt():openIt(); });
+  trigger.addEventListener('keydown', e=>{ if(e.key==='Escape') closeIt(); });
+  panel.addEventListener('click', e=> e.stopPropagation());
+  document.addEventListener('click', ()=>{ if(open) closeIt(); });
+  function setOptions(arr){
+    options = arr.map(o => typeof o==='string' ? {value:o, label:o} : o);
+    if(!options.find(x=>x.value===current)) current = options.length ? options[0].value : null;
+    renderPanel();
+  }
+  const api = { el:wrap, get:()=>current, set:v=>setCur(v), setOptions,
+    selected:()=>options.find(x=>x.value===current), close:closeIt };
+  allDropdowns.push(api);
+  setOptions(opts.options || []);
+  if(opts.value != null) setCur(opts.value);
+  return api;
+}
+
+/* ---------- reusable flat SVG KNOB ---------- */
+function makeKnob(opts){
+  const min = opts.min!=null?opts.min:0, max = opts.max!=null?opts.max:127;
+  let value = opts.value!=null?opts.value:min;
+  const def = opts.defaultVal!=null?opts.defaultVal:value;
+  const fmt = opts.format || (v=>String(Math.round(v)));
+  const step = opts.step || 1;
+  const root = div('knob'); root.tabIndex = 0;
+  root.innerHTML =
+    '<svg viewBox="0 0 64 64" class="knob-svg">'
+    + '<circle cx="32" cy="32" r="24" class="k-face"/>'
+    + '<line x1="32" y1="4" x2="32" y2="8" class="k-ticks"/>'
+    + '<line x1="9" y1="45" x2="12" y2="43" class="k-ticks"/>'
+    + '<line x1="55" y1="45" x2="52" y2="43" class="k-ticks"/>'
+    + '<g class="k-rot"><line x1="32" y1="32" x2="32" y2="12" class="k-ptr"/></g>'
+    + '<circle cx="32" cy="32" r="2.6" class="k-hub"/></svg>'
+    + '<div class="knob-label"></div><div class="knob-val"></div>';
+  const svg = root.querySelector('.knob-svg');
+  const gRot = root.querySelector('.k-rot');
+  const labEl = root.querySelector('.knob-label');
+  const valEl = root.querySelector('.knob-val');
+  labEl.textContent = opts.label||'';
+  let enabled = true;
+  const clamp = v => Math.max(min, Math.min(max, v));
+  function paint(){
+    const frac = (value-min)/((max-min)||1);
+    gRot.setAttribute('transform', 'rotate('+(-135+frac*270)+' 32 32)');
+    valEl.textContent = fmt(value);
+  }
+  function setV(v, silent){
+    v = clamp(Math.round(v));
+    if(v===value){ paint(); return; }
+    value = v; paint();
+    if(!silent && opts.onChange) opts.onChange(value);
+  }
+  paint();
+  let dragging=false, startY=0, startVal=0;
+  svg.addEventListener('pointerdown', e=>{ if(!enabled) return; e.preventDefault(); dragging=true; startY=e.clientY; startVal=value; try{svg.setPointerCapture(e.pointerId);}catch(_){}});
+  svg.addEventListener('pointermove', e=>{ if(!dragging) return; setV(startVal + (startY-e.clientY)*((max-min)/200)); });
+  const endDrag = e=>{ if(!dragging) return; dragging=false; try{svg.releasePointerCapture(e.pointerId);}catch(_){} if(opts.springBack) setV(def); };
+  svg.addEventListener('pointerup', endDrag);
+  svg.addEventListener('pointercancel', endDrag);
+  svg.addEventListener('wheel', e=>{ if(!enabled) return; e.preventDefault(); setV(value + (e.deltaY<0?step:-step)); }, {passive:false});
+  root.addEventListener('dblclick', ()=>{ if(enabled) setV(def); });
+  root.addEventListener('keydown', e=>{ if(!enabled) return;
+    if(e.key==='ArrowUp'||e.key==='ArrowRight'){ e.preventDefault(); setV(value+step); }
+    else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ e.preventDefault(); setV(value-step); } });
+  return { el:root, cc:opts.cc, set:(v,s)=>setV(v,s), get:()=>value,
+    setLabel:t=>{ labEl.textContent=t; }, setTitle:t=>{ root.title=t||''; },
+    setEnabled:on=>{ enabled=!!on; root.classList.toggle('disabled', !on); } };
+}
+
+/* ---------- ports ---------- */
 function setStatus(){
   const ok = !!midiOut;
   $('lamp').classList.toggle('on', ok);
-  $('connStatus').textContent = ok
-    ? 'OUT: '+midiOut.name+' · IN: '+(midiIn?midiIn.name:'none')
-    : 'no MIDI output';
+  $('connStatus').textContent = ok ? 'OUT: '+midiOut.name+' · IN: '+(midiIn?midiIn.name:'none') : 'no MIDI output';
 }
 function setInput(inp){
   if(midiIn) midiIn.onmidimessage = null;
   midiIn = inp || null;
   if(midiIn) midiIn.onmidimessage = e => logMsg('IN', [...e.data]);
 }
+const ddOut = makeDropdown({ options:[{value:'',label:'—'}], placeholder:'—', onChange:id=>{
+  const outs=[...midiAccess.outputs.values()]; midiOut = outs.find(o=>o.id===id)||null;
+  if(midiOut) lsSet('sp404_out', midiOut.id); else refreshPorts(); setStatus();
+}});
+const ddIn = makeDropdown({ options:[{value:'',label:'(none)'}], onChange:id=>{
+  const ins=[...midiAccess.inputs.values()]; const pick = ins.find(i=>i.id===id)||null;
+  setInput(pick); lsSet('sp404_in', pick?pick.id:''); setStatus();
+}});
+$('outMount').appendChild(ddOut.el); $('inMount').appendChild(ddIn.el);
 function refreshPorts(){
   const outs = midiAccess ? [...midiAccess.outputs.values()] : [];
   const ins  = midiAccess ? [...midiAccess.inputs.values()]  : [];
-  const outSel = $('outSel'), inSel = $('inSel');
-  outSel.innerHTML = '';
-  if(!outs.length){ outSel.innerHTML = '<option value="">No outputs</option>'; midiOut = null; }
+  if(!outs.length){ ddOut.setOptions([{value:'',label:'No outputs'}]); ddOut.set(''); midiOut = null; }
   else{
-    outs.forEach(o=>{ const op=el('option',null,o.name); op.value=o.id; outSel.appendChild(op); });
+    ddOut.setOptions(outs.map(o=>({value:o.id,label:o.name})));
     const saved = lsGet('sp404_out');
     const pick = outs.find(o=>o.id===saved) || outs.find(o=>/sp-?404|mk2/i.test(o.name)) || outs[0];
-    outSel.value = pick.id; midiOut = pick;
+    ddOut.set(pick.id); midiOut = pick;
   }
-  inSel.innerHTML = '<option value="">(none)</option>';
-  ins.forEach(i=>{ const op=el('option',null,i.name); op.value=i.id; inSel.appendChild(op); });
+  ddIn.setOptions([{value:'',label:'(none)'}].concat(ins.map(i=>({value:i.id,label:i.name}))));
   const savedIn = lsGet('sp404_in');
   let pickIn = null;
   if(savedIn === null) pickIn = ins.find(i=>/sp-?404|mk2/i.test(i.name)) || ins[0] || null;
   else if(savedIn !== '') pickIn = ins.find(i=>i.id===savedIn) || ins.find(i=>/sp-?404|mk2/i.test(i.name)) || ins[0] || null;
-  inSel.value = pickIn ? pickIn.id : '';
-  setInput(pickIn);
-  setStatus();
+  ddIn.set(pickIn ? pickIn.id : ''); setInput(pickIn); setStatus();
 }
-$('outSel').addEventListener('change', e=>{
-  const outs = [...midiAccess.outputs.values()];
-  midiOut = outs.find(o=>o.id===e.target.value) || null;
-  if(midiOut) lsSet('sp404_out', midiOut.id); else refreshPorts();
-  setStatus();
-});
-$('inSel').addEventListener('change', e=>{
-  const ins = [...midiAccess.inputs.values()];
-  const pick = ins.find(i=>i.id===e.target.value) || null;
-  setInput(pick); lsSet('sp404_in', pick ? pick.id : ''); setStatus();
-});
 $('rescanBtn').addEventListener('click', refreshPorts);
 $('panicBtn').addEventListener('click', panicAll);
 $('panicNote').textContent = 'All Notes Off + All Sound Off + Reset Controllers + pitch-center on all 16 channels; also clears stuck held-key highlights. Note: the SP only honors All Sound Off on ch16 and ignores note-off for pads — to stop pad/looper playback use the Looper "stop all" (CC85) or the hardware.';
-
 async function initMIDI(){
   if(!navigator.requestMIDIAccess){ $('connStatus').textContent = 'Web MIDI not supported — use Chrome or Edge'; return; }
-  try{
-    midiAccess = await navigator.requestMIDIAccess({sysex:false});
-    midiAccess.onstatechange = refreshPorts;
-    refreshPorts();
-  }catch(e){ $('connStatus').textContent = 'MIDI access denied'; }
+  try{ midiAccess = await navigator.requestMIDIAccess({sysex:false}); midiAccess.onstatechange = refreshPorts; refreshPorts(); }
+  catch(e){ $('connStatus').textContent = 'MIDI access denied'; }
 }
 
 /* ---------- sending ---------- */
@@ -453,18 +552,12 @@ const sendCC   = (ch, cc, val, hexEl) => sendBytes([0xB0|((ch-1)&0x0F), cc&0x7F,
 const sendOn   = (ch, note, vel, hexEl) => sendBytes([0x90|((ch-1)&0x0F), note&0x7F, vel&0x7F], hexEl);
 const sendOff  = (ch, note, hexEl) => sendBytes([0x80|((ch-1)&0x0F), note&0x7F, 0], hexEl);
 const sendPC   = (ch, pgm, hexEl) => sendBytes([0xC0|((ch-1)&0x0F), pgm&0x7F], hexEl);
-function sendBend(ch, val, hexEl){
-  const v = Math.max(0, Math.min(16383, val+8192));
-  return sendBytes([0xE0|((ch-1)&0x0F), v&0x7F, (v>>7)&0x7F], hexEl);
-}
+function sendBend(ch, val, hexEl){ const v = Math.max(0, Math.min(16383, val+8192)); return sendBytes([0xE0|((ch-1)&0x0F), v&0x7F, (v>>7)&0x7F], hexEl); }
 
 /* ---------- panic ---------- */
 function panicAll(){
   const msgs = [];
-  for(let ch=1; ch<=16; ch++){
-    const st = (ch-1)&0x0F;
-    msgs.push([0xB0|st, 120, 0], [0xB0|st, 123, 0], [0xB0|st, 121, 0], [0xE0|st, 0, 64]);
-  }
+  for(let ch=1; ch<=16; ch++){ const st=(ch-1)&0x0F; msgs.push([0xB0|st,120,0],[0xB0|st,123,0],[0xB0|st,121,0],[0xE0|st,0,64]); }
   let sent = 0, failed = false;
   if(midiOut){ for(const m of msgs){ try{ midiOut.send(m); sent++; }catch(e){ failed = true; } } }
   document.querySelectorAll('.active-key').forEach(el=>el.classList.remove('active-key'));
@@ -472,52 +565,6 @@ function panicAll(){
     + (midiOut ? sent+' msgs'+(failed?' (some failed)':'') : 'NO OUTPUT PORT') + ')';
   monBuf.push({dir:'OUT', line}); if(monBuf.length > MON_CAP) monBuf.shift();
   if(monMatch(line)) appendMonLine('OUT', line);
-}
-
-/* ---------- reusable KNOB control ---------- */
-function makeKnob(opts){
-  const min = opts.min!=null?opts.min:0, max = opts.max!=null?opts.max:127;
-  let value = opts.value!=null?opts.value:min;
-  const def = opts.defaultVal!=null?opts.defaultVal:value;
-  const fmt = opts.format || (v=>String(Math.round(v)));
-  const step = opts.step || 1;
-  const root = div('knob'); root.tabIndex = 0;
-  const dial = div('knob-dial'); const ind = div('knob-ind'); dial.appendChild(ind);
-  const labEl = div('knob-label', opts.label||''); const valEl = div('knob-val');
-  root.append(dial, labEl, valEl);
-  let enabled = true;
-  const clamp = v => Math.max(min, Math.min(max, v));
-  function paint(){
-    const frac = (value-min)/((max-min)||1);
-    ind.style.transform = 'rotate('+(-135+frac*270)+'deg)';
-    valEl.textContent = fmt(value);
-  }
-  function setV(v, silent){
-    v = clamp(Math.round(v));
-    if(v===value){ paint(); return; }
-    value = v; paint();
-    if(!silent && opts.onChange) opts.onChange(value);
-  }
-  paint();
-  let dragging=false, startY=0, startVal=0;
-  dial.addEventListener('pointerdown', e=>{ if(!enabled) return; e.preventDefault(); dragging=true; startY=e.clientY; startVal=value; try{dial.setPointerCapture(e.pointerId);}catch(_){}});
-  dial.addEventListener('pointermove', e=>{ if(!dragging) return; setV(startVal + (startY-e.clientY)*((max-min)/200)); });
-  const endDrag = e=>{ if(!dragging) return; dragging=false; try{dial.releasePointerCapture(e.pointerId);}catch(_){}
-    if(opts.springBack) setV(def); };
-  dial.addEventListener('pointerup', endDrag);
-  dial.addEventListener('pointercancel', endDrag);
-  dial.addEventListener('wheel', e=>{ if(!enabled) return; e.preventDefault(); setV(value + (e.deltaY<0?step:-step)); }, {passive:false});
-  root.addEventListener('dblclick', ()=>{ if(enabled) setV(def); });
-  root.addEventListener('keydown', e=>{ if(!enabled) return;
-    if(e.key==='ArrowUp'||e.key==='ArrowRight'){ e.preventDefault(); setV(value+step); }
-    else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ e.preventDefault(); setV(value-step); } });
-  return {
-    el:root, cc:opts.cc,
-    set:(v,s)=>setV(v,s), get:()=>value,
-    setLabel:t=>{ labEl.textContent=t; },
-    setTitle:t=>{ root.title=t||''; },
-    setEnabled:on=>{ enabled=!!on; root.classList.toggle('disabled', !on); },
-  };
 }
 
 /* ---------- monitor ---------- */
@@ -530,12 +577,10 @@ function fmtTime(){ const d = new Date(); return d.toTimeString().slice(0,8) + '
 function ctrlIdx(cc){ return CTRL_CCS.indexOf(cc); }
 function paramFor(ch, cc){ const eff = busEffect[ch]; const ps = eff && PARAMS[eff]; return ps ? ps.find(p=>p.cc===cc) : null; }
 function looperDecode(cc, val){
-  const def = LOOP.cc[String(cc)];
-  if(!def) return null;
+  const def = LOOP.cc[String(cc)]; if(!def) return null;
   let match = null;
   for(const part of def.values.split(', ')){
-    const m = part.match(/^(\d+)(?:-(\d+))? = (.+)$/);
-    if(!m) continue;
+    const m = part.match(/^(\d+)(?:-(\d+))? = (.+)$/); if(!m) continue;
     const lo = +m[1], hi = m[2] !== undefined ? +m[2] : null;
     if(hi !== null ? (val>=lo && val<=hi) : val===lo){ match = m[3]; break; }
   }
@@ -548,8 +593,7 @@ function describe(bytes){
   if((st & 0x80) === 0) return 'data bytes (running status?)';
   const type = st & 0xF0, ch = (st & 0x0F) + 1; const chs = 'ch'+ch;
   if(type === 0x90 || type === 0x80){
-    const n = bytes[1], vel = bytes[2];
-    const on = type === 0x90 && vel > 0; const kind = on ? 'NoteOn' : 'NoteOff';
+    const n = bytes[1], vel = bytes[2]; const on = type === 0x90 && vel > 0; const kind = on ? 'NoteOn' : 'NoteOff';
     let role = '';
     if(ch === CHROMA_CH) role = 'Chromatic '+noteName(n);
     else if(ch === VOC_CH) role = 'Vocoder '+noteName(n);
@@ -564,13 +608,8 @@ function describe(bytes){
     const cc = bytes[1], val = bytes[2]; const base = chs+' CC'+cc+'='+val; const bus = busByCh[ch];
     if(bus){
       if(cc === CC_SW) return base+' → '+bus.label+' EFX '+(val>=64?'ON':'OFF');
-      if(cc === CC_SEL){
-        const name = TABLES[bus.table][String(val)];
-        if(name !== undefined) busEffect[ch] = name;
-        return base+' → '+bus.label+' select '+(name !== undefined ? name : '(out of range — ignored)');
-      }
-      const ci = ctrlIdx(cc);
-      if(ci >= 0){ const p = paramFor(ch, cc); return base+' → '+bus.label+' Ctrl'+(ci+1)+(p ? ' ('+p.name+')' : ''); }
+      if(cc === CC_SEL){ const name = TABLES[bus.table][String(val)]; if(name !== undefined) busEffect[ch] = name; return base+' → '+bus.label+' select '+(name !== undefined ? name : '(out of range — ignored)'); }
+      const ci = ctrlIdx(cc); if(ci >= 0){ const p = paramFor(ch, cc); return base+' → '+bus.label+' Ctrl'+(ci+1)+(p ? ' ('+p.name+')' : ''); }
     }
     if(ch === LOOP.channel){ const ld = looperDecode(cc, val); if(ld) return base+' → '+ld; }
     if(DJ_REC[String(cc)] && DJ_ROWS.some(r=>r.cc===cc && r.ch===ch)) return base+' → DJ '+DJ_REC[String(cc)];
@@ -586,10 +625,7 @@ function describe(bytes){
 }
 function updateSuppressed(){ $('monSuppressed').textContent = (supClock||supSense) ? 'suppressed: '+supClock+' clock, '+supSense+' sensing' : ''; }
 function logMsg(dir, bytes, extra){
-  if($('monHideRt').checked && (bytes[0]===0xF8 || bytes[0]===0xFE)){
-    if(bytes[0]===0xF8) supClock++; else supSense++;
-    updateSuppressed(); return;
-  }
+  if($('monHideRt').checked && (bytes[0]===0xF8 || bytes[0]===0xFE)){ if(bytes[0]===0xF8) supClock++; else supSense++; updateSuppressed(); return; }
   const line = fmtTime()+' '+dir.padEnd(3)+' '+hex(bytes).padEnd(9)+' '+describe(bytes)+(extra||'');
   monBuf.push({dir, line}); if(monBuf.length > MON_CAP) monBuf.shift();
   if(monMatch(line)) appendMonLine(dir, line);
@@ -617,26 +653,18 @@ $('fxDesc').textContent = MAP.effects_control.description+' EFX switch = CC'+CC_
 BUSES.forEach(bus=>{
   const strip = div('bus'); strip.dataset.ch = bus.ch;
   const head = div('bus-head');
-  const efx = sbtn('EFX'); efx.classList.add('sm');
+  const efx = sbtn('EFX','sm');
   let efxOn = false;
   efx.addEventListener('click', ()=>{ efxOn = !efxOn; efx.classList.toggle('on', efxOn); sendCC(bus.ch, CC_SW, efxOn?127:0, null); });
-  const lcd = div('lcd'); const sel = el('select');
-  Object.entries(TABLES[bus.table]).sort((a,b)=>+a[0]-+b[0]).forEach(([code,name])=>{
-    const op = el('option', null, code+': '+name); op.value = code; op.dataset.name = name; sel.appendChild(op);
-  });
-  lcd.appendChild(sel);
+  const fxOptions = Object.entries(TABLES[bus.table]).sort((a,b)=>+a[0]-+b[0]).map(([code,name])=>({value:code, label:code+': '+name, name}));
+  const fx = makeDropdown({ className:'lcd', options:fxOptions, value:'0', onChange:v=>{ sendCC(bus.ch, CC_SEL, +v, null); applyParams(); } });
   const ann = span('bus-ann','');
-  head.append(span('bus-name', bus.label), span('bus-ch','ch'+bus.ch), efx, lcd, ann);
-
+  head.append(span('bus-name', bus.label), span('bus-ch','ch'+bus.ch), efx, fx.el, ann);
   const krow = div('knob-row');
-  bus.knobs = CTRL_CCS.map((cc,i)=> {
-    const k = makeKnob({ label:'CTRL '+(i+1), cc, value:0, onChange:v=>sendCC(bus.ch, cc, v, null) });
-    krow.appendChild(k.el); return k;
-  });
+  bus.knobs = CTRL_CCS.map((cc,i)=>{ const k = makeKnob({ label:'CTRL '+(i+1), cc, value:0, onChange:v=>sendCC(bus.ch, cc, v, null) }); krow.appendChild(k.el); return k; });
   strip.append(head, krow);
-
   function applyParams(){
-    const name = sel.selectedOptions[0] ? sel.selectedOptions[0].dataset.name : null;
+    const sel = fx.selected(); const name = sel ? sel.name : null;
     busEffect[bus.ch] = name;
     const ps = name ? PARAMS[name] : null;
     bus.knobs.forEach((k,i)=>{
@@ -646,9 +674,8 @@ BUSES.forEach(bus=>{
       else { k.setLabel('CTRL '+(i+1)); k.setTitle('CC'+k.cc+' — param names unknown for this selection'); k.setEnabled(true); }
     });
   }
-  sel.addEventListener('change', ()=>{ sendCC(bus.ch, CC_SEL, +sel.value, null); applyParams(); });
   applyParams();
-  bus.selEl = sel; bus.setEfx = on=>{ efxOn=on; efx.classList.toggle('on',on); };
+  bus.fx = fx; bus.setEfx = on=>{ efxOn=on; efx.classList.toggle('on',on); };
   bus.applyParams = applyParams; bus.stripEl = strip; bus.annEl = ann;
   $('fxCols').appendChild(strip);
 });
@@ -663,16 +690,14 @@ if(ROUTING && Array.isArray(ROUTING.params)){
   })();
   const wrap = $('fxRouting');
   wrap.appendChild(div('title','Your SP audio routing — declare it (the app can’t read it; it always sends on ch1-5)'));
-  const ctrls = div();
+  const grid = div('rgrid');
   ROUTING.params.forEach(p=>{
-    const lab = el('label'); lab.appendChild(document.createTextNode(p.label+' '));
-    const sel = el('select');
-    p.options.forEach(o=>{ const op=el('option',null,o); op.value=o; sel.appendChild(op); });
-    sel.value = routeState[p.key]; if(p.note) sel.title = p.note;
-    sel.addEventListener('change', ()=>{ routeState[p.key]=sel.value; lsSet('sp404_routing', JSON.stringify(routeState)); applyRouting(); });
-    lab.appendChild(sel); ctrls.appendChild(lab);
+    const lab = el('label','rlab'); lab.appendChild(document.createTextNode(p.label));
+    const dd = makeDropdown({ options:p.options, value:routeState[p.key], onChange:v=>{ routeState[p.key]=v; lsSet('sp404_routing', JSON.stringify(routeState)); applyRouting(); } });
+    if(p.note) dd.el.title = p.note;
+    lab.appendChild(dd.el); grid.appendChild(lab);
   });
-  wrap.appendChild(ctrls);
+  wrap.appendChild(grid);
   const rnote = div('rn'); wrap.appendChild(rnote);
   function applyRouting(){
     const serial = /TYPE A/i.test(routeState.bus12);
@@ -696,7 +721,7 @@ if(ROUTING && Array.isArray(ROUTING.params)){
   applyRouting();
 }
 
-/* ---------- shared key helper: note on while pressed, off on release ---------- */
+/* ---------- pressable key helper ---------- */
 function pressable(node, getCh, note, getVel){
   let downCh = null;
   node.addEventListener('pointerdown', e=>{ e.preventDefault(); downCh = getCh(); node.classList.add('active-key'); sendOn(downCh, note, getVel()); });
@@ -723,13 +748,11 @@ const padCh = ()=> padBank;
 const padVel = ()=> padVelKnob.get();
 for(let pad=1; pad<=16; pad++){
   const note = padToNote[pad];
-  const p = div('pad'); p.style.background = 'hsl('+((pad-1)*23)%360+',66%,63%)';
+  const p = div('pad'); p.style.background = 'hsl('+(((pad-1)*23)%360)+',62%,66%)';
   p.append(span('num', String(pad)), span('nn', noteName(note)+' · '+note));
   pressable(p, padCh, note, padVel);
   $('padGrid').appendChild(p);
 }
-
-/* EXT SOURCE */
 $('extDesc').textContent = MAP.ext_source_control.description;
 {
   const extBtn = sbtn('EXT SOURCE','accent2'); $('extMount').appendChild(extBtn);
@@ -737,39 +760,23 @@ $('extDesc').textContent = MAP.ext_source_control.description;
   let gateMode = false;
   modeBtn.addEventListener('click', ()=>{ gateMode = !gateMode; modeBtn.textContent = 'mode: '+(gateMode?'gate (hold)':'toggle'); });
   let gateCh = null;
-  extBtn.addEventListener('pointerdown', e=>{
-    e.preventDefault();
+  extBtn.addEventListener('pointerdown', e=>{ e.preventDefault();
     if(!gateMode){ sendOn(padCh(), EXT_NOTE, padVel()); }
-    else{ gateCh = padCh(); extBtn.classList.add('held'); sendOn(gateCh, EXT_NOTE, padVel()); }
-  });
+    else{ gateCh = padCh(); extBtn.classList.add('held'); sendOn(gateCh, EXT_NOTE, padVel()); } });
   const up = ()=>{ if(gateCh === null) return; sendOff(gateCh, EXT_NOTE); gateCh = null; extBtn.classList.remove('held'); };
-  extBtn.addEventListener('pointerup', up);
-  extBtn.addEventListener('pointerleave', up);
-  extBtn.addEventListener('pointercancel', up);
+  extBtn.addEventListener('pointerup', up); extBtn.addEventListener('pointerleave', up); extBtn.addEventListener('pointercancel', up);
 }
 
-/* ---------- KEYS: chromatic (ch16) + vocoder (ch11) ---------- */
+/* ---------- KEYS ---------- */
 function buildKeyboard(container, ch, lo, hi){
-  for(let n=lo; n<=hi; n++){
-    const k = div('key'+([1,3,6,8,10].includes(n%12)?' blk':''), noteName(n));
-    pressable(k, ()=>ch, n, ()=>100);
-    container.appendChild(k);
-  }
+  for(let n=lo; n<=hi; n++){ const k = div('key'+([1,3,6,8,10].includes(n%12)?' blk':''), noteName(n)); pressable(k, ()=>ch, n, ()=>100); container.appendChild(k); }
 }
 $('chromaDesc').textContent = 'ch'+CHROMA_CH+' — '+PADS.chromatic.notes;
 buildKeyboard($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI);
-{
-  const aso = sbtn('All Sound Off (CC120)','sm');
-  aso.addEventListener('click', ()=> sendCC(CHROMA_CH, 120, 0, null));
-  $('asoMount').appendChild(aso);
-}
+{ const aso = sbtn('All Sound Off (CC120)','sm'); aso.addEventListener('click', ()=> sendCC(CHROMA_CH, 120, 0, null)); $('asoMount').appendChild(aso); }
 $('vocDesc').textContent = 'ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)];
 buildKeyboard($('vocKbd'), VOC_CH, 48, 72);
-{
-  const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256, springBack:true,
-    format:v=> (v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) });
-  $('vocBendMount').appendChild(bendKnob.el);
-}
+{ const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256, springBack:true, format:v=>(v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) }); $('vocBendMount').appendChild(bendKnob.el); }
 
 /* ---------- PATTERNS ---------- */
 $('patDesc').textContent = PADS.pattern_launch.message+'. '+PADS.pattern_launch.mapping;
@@ -781,38 +788,21 @@ for(let i=0;i<10;i++){
   b.addEventListener('click', ()=>{ patBank = i+1; patBankBtns.forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
   patBankBtns.push(b); $('patBanks').appendChild(b);
 }
-for(let p=PC_LO; p<=PC_HI; p++){
-  const b = sbtn(String(p+1)); b.title = 'Pattern '+(p+1)+' (PC'+p+')';
-  b.addEventListener('click', ()=> sendPC(patBank, p, null));
-  $('patGrid').appendChild(b);
-}
+for(let p=PC_LO; p<=PC_HI; p++){ const b = sbtn(String(p+1)); b.title = 'Pattern '+(p+1)+' (PC'+p+')'; b.addEventListener('click', ()=> sendPC(patBank, p, null)); $('patGrid').appendChild(b); }
 
 /* ---------- LOOPER ---------- */
 $('looperDesc').textContent = LOOP.description+' All CCs on ch'+LOOP.channel+'.';
 Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).forEach(([ccStr, def])=>{
-  const cc = +ccStr;
-  const row = div('looprow');
-  row.appendChild(span(null, 'CC'+cc+' '+def.function));
+  const cc = +ccStr; const row = div('looprow'); row.appendChild(span(null, 'CC'+cc+' '+def.function));
   const rangeM = def.values.match(/^(\d+)-(\d+) = (.+)$/);
-  if(rangeM){
-    const k = makeKnob({ label:rangeM[3], min:+rangeM[1], max:+rangeM[2], value:64, defaultVal:64, onChange:v=>sendCC(LOOP.channel, cc, v, null) });
-    row.appendChild(k.el);
-  }else{
-    def.values.split(', ').forEach(part=>{
-      const m = part.match(/^(\d+) = (.+)$/); if(!m) return;
-      const b = sbtn(m[2]+' ('+m[1]+')','sm');
-      b.addEventListener('click', ()=> sendCC(LOOP.channel, cc, +m[1], null));
-      row.appendChild(b);
-    });
-  }
+  if(rangeM){ const k = makeKnob({ label:rangeM[3], min:+rangeM[1], max:+rangeM[2], value:64, defaultVal:64, onChange:v=>sendCC(LOOP.channel, cc, v, null) }); row.appendChild(k.el); }
+  else{ def.values.split(', ').forEach(part=>{ const m = part.match(/^(\d+) = (.+)$/); if(!m) return; const b = sbtn(m[2]+' ('+m[1]+')','sm'); b.addEventListener('click', ()=> sendCC(LOOP.channel, cc, +m[1], null)); row.appendChild(b); }); }
   $('looperRows').appendChild(row);
 });
 
-/* ---------- TRANSPORT: realtime + clock ---------- */
+/* ---------- TRANSPORT ---------- */
 $('rtDesc').textContent = MAP.system_realtime.start_stop;
-[['Start (FA)',0xFA],['Stop (FC)',0xFC],['Continue (FB) — untested',0xFB]].forEach(([label,byte])=>{
-  const b = sbtn(label); b.addEventListener('click', ()=> sendBytes([byte], null)); $('rtMount').appendChild(b);
-});
+[['Start (FA)',0xFA],['Stop (FC)',0xFC],['Continue (FB) — untested',0xFB]].forEach(([label,byte])=>{ const b = sbtn(label); b.addEventListener('click', ()=> sendBytes([byte], null)); $('rtMount').appendChild(b); });
 const clock = {running:false, next:0, timer:null, count:0, bpm:120};
 const bpmKnob = makeKnob({ label:'BPM', min:40, max:300, value:120, defaultVal:120, step:1, onChange:v=>{ clock.bpm=v; } });
 $('clockMount').appendChild(bpmKnob.el);
@@ -831,53 +821,36 @@ function clockPump(){
     try{ midiOut.send([0xF8], clock.next); }catch(e){}
     clock.count++; clock.next += tick;
   }
-  updateSuppressed();
-  clockStatus.textContent = 'running — '+clock.count+' ticks sent';
+  updateSuppressed(); clockStatus.textContent = 'running — '+clock.count+' ticks sent';
 }
 clockBtn.addEventListener('click', ()=>{
-  if(clock.running){
-    clock.running = false; clearInterval(clock.timer);
-    clockBtn.textContent = 'Start clock (F8 · 24 ppqn)'; clockBtn.classList.remove('on');
-    clockStatus.textContent = 'clock stopped — '+clock.count+' ticks sent';
-  }else{
-    if(!midiOut){ clockStatus.textContent = 'no output port'; return; }
-    clock.running = true; clock.count = 0; clock.next = performance.now() + 20;
-    clock.timer = setInterval(clockPump, 50);
-    clockBtn.textContent = 'Stop clock'; clockBtn.classList.add('on'); clockPump();
-  }
+  if(clock.running){ clock.running = false; clearInterval(clock.timer); clockBtn.textContent = 'Start clock (F8 · 24 ppqn)'; clockBtn.classList.remove('on'); clockStatus.textContent = 'clock stopped — '+clock.count+' ticks sent'; }
+  else{ if(!midiOut){ clockStatus.textContent = 'no output port'; return; } clock.running = true; clock.count = 0; clock.next = performance.now() + 20; clock.timer = setInterval(clockPump, 50); clockBtn.textContent = 'Stop clock'; clockBtn.classList.add('on'); clockPump(); }
 });
 
 /* ---------- DJ ---------- */
 $('djWarn').textContent = MAP.dj_mode.warning;
-DJ_ROWS.forEach(({cc, ch})=>{
-  const k = makeKnob({ label:'CC'+cc+' ch'+ch, min:0, max:127, value: cc===8?64:100, defaultVal: cc===8?64:100,
-    onChange:v=>sendCC(ch, cc, v, null) });
-  k.setTitle(DJ_REC[String(cc)]);
-  $('djRows').appendChild(k.el);
-});
+DJ_ROWS.forEach(({cc, ch})=>{ const k = makeKnob({ label:'CC'+cc+' ch'+ch, min:0, max:127, value: cc===8?64:100, defaultVal: cc===8?64:100, onChange:v=>sendCC(ch, cc, v, null) }); k.setTitle(DJ_REC[String(cc)]); $('djRows').appendChild(k.el); });
 
 /* ---------- raw sender ---------- */
 $('rawSend').addEventListener('click', ()=>{
-  $('rawErr').textContent = '';
-  const bytes = [];
+  $('rawErr').textContent = ''; const bytes = [];
   for(const id of ['raw0','raw1','raw2']){
-    const s = $(id).value.trim().replace(/^0x/i,'');
-    if(s === '') break;
+    const s = $(id).value.trim().replace(/^0x/i,''); if(s === '') break;
     if(!/^[0-9a-f]{1,2}$/i.test(s)){ $('rawErr').textContent = 'bad hex byte: "'+s+'"'; return; }
     bytes.push(parseInt(s, 16));
   }
   if(!bytes.length){ $('rawErr').textContent = 'enter at least one hex byte'; return; }
-  const ok = sendBytes(bytes, $('rawHex'));
-  if(!ok && midiOut) $('rawErr').textContent = 'rejected by Web MIDI (invalid MIDI message?)';
+  const ok = sendBytes(bytes, $('rawHex')); if(!ok && midiOut) $('rawErr').textContent = 'rejected by Web MIDI (invalid MIDI message?)';
 });
 
 /* ---------- verification checklist ---------- */
 const CHECKS = [
   { id:'ctrl456_mapping', title:'(a) Do CC80/81/82 drive the 4th/5th/6th listed parameter? — RESOLVED by manual',
-    desc:'ANSWERED YES by the v5.50 manual. p.33 "Editing the effects": CTRL 1-3 edit the main parameters, and holding [VALUE] + CTRL 1-3 edits the sub-parameters; the MFX List (pp.143-157) prints params in exactly that order. The implementation chart example 0xB2 50 7F = "BUS 3 Ctrl 4=127" pins CC80=Ctrl4. Optional hardware re-confirm: steps CC80 through 0/32/64/96/127 on a Tape Echo (BUS 1) — the tape-head MODE should change.',
+    desc:'ANSWERED YES by the v5.50 manual. p.33 "Editing the effects": CTRL 1-3 edit the main parameters, and holding [VALUE] + CTRL 1-3 edits the sub-parameters; the MFX List prints params in that order. The chart example 0xB2 50 7F = "BUS 3 Ctrl 4=127" pins CC80=Ctrl4. Optional hardware re-confirm: steps CC80 through 0/32/64/96/127 on a Tape Echo (BUS 1) — the tape-head MODE should change.',
     run: runTestA },
   { id:'transmit_ctrl456', title:'(b) Does the SP transmit CCs for Ctrl 4-6 via held-VALUE combos? — RESOLVED by manual',
-    desc:'ANSWERED YES by the implementation chart: "CC#80–83  o  o" marks CC80-82 as Transmitted. Optional hardware re-confirm: filters the monitor to incoming Ctrl4-6 lines; on the SP, hold [VALUE] and turn CTRL 1-3 on a 6-parameter effect — any "IN … Ctrl4/5/6" lines confirm it.',
+    desc:'ANSWERED YES by the implementation chart: "CC#80–83  o  o" marks CC80-82 as Transmitted. Optional hardware re-confirm: filters the monitor to incoming Ctrl4-6 lines; on the SP, hold [VALUE] and turn CTRL 1-3 on a 6-parameter effect.',
     run: runTestB },
 ];
 function loadChecks(){ try{ return JSON.parse(lsGet('sp404_checklist')) || {}; }catch(e){ return {}; } }
@@ -885,46 +858,34 @@ function saveChecks(state){ lsSet('sp404_checklist', JSON.stringify(state)); }
 const checkState = loadChecks();
 CHECKS.forEach(chk=>{
   const saved = checkState[chk.id] || {status:'untested', notes:''};
-  const box = div('checkitem');
-  const row = div('row');
+  const box = div('checkitem'); const row = div('row');
   const btn = sbtn('Test','sm');
-  const status = el('select');
-  ['untested','pass','fail'].forEach(s=>{ const op=el('option',null,s); op.value=s; status.appendChild(op); });
-  status.value = saved.status;
-  const prog = span('note');
   const notes = el('textarea'); notes.placeholder = 'notes…'; notes.value = saved.notes;
-  const persist = ()=>{ checkState[chk.id] = {status: status.value, notes: notes.value}; saveChecks(checkState); };
-  status.addEventListener('change', persist);
+  const persist = ()=>{ checkState[chk.id] = {status: ddStatus.get(), notes: notes.value}; saveChecks(checkState); };
+  const ddStatus = makeDropdown({ options:['untested','pass','fail'], value:saved.status, onChange:persist });
   notes.addEventListener('input', persist);
-  btn.addEventListener('click', ()=> chk.run(prog, btn));
-  row.append(btn, document.createTextNode(' result: '), status, prog);
+  btn.addEventListener('click', ()=> chk.run(el('span'), btn));
+  row.append(btn, document.createTextNode(' result: '), ddStatus.el);
   box.append(el('b',null,chk.title), div('note',chk.desc), row, notes);
   $('checkItems').appendChild(box);
 });
 const sleep = ms => new Promise(res=>setTimeout(res, ms));
 async function runTestA(prog, btn){
-  if(!midiOut){ prog.textContent = 'no output port — connect the SP first'; return; }
+  if(!midiOut){ btn.textContent = 'no port'; return; }
   btn.disabled = true;
   try{
     const bus = BUSES[0];
     const entry = Object.entries(TABLES[bus.table]).find(([,name])=>name==='Tape Echo');
-    if(!entry){ prog.textContent = 'Tape Echo not found in '+bus.table; return; }
-    prog.textContent = 'EFX ON + select Tape Echo…';
+    if(!entry){ return; }
     bus.setEfx(true); sendCC(bus.ch, CC_SW, 127, null);
-    bus.selEl.value = entry[0]; sendCC(bus.ch, CC_SEL, +entry[0], null); bus.applyParams();
+    bus.fx.set(entry[0]); sendCC(bus.ch, CC_SEL, +entry[0], null); bus.applyParams();
     await sleep(600);
     const k4 = bus.knobs.find(k=>k.cc===CTRL_CCS[3]);
-    for(const v of [0, 32, 64, 96, 127]){ prog.textContent = 'CC'+k4.cc+'='+v+' — watch the MODE (tape head) value…'; k4.set(v); await sleep(800); }
-    prog.textContent = 'done — did MODE step through its head combos? Record pass/fail.';
+    for(const v of [0, 32, 64, 96, 127]){ k4.set(v); await sleep(800); }
   }finally{ btn.disabled = false; }
 }
-async function runTestB(prog){
-  $('dev').open = true;
-  $('monHideRt').checked = true;
-  $('monFilter').value = '^\\S+ IN\\b.*Ctrl[4-6]';
-  applyFilter();
-  $('pMon').scrollIntoView({behavior:'smooth'});
-  prog.textContent = 'monitor filtered to IN Ctrl4-6. Hold [VALUE] + turn CTRL 1-3 on the SP now.';
+async function runTestB(){
+  $('dev').open = true; $('monHideRt').checked = true; $('monFilter').value = '^\\S+ IN\\b.*Ctrl[4-6]'; applyFilter(); $('pMon').scrollIntoView({behavior:'smooth'});
 }
 
 /* ---------- SHORTCUT FINDER ---------- */
@@ -934,12 +895,14 @@ async function runTestB(prog){
   catch(e){ $('scDesc').textContent = 'Shortcut list unavailable ('+e.message+'). The rest of the app is unaffected.'; return; }
   const items = SC.shortcuts || [];
   $('scDesc').textContent = (SC.meta && SC.meta.device ? SC.meta.device+' ' : '')+'hardware button combos ('+items.length+'), from the '+((SC.meta&&SC.meta.manual_version)||'')+' manual. Each row shows whether this app can reproduce it over MIDI; hover the badge for how.';
-  const catSel = $('scCat');
-  (SC.categories || [...new Set(items.map(i=>i.category))].sort()).forEach(c=>{ const op=el('option',null,c); op.value=c; catSel.appendChild(op); });
+  const cats = SC.categories || [...new Set(items.map(i=>i.category))].sort();
+  const ddCat = makeDropdown({ options:[{value:'',label:'All'}].concat(cats.map(c=>({value:c,label:c}))), value:'', onChange:render });
+  const ddCap = makeDropdown({ options:[{value:'',label:'All'},{value:'app',label:'App can do it'},{value:'full',label:'App: full'},{value:'partial',label:'App: partial'},{value:'hw',label:'Hardware only'}], value:'', onChange:render });
+  $('scCatMount').appendChild(ddCat.el); $('scCapMount').appendChild(ddCap.el);
   const capOf = it => it.app_midi ? (it.app_midi.can || 'partial') : 'hw';
   const capLabel = { full:'App: full', partial:'App: partial', hw:'Hardware only' };
   function render(){
-    const q = $('scSearch').value.trim().toLowerCase(); const cat = $('scCat').value; const capF = $('scCap').value;
+    const q = $('scSearch').value.trim().toLowerCase(); const cat = ddCat.get(); const capF = ddCap.get();
     const list = $('scList'); list.innerHTML = '';
     const matches = items.filter(it=>{
       if(cat && it.category !== cat) return false;
@@ -972,19 +935,15 @@ async function runTestB(prog){
     });
   }
   $('scSearch').addEventListener('input', render);
-  $('scCat').addEventListener('change', render);
-  $('scCap').addEventListener('change', render);
   render();
 })();
 
-/* ---------- jump menu (scroll + scroll-spy) ---------- */
+/* ---------- jump menu ---------- */
 const navBtns = [...document.querySelectorAll('#nav button')];
 navBtns.forEach(b=> b.addEventListener('click', ()=>{ const t = $(b.dataset.t); if(t){ if(t.tagName==='DETAILS') t.open = true; t.scrollIntoView({behavior:'smooth', block:'start'}); } }));
 if('IntersectionObserver' in window){
   const byId = {}; navBtns.forEach(b=> byId[b.dataset.t] = b);
-  const obs = new IntersectionObserver(entries=>{
-    entries.forEach(en=>{ if(en.isIntersecting){ navBtns.forEach(x=>x.classList.remove('active')); const b = byId[en.target.id]; if(b) b.classList.add('active'); } });
-  }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
+  const obs = new IntersectionObserver(entries=>{ entries.forEach(en=>{ if(en.isIntersecting){ navBtns.forEach(x=>x.classList.remove('active')); const b = byId[en.target.id]; if(b) b.classList.add('active'); } }); }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
   ['setup','fx','pads','keys','patterns','looper','transport','dj','shortcuts','dev'].forEach(id=>{ const s=$(id); if(s) obs.observe(s); });
 }
 

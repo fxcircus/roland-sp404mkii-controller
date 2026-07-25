@@ -12,11 +12,10 @@ Open http://localhost:8404/ in Chrome or Edge (Web MIDI needs a Chromium browser
 - `index.html` — the entire app. Panels 1-12 = MIDI test harness; panel 13 = Shortcut Finder.
 - `sp404mk2-midi-map.json` — **single source of truth** for the MIDI panels. Every effect name, CC number, parameter, and note range is loaded from here at runtime. Do NOT hardcode effect names or CC values in the UI code — render from the JSON.
 - `sp404mk2-shortcuts.json` — data for the Shortcut Finder (panel 13), same runtime-render pattern.
-- Both JSONs were verified line-by-line against the official v5.50 manual — see `MIDI-VERIFICATION.md`.
+- Both JSONs were verified line-by-line against the official v5.50 manual — see `plans/MIDI-VERIFICATION.md`.
 
-## Reference material (searchable, committed)
-- `manual-v550-text.txt` + `manual-index.md` — full extracted manual text with a section/page index. Grep the .txt.
-- `SP-404mk2_v550_reference_eng04_W.pdf` — the original 26 MB Roland manual. **This PDF is git-ignored and must NEVER be committed/pushed** (it's heavy and it's Roland's copyrighted doc). It stays local only; the extracted text is the substitute.
+## Local-only `plans/` folder (git-ignored — NEVER pushed)
+The entire `plans/` directory is in `.gitignore`. It holds reference/planning material we deliberately keep out of the public repo: `plans/manual-v550-text.txt` + `plans/manual-index.md` (grep the .txt), `plans/MIDI-VERIFICATION.md`, `plans/FUTURE-PLANS.md`, `plans/reference_ui.jpg` (the target design), and `plans/SP-404mk2_v550_reference_eng04_W.pdf` (the 26 MB Roland manual — heavy + copyrighted, never commit it). Keep adding anything that shouldn't be uploaded to `plans/`. The two runtime JSONs (`sp404mk2-midi-map.json`, `sp404mk2-shortcuts.json`) must stay in the **repo root** — the app fetches them relative to `index.html`, so moving them into `plans/` breaks the app.
 
 ## GitHub / deploy workflow — when Roy says "push"
 Do this every time, no need to ask:

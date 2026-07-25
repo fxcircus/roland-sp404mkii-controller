@@ -1,2 +1,4 @@
 .DS_Store
+plans/
+# heavy Roland manual — never commit (now lives in plans/, already ignored)
 SP-404mk2_v550_reference_eng04_W.pdf
