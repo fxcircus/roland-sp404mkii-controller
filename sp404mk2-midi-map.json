@@ -1,0 +1,617 @@
+{
+  "meta": {
+    "device": "Roland SP-404MK2",
+    "source": "SP-404MK2 Reference Manual v5.50 (chart dated Jul 01 2025, chart version 5)",
+    "generated": "2026-07-24",
+    "notes": [
+      "All mappings below are firmware-native. No assign setup, no SysEx, no .tsl needed.",
+      "Ctrl knob positions per effect are inferred from MFX List display order: main parameters (screen row 1-3) = CTRL 1-3 = CC 16/17/18; sub-parameters (VALUE knob held + CTRL 1-3 on hardware) = CTRL 4-6 = CC 80/81/82. Verify a couple of effects on hardware before shipping; the Roland support example confirms CC 80 = Ctrl 4.",
+      "No SysEx transmitted or received. App must own its own state; no readback of current effect, knob positions, or sample names.",
+      "MIDI over USB-C (class compliant) or 5-pin MIDI IN. Web MIDI works in Chromium browsers."
+    ]
+  },
+  "channel_map": {
+    "1": "BUS 1 effects (+ looper transport when in Looper mode, + DJ mode CH1 deck transmit-only)",
+    "2": "BUS 2 effects (+ DJ mode CH2 deck transmit-only)",
+    "3": "BUS 3 effects (+ DJ mode pattern sequencer transmit-only)",
+    "4": "BUS 4 effects (+ pattern Program Change bank D convention)",
+    "5": "INPUT FX",
+    "1-10": "Pad note triggering, one bank per channel (MIDI Mode A: CH1=Bank A ... CH10=Bank J)",
+    "11": "Vocoder note/pitch-bend input (notes 0-127, pitch bend recognized)",
+    "16": "Chromatic mode: play last-selected sample chromatically, notes 36-60 (C2-C4)"
+  },
+  "effects_control": {
+    "description": "Send on the bus's channel (1-5). Works anytime, no mode required.",
+    "cc": {
+      "19": {
+        "function": "EFX switch",
+        "values": "0-63 = OFF, 64-127 = ON"
+      },
+      "83": {
+        "function": "EFX select",
+        "values": "see cc83_effect_tables (per bus)"
+      },
+      "16": {
+        "function": "Ctrl 1",
+        "values": "0-127 scaled to parameter range"
+      },
+      "17": {
+        "function": "Ctrl 2",
+        "values": "0-127"
+      },
+      "18": {
+        "function": "Ctrl 3",
+        "values": "0-127"
+      },
+      "80": {
+        "function": "Ctrl 4",
+        "values": "0-127"
+      },
+      "81": {
+        "function": "Ctrl 5",
+        "values": "0-127"
+      },
+      "82": {
+        "function": "Ctrl 6",
+        "values": "0-127"
+      }
+    },
+    "examples": [
+      "B0 13 7F = BUS1 EFX ON",
+      "B2 53 01 = BUS3 select 303 VinylSim",
+      "B0 10 00 = BUS1 Ctrl1 min"
+    ]
+  },
+  "cc83_effect_tables": {
+    "bus_1_2": {
+      "0": "(OFF)",
+      "1": "Direct FX1",
+      "2": "Direct FX2",
+      "3": "Direct FX3",
+      "4": "Direct FX4",
+      "5": "Direct FX5",
+      "6": "Scatter",
+      "7": "Downer",
+      "8": "Ha-Dou",
+      "9": "Ko-Da-Ma",
+      "10": "Zan-Zou",
+      "11": "To-Gu-Ro",
+      "12": "SBF",
+      "13": "Stopper",
+      "14": "Tape Echo",
+      "15": "TimeCtrlDly",
+      "16": "Super Filter",
+      "17": "WrmSaturator",
+      "18": "303 VinylSim",
+      "19": "404 VinylSim",
+      "20": "Cassette Sim",
+      "21": "Lo-fi",
+      "22": "Reverb",
+      "23": "Chorus",
+      "24": "JUNO Chorus",
+      "25": "Flanger",
+      "26": "Phaser",
+      "27": "Wah",
+      "28": "Slicer",
+      "29": "Tremolo/Pan",
+      "30": "Chromatic PS",
+      "31": "Hyper-Reso",
+      "32": "Ring Mod",
+      "33": "Crusher",
+      "34": "Overdrive",
+      "35": "Distortion",
+      "36": "Equalizer",
+      "37": "Compressor",
+      "38": "SX Reverb",
+      "39": "SX Delay",
+      "40": "Cloud Delay",
+      "41": "Back Spin",
+      "42": "DJFX Delay"
+    },
+    "bus_3_4": {
+      "0": "(OFF)",
+      "1": "303 VinylSim",
+      "2": "404 VinylSim",
+      "3": "Cassette Sim",
+      "4": "Lo-fi",
+      "5": "Downer",
+      "6": "Compressor",
+      "7": "Equalizer",
+      "8": "Isolator",
+      "9": "Super Filter",
+      "10": "Filter+Drive",
+      "11": "WrmSaturator",
+      "12": "Overdrive",
+      "13": "Distortion",
+      "14": "Crusher",
+      "15": "Ring Mod",
+      "16": "SBF",
+      "17": "Resonator",
+      "18": "Hyper-Reso",
+      "19": "Chromatic PS",
+      "20": "Reverb",
+      "21": "Ha-Dou",
+      "22": "Zan-Zou",
+      "23": "Sync Delay",
+      "24": "TimeCtrlDly",
+      "25": "Ko-Da-Ma",
+      "26": "Tape Echo",
+      "27": "Chorus",
+      "28": "JUNO Chorus",
+      "29": "Flanger",
+      "30": "Phaser",
+      "31": "Wah",
+      "32": "Slicer",
+      "33": "Tremolo/Pan",
+      "34": "To-Gu-Ro",
+      "35": "DJFX Looper",
+      "36": "Scatter",
+      "37": "SX Reverb",
+      "38": "SX Delay",
+      "39": "Cloud Delay",
+      "40": "DJFX Delay"
+    },
+    "input_fx": {
+      "0": "(OFF)",
+      "1": "Auto Pitch",
+      "2": "Vocoder",
+      "3": "Harmony",
+      "4": "Gt Amp Sim",
+      "5": "Chorus",
+      "6": "JUNO Chorus",
+      "7": "Reverb",
+      "8": "TimeCtrlDly",
+      "9": "Chromatic PS",
+      "10": "Downer",
+      "11": "WrmSaturator",
+      "12": "303 VinylSim",
+      "13": "404 VinylSim",
+      "14": "Cassette Sim",
+      "15": "Lo-fi",
+      "16": "Equalizer",
+      "17": "Compressor"
+    },
+    "note": "Values above the listed max are ignored. Direct FX1-5 slots recall whatever effect the user assigned to those buttons; their Ctrl mapping follows the loaded effect."
+  },
+  "effects_parameters": {
+    "Filter+Drive": [
+      { "pos": 1, "name": "CUTOFF", "cc": 16, "knob": "CTRL 1", "value_range": "20-16000 Hz", "hint": "Filter cutoff frequency" },
+      { "pos": 2, "name": "RESONANCE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Resonance" },
+      { "pos": 3, "name": "DRIVE", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Distortion amount" },
+      { "pos": 4, "name": "FLT TYPE", "cc": 80, "knob": "CTRL 4", "value_range": "HPF, LPF", "hint": "Filter type" },
+      { "pos": 5, "name": "LOW FREQ", "cc": 81, "knob": "CTRL 5", "value_range": "20-16000 Hz", "hint": "Low shelf frequency" },
+      { "pos": 6, "name": "LOW GAIN", "cc": 82, "knob": "CTRL 6", "value_range": "-24 to +24 dB", "hint": "Low shelf gain" }
+    ],
+    "Resonator": [
+      { "pos": 1, "name": "ROOT", "cc": 16, "knob": "CTRL 1", "value_range": "C-1 to G9", "hint": "Root note" },
+      { "pos": 2, "name": "BRIGHT", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Brightness" },
+      { "pos": 3, "name": "FEEDBACK", "cc": 18, "knob": "CTRL 3", "value_range": "0-99 %", "hint": "Feedback" },
+      { "pos": 4, "name": "CHORD", "cc": 80, "knob": "CTRL 4", "value_range": "Root/Oct/UpDn/P5/m3...M11", "hint": "Chord structure" },
+      { "pos": 5, "name": "PANNING", "cc": 81, "knob": "CTRL 5", "value_range": "0-100", "hint": "Resonator pan" },
+      { "pos": 6, "name": "ENV MOD", "cc": 82, "knob": "CTRL 6", "value_range": "0-100", "hint": "Input-level feedback mod" }
+    ],
+    "Sync Delay": [
+      { "pos": 1, "name": "TIME", "cc": 16, "knob": "CTRL 1", "value_range": "1/32-1/1 note values", "hint": "Delay time (synced)" },
+      { "pos": 2, "name": "FEEDBACK", "cc": 17, "knob": "CTRL 2", "value_range": "0-99 %", "hint": "Feedback" },
+      { "pos": 3, "name": "LEVEL", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Effect level" },
+      { "pos": 4, "name": "L DAMP F", "cc": 80, "knob": "CTRL 4", "value_range": "FLAT, 80-800 Hz", "hint": "Low damp frequency" },
+      { "pos": 5, "name": "H DAMP F", "cc": 81, "knob": "CTRL 5", "value_range": "630-12500, FLAT Hz", "hint": "High damp frequency" }
+    ],
+    "Isolator": [
+      { "pos": 1, "name": "LOW", "cc": 16, "knob": "CTRL 1", "value_range": "-INF, -41.87 to +12 dB", "hint": "Low band cut/boost" },
+      { "pos": 2, "name": "MID", "cc": 17, "knob": "CTRL 2", "value_range": "-INF, -41.87 to +12 dB", "hint": "Mid band cut/boost" },
+      { "pos": 3, "name": "HIGH", "cc": 18, "knob": "CTRL 3", "value_range": "-INF, -41.87 to +12 dB", "hint": "High band cut/boost" }
+    ],
+    "DJFX Looper": [
+      { "pos": 1, "name": "LENGTH", "cc": 16, "knob": "CTRL 1", "value_range": "0.230-0.012 sec", "hint": "Loop length" },
+      { "pos": 2, "name": "SPEED", "cc": 17, "knob": "CTRL 2", "value_range": "-100 to 100", "hint": "Direction and speed (neg=reverse, 0=stop)" },
+      { "pos": 3, "name": "LOOP SW", "cc": 18, "knob": "CTRL 3", "value_range": "OFF, ON", "hint": "Engage loop" }
+    ],
+    "Scatter": [
+      { "pos": 1, "name": "TYPE", "cc": 16, "knob": "CTRL 1", "value_range": "1-10", "hint": "Scatter type" },
+      { "pos": 2, "name": "DEPTH", "cc": 17, "knob": "CTRL 2", "value_range": "10-100 (steps of 10)", "hint": "Scatter depth" },
+      { "pos": 3, "name": "SCATTER", "cc": 18, "knob": "CTRL 3", "value_range": "OFF, ON", "hint": "Engage" },
+      { "pos": 4, "name": "SPEED", "cc": 80, "knob": "CTRL 4", "value_range": "SINGLE, DOUBLE", "hint": "Scatter speed" }
+    ],
+    "Downer": [
+      { "pos": 1, "name": "DEPTH", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Slowdown amount" },
+      { "pos": 2, "name": "RATE", "cc": 17, "knob": "CTRL 2", "value_range": "2/1-1/32", "hint": "Cycle period" },
+      { "pos": 3, "name": "FILTER", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "HF attenuation" },
+      { "pos": 4, "name": "PITCH", "cc": 80, "knob": "CTRL 4", "value_range": "OFF, ON", "hint": "Pitch-correct lowered audio" },
+      { "pos": 5, "name": "RESONANCE", "cc": 81, "knob": "CTRL 5", "value_range": "0-100", "hint": "Resonance" }
+    ],
+    "Ha-Dou": [
+      { "pos": 1, "name": "MOD DEPTH", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Effect depth" },
+      { "pos": 2, "name": "TIME", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Effect length" },
+      { "pos": 3, "name": "LEVEL", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Effect level" },
+      { "pos": 4, "name": "LOW CUT", "cc": 80, "knob": "CTRL 4", "value_range": "FLAT, 20-800 Hz", "hint": "Low cut" },
+      { "pos": 5, "name": "HIGH CUT", "cc": 81, "knob": "CTRL 5", "value_range": "630-12500, FLAT Hz", "hint": "High cut" },
+      { "pos": 6, "name": "PRE DELAY", "cc": 82, "knob": "CTRL 6", "value_range": "0-100 msec", "hint": "Pre-delay" }
+    ],
+    "Ko-Da-Ma": [
+      { "pos": 1, "name": "TIME", "cc": 16, "knob": "CTRL 1", "value_range": "1/32-1/1 note values", "hint": "Delay time (synced)" },
+      { "pos": 2, "name": "FEEDBACK", "cc": 17, "knob": "CTRL 2", "value_range": "0-99 %", "hint": "Repeat amount" },
+      { "pos": 3, "name": "SEND", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Send level" },
+      { "pos": 4, "name": "L DAMP F", "cc": 80, "knob": "CTRL 4", "value_range": "FLAT, 80-800 Hz", "hint": "Low damp" },
+      { "pos": 5, "name": "H DAMP F", "cc": 81, "knob": "CTRL 5", "value_range": "630-12500, FLAT Hz", "hint": "High damp" },
+      { "pos": 6, "name": "MODE", "cc": 82, "knob": "CTRL 6", "value_range": "SINGLE, PAN", "hint": "Center or ping-pong" }
+    ],
+    "Zan-Zou": [
+      { "pos": 1, "name": "TIME", "cc": 16, "knob": "CTRL 1", "value_range": "0-100 / note values when SYNC ON", "hint": "Delay time" },
+      { "pos": 2, "name": "FEEDBACK", "cc": 17, "knob": "CTRL 2", "value_range": "0-99", "hint": "Feedback" },
+      { "pos": 3, "name": "HF DAMP", "cc": 18, "knob": "CTRL 3", "value_range": "200-8000, OFF Hz", "hint": "HF damp" },
+      { "pos": 4, "name": "LEVEL", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Effect level" },
+      { "pos": 5, "name": "MODE", "cc": 81, "knob": "CTRL 5", "value_range": "2TAP, 3TAP, 4TAP", "hint": "Tap mode" },
+      { "pos": 6, "name": "SYNC", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Tempo sync" }
+    ],
+    "To-Gu-Ro": [
+      { "pos": 1, "name": "DEPTH", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Slowdown depth" },
+      { "pos": 2, "name": "RATE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100 / 2/1-1/128 when SYNC ON", "hint": "Cycle rate" },
+      { "pos": 3, "name": "RESONANCE", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Resonance" },
+      { "pos": 4, "name": "FLT MOD", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Filter mod by speed" },
+      { "pos": 5, "name": "AMP MOD", "cc": 81, "knob": "CTRL 5", "value_range": "0-100", "hint": "Volume mod by speed" },
+      { "pos": 6, "name": "SYNC", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Tempo sync" }
+    ],
+    "SBF": [
+      { "pos": 1, "name": "INTERVAL", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Band interval" },
+      { "pos": 2, "name": "WIDTH", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Bandwidth" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 4, "name": "TYPE", "cc": 80, "knob": "CTRL 4", "value_range": "SBF1-SBF6", "hint": "Filter range" },
+      { "pos": 5, "name": "GAIN", "cc": 81, "knob": "CTRL 5", "value_range": "-INF, -52.3 to +10 dB", "hint": "Effect gain" }
+    ],
+    "Stopper": [
+      { "pos": 1, "name": "DEPTH", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Slowdown depth" },
+      { "pos": 2, "name": "RATE", "cc": 17, "knob": "CTRL 2", "value_range": "4/1-1/64", "hint": "Cycle period" },
+      { "pos": 3, "name": "RESONANCE", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Resonance" },
+      { "pos": 4, "name": "FLT MOD", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Filter mod by speed" },
+      { "pos": 5, "name": "AMP MOD", "cc": 81, "knob": "CTRL 5", "value_range": "0-100", "hint": "Volume mod by speed" }
+    ],
+    "Tape Echo": [
+      { "pos": 1, "name": "TIME", "cc": 16, "knob": "CTRL 1", "value_range": "10-800 msec", "hint": "Tape speed / delay interval" },
+      { "pos": 2, "name": "FEEDBACK", "cc": 17, "knob": "CTRL 2", "value_range": "0-99 %", "hint": "Repeat level" },
+      { "pos": 3, "name": "LEVEL", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Effect level" },
+      { "pos": 4, "name": "MODE", "cc": 80, "knob": "CTRL 4", "value_range": "S/M/L combinations", "hint": "Playback head combo" },
+      { "pos": 5, "name": "W/F RATE", "cc": 81, "knob": "CTRL 5", "value_range": "0-100", "hint": "Wow/flutter speed" },
+      { "pos": 6, "name": "W/F DEPTH", "cc": 82, "knob": "CTRL 6", "value_range": "0-100", "hint": "Wow/flutter depth" }
+    ],
+    "TimeCtrlDly": [
+      { "pos": 1, "name": "TIME", "cc": 16, "knob": "CTRL 1", "value_range": "0-100 msec / note values when SYNC ON", "hint": "Delay time" },
+      { "pos": 2, "name": "FEEDBACK", "cc": 17, "knob": "CTRL 2", "value_range": "0-99 %", "hint": "Feedback" },
+      { "pos": 3, "name": "LEVEL", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Effect level" },
+      { "pos": 4, "name": "L DAMP F", "cc": 80, "knob": "CTRL 4", "value_range": "FLAT, 80-800 Hz", "hint": "Low damp" },
+      { "pos": 5, "name": "H DAMP F", "cc": 81, "knob": "CTRL 5", "value_range": "630-12500, FLAT Hz", "hint": "High damp" },
+      { "pos": 6, "name": "SYNC", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Tempo sync" }
+    ],
+    "Super Filter": [
+      { "pos": 1, "name": "CUTOFF", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Cutoff" },
+      { "pos": 2, "name": "RESONANCE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Resonance" },
+      { "pos": 3, "name": "FLT TYPE", "cc": 18, "knob": "CTRL 3", "value_range": "LPF, BPF, HPF", "hint": "Filter type" },
+      { "pos": 4, "name": "DEPTH", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "LFO depth" },
+      { "pos": 5, "name": "RATE", "cc": 81, "knob": "CTRL 5", "value_range": "0-100 / note values when SYNC ON", "hint": "LFO rate" },
+      { "pos": 6, "name": "SYNC", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Tempo sync" }
+    ],
+    "WrmSaturator": [
+      { "pos": 1, "name": "DRIVE", "cc": 16, "knob": "CTRL 1", "value_range": "0-48 dB", "hint": "Saturation" },
+      { "pos": 2, "name": "Eq LOW", "cc": 17, "knob": "CTRL 2", "value_range": "-24 to +24 dB", "hint": "Low EQ" },
+      { "pos": 3, "name": "Eq HIGH", "cc": 18, "knob": "CTRL 3", "value_range": "-24 to +24 dB", "hint": "High EQ" },
+      { "pos": 4, "name": "LEVEL", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Effect level" }
+    ],
+    "303 VinylSim": [
+      { "pos": 1, "name": "COMP", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Vinyl compression" },
+      { "pos": 2, "name": "NOISE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Noise level" },
+      { "pos": 3, "name": "WOW FLUT", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Wow/flutter" },
+      { "pos": 4, "name": "LEVEL", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Effect level" }
+    ],
+    "404 VinylSim": [
+      { "pos": 1, "name": "FREQUENCY", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Playback freq character" },
+      { "pos": 2, "name": "NOISE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Noise level" },
+      { "pos": 3, "name": "WOW FLUT", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Wow/flutter" }
+    ],
+    "Cassette Sim": [
+      { "pos": 1, "name": "TONE", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Tone" },
+      { "pos": 2, "name": "HISS", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Tape hiss" },
+      { "pos": 3, "name": "AGE", "cc": 18, "knob": "CTRL 3", "value_range": "0-60 years", "hint": "Tape deterioration" },
+      { "pos": 4, "name": "DRIVE", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Distortion" },
+      { "pos": 5, "name": "WOW FLUT", "cc": 81, "knob": "CTRL 5", "value_range": "0-100", "hint": "Wow/flutter" },
+      { "pos": 6, "name": "Catch", "cc": 82, "knob": "CTRL 6", "value_range": "0-100", "hint": "Tape stretch" }
+    ],
+    "Lo-fi": [
+      { "pos": 1, "name": "PRE FILT", "cc": 16, "knob": "CTRL 1", "value_range": "1-6", "hint": "Pre-filter type" },
+      { "pos": 2, "name": "LOFI TYPE", "cc": 17, "knob": "CTRL 2", "value_range": "1-9", "hint": "Degradation amount" },
+      { "pos": 3, "name": "TONE", "cc": 18, "knob": "CTRL 3", "value_range": "-100 to 100", "hint": "Tone" },
+      { "pos": 4, "name": "CUTOFF", "cc": 80, "knob": "CTRL 4", "value_range": "200-8000 Hz", "hint": "Post-filter cutoff" },
+      { "pos": 5, "name": "BALANCE", "cc": 81, "knob": "CTRL 5", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 6, "name": "LEVEL", "cc": 82, "knob": "CTRL 6", "value_range": "0-100", "hint": "Effect level" }
+    ],
+    "Reverb": [
+      { "pos": 1, "name": "TYPE", "cc": 16, "knob": "CTRL 1", "value_range": "AMBI, ROOM, HALL1, HALL2", "hint": "Reverb type" },
+      { "pos": 2, "name": "TIME", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Reverb time" },
+      { "pos": 3, "name": "LEVEL", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Effect level" },
+      { "pos": 4, "name": "LOW CUT", "cc": 80, "knob": "CTRL 4", "value_range": "FLAT, 20-800 Hz", "hint": "Low cut" },
+      { "pos": 5, "name": "HIGH CUT", "cc": 81, "knob": "CTRL 5", "value_range": "630-12500, FLAT Hz", "hint": "High cut" },
+      { "pos": 6, "name": "PRE DELAY", "cc": 82, "knob": "CTRL 6", "value_range": "0-100 ms", "hint": "Pre-delay" }
+    ],
+    "Chorus": [
+      { "pos": 1, "name": "DEPTH", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Depth" },
+      { "pos": 2, "name": "RATE", "cc": 17, "knob": "CTRL 2", "value_range": "0.33-2.30 sec", "hint": "Rate" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 4, "name": "EQ LOW", "cc": 80, "knob": "CTRL 4", "value_range": "-15 to 15 dB", "hint": "Low EQ" },
+      { "pos": 5, "name": "EQ HIGH", "cc": 81, "knob": "CTRL 5", "value_range": "-15 to 15 dB", "hint": "High EQ" },
+      { "pos": 6, "name": "LEVEL", "cc": 82, "knob": "CTRL 6", "value_range": "0-100", "hint": "Effect level" }
+    ],
+    "JUNO Chorus": [
+      { "pos": 1, "name": "MODE", "cc": 16, "knob": "CTRL 1", "value_range": "JUNO 1, JUNO 2, JUNO12, JX-1 1, JX-1 2", "hint": "Chorus model" },
+      { "pos": 2, "name": "NOISE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Model noise" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" }
+    ],
+    "Flanger": [
+      { "pos": 1, "name": "DEPTH", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Depth" },
+      { "pos": 2, "name": "RATE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100 / 4.000-0.016 bar when SYNC ON", "hint": "Rate" },
+      { "pos": 3, "name": "MANUAL", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Frequency range" },
+      { "pos": 4, "name": "RESONANCE", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Resonance" },
+      { "pos": 5, "name": "BALANCE", "cc": 81, "knob": "CTRL 5", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 6, "name": "SYNC", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Tempo sync" }
+    ],
+    "Phaser": [
+      { "pos": 1, "name": "DEPTH", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Depth" },
+      { "pos": 2, "name": "RATE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100 / 4.000-0.016 bar when SYNC ON", "hint": "Rate" },
+      { "pos": 3, "name": "MANUAL", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Frequency range" },
+      { "pos": 4, "name": "RESONANCE", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Resonance" },
+      { "pos": 5, "name": "BALANCE", "cc": 81, "knob": "CTRL 5", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 6, "name": "SYNC", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Tempo sync" }
+    ],
+    "Wah": [
+      { "pos": 1, "name": "PEAK", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Peak width" },
+      { "pos": 2, "name": "RATE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100 / 1.000-0.010 bar when SYNC ON", "hint": "Rate" },
+      { "pos": 3, "name": "MANUAL", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Frequency range" },
+      { "pos": 4, "name": "DEPTH", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Depth" },
+      { "pos": 5, "name": "FLT TYPE", "cc": 81, "knob": "CTRL 5", "value_range": "LPF, BPF", "hint": "Filter type" },
+      { "pos": 6, "name": "SYNC", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Tempo sync" }
+    ],
+    "Slicer": [
+      { "pos": 1, "name": "PATTERN", "cc": 16, "knob": "CTRL 1", "value_range": "1-32", "hint": "Sequence pattern" },
+      { "pos": 2, "name": "SPEED", "cc": 17, "knob": "CTRL 2", "value_range": "0-100 / 2/1-1/64T when SYNC ON", "hint": "Pattern speed" },
+      { "pos": 3, "name": "DEPTH", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Slice depth" },
+      { "pos": 4, "name": "SHUFFLE", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Even-step delay" },
+      { "pos": 5, "name": "MODE", "cc": 81, "knob": "CTRL 5", "value_range": "LEGATO, SLASH", "hint": "Step volume behavior" },
+      { "pos": 6, "name": "SYNC", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Tempo sync" }
+    ],
+    "Tremolo/Pan": [
+      { "pos": 1, "name": "DEPTH", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Depth" },
+      { "pos": 2, "name": "RATE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100 / 1.000-0.010 when SYNC ON", "hint": "Rate" },
+      { "pos": 3, "name": "TYPE", "cc": 18, "knob": "CTRL 3", "value_range": "TRE, PAN", "hint": "Tremolo or autopan" },
+      { "pos": 4, "name": "WAVE", "cc": 80, "knob": "CTRL 4", "value_range": "TRI, SQR, SIN, SAW1, SAW2, TRP", "hint": "LFO shape" },
+      { "pos": 5, "name": "SYNC", "cc": 81, "knob": "CTRL 5", "value_range": "OFF, ON", "hint": "Tempo sync" }
+    ],
+    "Chromatic PS": [
+      { "pos": 1, "name": "PITCH1", "cc": 16, "knob": "CTRL 1", "value_range": "-24 to 12 semi", "hint": "Voice 1 pitch" },
+      { "pos": 2, "name": "PITCH2", "cc": 17, "knob": "CTRL 2", "value_range": "-24 to 12 semi", "hint": "Voice 2 pitch" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 4, "name": "PAN1", "cc": 80, "knob": "CTRL 4", "value_range": "L50-R50", "hint": "Voice 1 pan" },
+      { "pos": 5, "name": "PAN2", "cc": 81, "knob": "CTRL 5", "value_range": "L50-R50", "hint": "Voice 2 pan" }
+    ],
+    "Hyper-Reso": [
+      { "pos": 1, "name": "NOTE", "cc": 16, "knob": "CTRL 1", "value_range": "-17 to -1, 1 to 18", "hint": "Scale degree" },
+      { "pos": 2, "name": "SPREAD", "cc": 17, "knob": "CTRL 2", "value_range": "UNISON, TINY, SMALL, MEDIUM, HUGE", "hint": "Octave spread" },
+      { "pos": 3, "name": "CHARACTER", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Brightness/detune" },
+      { "pos": 4, "name": "SCALE", "cc": 80, "knob": "CTRL 4", "value_range": "C Maj-B Maj, C min-B min", "hint": "Scale and root" },
+      { "pos": 5, "name": "FEEDBACK", "cc": 81, "knob": "CTRL 5", "value_range": "0-99 %", "hint": "Feedback" },
+      { "pos": 6, "name": "ENV MOD", "cc": 82, "knob": "CTRL 6", "value_range": "0-100", "hint": "Input-level feedback mod" }
+    ],
+    "Ring Mod": [
+      { "pos": 1, "name": "FREQUENCY", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Mod frequency" },
+      { "pos": 2, "name": "SENS", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Effect volume" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 4, "name": "POLARITY", "cc": 80, "knob": "CTRL 4", "value_range": "OFF, ON", "hint": "Mod direction" },
+      { "pos": 5, "name": "EQ LOW", "cc": 81, "knob": "CTRL 5", "value_range": "-15 to 15 dB", "hint": "Low EQ" },
+      { "pos": 6, "name": "EQ HIGH", "cc": 82, "knob": "CTRL 6", "value_range": "-15 to 15 dB", "hint": "High EQ" }
+    ],
+    "Crusher": [
+      { "pos": 1, "name": "FILTER", "cc": 16, "knob": "CTRL 1", "value_range": "331-15392 Hz", "hint": "Pre-filter" },
+      { "pos": 2, "name": "RATE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Sample-rate reduction" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" }
+    ],
+    "Overdrive": [
+      { "pos": 1, "name": "DRIVE", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Distortion" },
+      { "pos": 2, "name": "TONE", "cc": 17, "knob": "CTRL 2", "value_range": "-100 to 100", "hint": "Tone" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 4, "name": "LEVEL", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Effect level" }
+    ],
+    "Distortion": [
+      { "pos": 1, "name": "DRIVE", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Distortion" },
+      { "pos": 2, "name": "TONE", "cc": 17, "knob": "CTRL 2", "value_range": "-100 to 100", "hint": "Tone" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 4, "name": "LEVEL", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Effect level" }
+    ],
+    "Equalizer": [
+      { "pos": 1, "name": "LOW GAIN", "cc": 16, "knob": "CTRL 1", "value_range": "-15 to 15 dB", "hint": "Low gain" },
+      { "pos": 2, "name": "MID GAIN", "cc": 17, "knob": "CTRL 2", "value_range": "-15 to 15 dB", "hint": "Mid gain" },
+      { "pos": 3, "name": "HIGH GAIN", "cc": 18, "knob": "CTRL 3", "value_range": "-15 to 15 dB", "hint": "High gain" },
+      { "pos": 4, "name": "LOW FREQ", "cc": 80, "knob": "CTRL 4", "value_range": "20-400 Hz", "hint": "Low frequency" },
+      { "pos": 5, "name": "Mid Freq", "cc": 81, "knob": "CTRL 5", "value_range": "200-8000 Hz", "hint": "Mid frequency" },
+      { "pos": 6, "name": "HIGH FREQ", "cc": 82, "knob": "CTRL 6", "value_range": "2000-16000 Hz", "hint": "High frequency" }
+    ],
+    "Compressor": [
+      { "pos": 1, "name": "SUSTAIN", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Sustain" },
+      { "pos": 2, "name": "ATTACK", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Attack" },
+      { "pos": 3, "name": "RATIO", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Ratio" },
+      { "pos": 4, "name": "LEVEL", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Effect level" }
+    ],
+    "SX Reverb": [
+      { "pos": 1, "name": "TIME", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Reverb time" },
+      { "pos": 2, "name": "TONE", "cc": 17, "knob": "CTRL 2", "value_range": "-100 to 100", "hint": "Tone" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" }
+    ],
+    "SX Delay": [
+      { "pos": 1, "name": "TIME", "cc": 16, "knob": "CTRL 1", "value_range": "1/32-1/1 note values", "hint": "Delay time" },
+      { "pos": 2, "name": "FEEDBACK", "cc": 17, "knob": "CTRL 2", "value_range": "0-99 %", "hint": "Feedback" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" }
+    ],
+    "Cloud Delay": [
+      { "pos": 1, "name": "WINDOW", "cc": 16, "knob": "CTRL 1", "value_range": "0-100", "hint": "Delay interval" },
+      { "pos": 2, "name": "PITCH", "cc": 17, "knob": "CTRL 2", "value_range": "-12.0 to +12.0", "hint": "Pitch shift" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 4, "name": "FEEDBACK", "cc": 80, "knob": "CTRL 4", "value_range": "-100 to 100", "hint": "Feedback" },
+      { "pos": 5, "name": "CLOUDY", "cc": 81, "knob": "CTRL 5", "value_range": "0-100", "hint": "Thickness" },
+      { "pos": 6, "name": "LOFI", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Degrade effect sound" }
+    ],
+    "Back Spin": [
+      { "pos": 1, "name": "LENGTH", "cc": 16, "knob": "CTRL 1", "value_range": "1/1, 1/2, 1/4, 1/8, 1/16", "hint": "Spin length" },
+      { "pos": 2, "name": "SPEED", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Spin speed" },
+      { "pos": 3, "name": "BACK SW", "cc": 18, "knob": "CTRL 3", "value_range": "OFF, ON", "hint": "Engage (needs ~3s charge after selecting)" }
+    ],
+    "DJFX Delay": [
+      { "pos": 1, "name": "LENGTH", "cc": 16, "knob": "CTRL 1", "value_range": "0.230-0.012 sec", "hint": "Loop length" },
+      { "pos": 2, "name": "TIME", "cc": 17, "knob": "CTRL 2", "value_range": "0-100 msec / note values when SYNC ON", "hint": "Delay time" },
+      { "pos": 3, "name": "LOOP SW", "cc": 18, "knob": "CTRL 3", "value_range": "OFF, ON", "hint": "Engage loop (delay only when ON)" },
+      { "pos": 4, "name": "FEEDBACK", "cc": 80, "knob": "CTRL 4", "value_range": "0-99", "hint": "Delay feedback" },
+      { "pos": 5, "name": "LEVEL", "cc": 81, "knob": "CTRL 5", "value_range": "0-100", "hint": "Delay level" },
+      { "pos": 6, "name": "SYNC", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Tempo sync" }
+    ],
+    "Auto Pitch": [
+      { "pos": 1, "name": "PITCH", "cc": 16, "knob": "CTRL 1", "value_range": "-100 to 100", "hint": "Voice pitch" },
+      { "pos": 2, "name": "FORMANT", "cc": 17, "knob": "CTRL 2", "value_range": "-100 to 100", "hint": "Formant" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 4, "name": "AT PITCH", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Correction strength" },
+      { "pos": 5, "name": "KEY", "cc": 81, "knob": "CTRL 5", "value_range": "CHROMA, A-Ab", "hint": "Correction key" },
+      { "pos": 6, "name": "ROBOT", "cc": 82, "knob": "CTRL 6", "value_range": "OFF, ON", "hint": "Robot voice" }
+    ],
+    "Vocoder": [
+      { "pos": 1, "name": "NOTE", "cc": 16, "knob": "CTRL 1", "value_range": "-17 to -1, 1 to 18", "hint": "Scale degree (also via MIDI notes + pitch bend on CH 11)" },
+      { "pos": 2, "name": "FORMANT", "cc": 17, "knob": "CTRL 2", "value_range": "-100 to 100", "hint": "Formant" },
+      { "pos": 3, "name": "TONE", "cc": 18, "knob": "CTRL 3", "value_range": "-100 to 100", "hint": "Brightness" },
+      { "pos": 4, "name": "SCALE", "cc": 80, "knob": "CTRL 4", "value_range": "C Maj-B Maj, C min-B min", "hint": "Scale and root" },
+      { "pos": 5, "name": "CHORD", "cc": 81, "knob": "CTRL 5", "value_range": "Root, P5, Oct, UpDn, UpDnP5, 3rd, 5thUp, 5thDn, 7thUp, 7thDn", "hint": "Chord structure" },
+      { "pos": 6, "name": "BALANCE", "cc": 82, "knob": "CTRL 6", "value_range": "100-0 to 0-100", "hint": "Dry/wet" }
+    ],
+    "Harmony": [
+      { "pos": 1, "name": "PITCH", "cc": 16, "knob": "CTRL 1", "value_range": "-100 to 100", "hint": "Voice pitch" },
+      { "pos": 2, "name": "FORMANT", "cc": 17, "knob": "CTRL 2", "value_range": "-100 to 100", "hint": "Formant" },
+      { "pos": 3, "name": "BALANCE", "cc": 18, "knob": "CTRL 3", "value_range": "100-0 to 0-100 %", "hint": "Dry/wet" },
+      { "pos": 4, "name": "AT PITCH", "cc": 80, "knob": "CTRL 4", "value_range": "0-100", "hint": "Correction strength" },
+      { "pos": 5, "name": "KEY", "cc": 81, "knob": "CTRL 5", "value_range": "CHROMA, A-Ab", "hint": "Key" },
+      { "pos": 6, "name": "HARMONY", "cc": 82, "knob": "CTRL 6", "value_range": "Root, P5, Oct, UpDn, UpDnP5, 3rd, 5thUp, 5thDn, 7thUp, 7thDn", "hint": "Harmonization" }
+    ],
+    "Gt Amp Sim": [
+      { "pos": 1, "name": "AMP TYPE", "cc": 16, "knob": "CTRL 1", "value_range": "JC, TWIN, BG, MATCH, MS, SLDN", "hint": "Amp model" },
+      { "pos": 2, "name": "DRIVE", "cc": 17, "knob": "CTRL 2", "value_range": "0-100", "hint": "Drive" },
+      { "pos": 3, "name": "LEVEL", "cc": 18, "knob": "CTRL 3", "value_range": "0-100", "hint": "Effect level" },
+      { "pos": 4, "name": "BASS", "cc": 80, "knob": "CTRL 4", "value_range": "-100 to 100", "hint": "Bass" },
+      { "pos": 5, "name": "MIDDLE", "cc": 81, "knob": "CTRL 5", "value_range": "-100 to 100", "hint": "Middle" },
+      { "pos": 6, "name": "TREBLE", "cc": 82, "knob": "CTRL 6", "value_range": "-100 to 100", "hint": "Treble" }
+    ]
+  },
+  "looper_mode": {
+    "channel": 1,
+    "description": "Recognized only while unit is in Looper mode.",
+    "cc": {
+      "88": {
+        "function": "[REC]",
+        "values": "127 = start sampling, 0 = stop sampling"
+      },
+      "89": {
+        "function": "[RESAMPLE]",
+        "values": "127 = overdub mode"
+      },
+      "87": {
+        "function": "[DEL]",
+        "values": "127 = delete sampled content"
+      },
+      "91": {
+        "function": "[SHIFT]+[PATTERN SELECT]",
+        "values": "127 = UNDO, 0 = REDO"
+      },
+      "90": {
+        "function": "[CTRL 3] knob",
+        "values": "0-127 = BPM / PLAY-RATE"
+      },
+      "85": {
+        "function": "[EXIT]",
+        "values": "127 = stop all samples (quad-press equivalent)"
+      },
+      "86": {
+        "function": "[PITCH/SPEED]",
+        "values": "127 = reset tempo"
+      }
+    }
+  },
+  "pads_and_patterns": {
+    "midi_mode_A": {
+      "recommended": true,
+      "notes": "Note 36-51 = pads 1-16 (C2-D#3), channel selects bank: CH1=A ... CH10=J. Chart lists received range 35-51.",
+      "pad_formula": "note = 36 + (pad_index_0_based); channel = bank_index_1_based"
+    },
+    "midi_mode_B": {
+      "recommended": false,
+      "notes": "Two-channel layout covering 5 banks per channel pair with Note Offset (-11 to 35) and Pad MIDI Channels offset settings. Use Mode A for the app; Mode B only matters for DAW piano-roll workflows."
+    },
+    "chromatic": {
+      "channel": 16,
+      "notes": "36-60 (C2-C4), plays current sample across 2 octaves. Enable via SHIFT+Pad4 on hardware."
+    },
+    "pattern_launch": {
+      "message": "Program Change, received when PC Rx = ON",
+      "mapping": "PC 0-15 = Pattern 1-16; channel selects bank (example in chart: 0xC3 0F = Bank D Pattern 16)"
+    },
+    "velocity": {
+      "note_on": "Velocity recognized; scales pad playback volume unless the pad has Fixed Velocity / 16 Velocity enabled on hardware.",
+      "note_off": "Not recognized per chart; gate/loop playback behavior is the pad's own setting, so a Note On triggers per that setting."
+    }
+  },
+  "dj_mode": {
+    "warning": "CC 20-27 are TRANSMIT ONLY. The SP sends these when you press its buttons; it does not respond to them. Remote DJ-mode transport is not possible.",
+    "recognized": {
+      "7": "Channel volume slider (CH1/CH2/pattern seq volume, 0-127)",
+      "8": "X-FADE on CH1 (127:0 - 0:127)"
+    },
+    "transmit_only": {
+      "20": "Play/pause",
+      "21": "Cue-point button",
+      "22": "SYNC",
+      "23": "CUE",
+      "24": "BEND+",
+      "25": "BEND-",
+      "26": "BPM+",
+      "27": "BPM-"
+    }
+  },
+  "system_realtime": {
+    "clock_in": "Recognized when MIDI Sync = Auto/MIDI/USB (remote mode)",
+    "clock_out": "Transmitted when MIDI Sync Out = ON and no external tempo input",
+    "start_stop": "FA (Start) / FC (Stop) recognized: starts/stops SAMPLING recording when on the sampling standby screen, and transport in remote mode. This is the only remote hook into regular (non-looper) sampling.",
+    "all_sound_off": "Recognized (CC 120 family) in chromatic mode CH16",
+    "active_sensing": "Transmitted and recognized. Note: all samples stop when a MIDI cable is unplugged."
+  },
+  "not_midi_controllable": [
+    "Sample chop, start/end points, envelopes, gate/loop per pad, mute groups",
+    "Resample workflow (outside looper overdub)",
+    "Bank/project/file management (use Roland's USB app for that)",
+    "TR-REC step entry, pattern recording arm",
+    "DJ mode transport (transmit only)",
+    "Any state readback (no SysEx in either direction)"
+  ],
+  "ext_source_control": {
+    "description": "Note 35 (B1) in MIDI Mode A (note 0 / C-1 in Mode B) toggles or gates the [EXT SOURCE] button, i.e. remote mute/unmute of the external audio input. Behavior set by the MIDI EXT SRC system parameter.",
+    "note_mode_A": 35,
+    "note_mode_B": 0,
+    "behavior_setting": {
+      "TOGGLE": "note-on flips EXT SOURCE on/off",
+      "GATE": "note-on = on, note-off = off (momentary kill switch)",
+      "THROUGH": "ignored"
+    }
+  },
+  "transmit_side_for_passive_mirroring": {
+    "description": "The SP broadcasts these over USB/MIDI OUT. Not controls, but a listener in the app can mirror hardware state for free.",
+    "pad_notes": "Sent when PAD Note Out = ON (same note map as receive)",
+    "sequencer_notes": "Sent when SEQ Note Out = ON while a pattern plays",
+    "effect_ccs": "CC16-19/80-83 transmitted when bus effect knobs/switches are operated",
+    "dj_mode_ccs": "CC7/8/20-27 sent on button presses (this is the only place play/cue/bend/bpm state is visible)",
+    "clock": "Sent when MIDI Sync Out = ON; Bend SYNC(DJ) = ON makes clock follow BEND pad speed changes",
+    "active_sensing": "Sent continuously; remember all samples stop if the DIN cable is unplugged mid-performance"
+  },
+  "routing_and_modes_not_control": {
+    "soft_through": "MIDI IN mirrored to MIDI OUT",
+    "usb_midi_thru": "USB MIDI mirrored to MIDI OUT and DIN IN mirrored to USB",
+    "app_auto_connection": "Auto-connects as a controller surface for Serato DJ, Koala Sampler, Melodics. In that role the SP is the controller and the app is the target, so it does not conflict with this project, but the user can't do both at once over the same USB session expectations."
+  }
+}
