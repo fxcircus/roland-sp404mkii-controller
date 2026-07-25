@@ -17,14 +17,23 @@ Open http://localhost:8404/ in Chrome or Edge (Web MIDI needs a Chromium browser
 ## Local-only `plans/` folder (git-ignored — NEVER pushed)
 The entire `plans/` directory is in `.gitignore`. It holds reference/planning material we deliberately keep out of the public repo: `plans/manual-v550-text.txt` + `plans/manual-index.md` (grep the .txt), `plans/MIDI-VERIFICATION.md`, `plans/FUTURE-PLANS.md`, `plans/reference_ui.jpg` (the target design), and `plans/SP-404mk2_v550_reference_eng04_W.pdf` (the 26 MB Roland manual — heavy + copyrighted, never commit it). Keep adding anything that shouldn't be uploaded to `plans/`. The two runtime JSONs (`sp404mk2-midi-map.json`, `sp404mk2-shortcuts.json`) must stay in the **repo root** — the app fetches them relative to `index.html`, so moving them into `plans/` breaks the app.
 
-## GitHub / deploy workflow — when Roy says "push"
-Do this every time, no need to ask:
+## GitHub / deploy workflow — push after EVERY finished change
+Don't wait to be told "push". As soon as a change is complete, do this without asking:
 1. `git add -A && git commit -m "…"`
 2. `git push origin main`
+
+Pushing *is* how Roy reviews the work — GitHub Pages redeploys from `main` automatically and he looks at the live site, not localhost.
 
 - Remote: `origin` = `git@github.com:fxcircus/roland-sp404mkii-controller.git` (SSH — this Mac pushes over SSH as `fxcircus`; no gh CLI, no tokens).
 - GitHub Pages serves from branch `main`, folder `/root`. **Live site: https://fxcircus.github.io/roland-sp404mkii-controller/** — a push to `main` redeploys it automatically (no extra step). `.nojekyll` is present so Pages serves the files as-is.
 - Never commit the Roland PDF (see above). It's in `.gitignore`; keep it there.
+
+### Verifying before you push
+Browser automation is **not** a gate — it's often unavailable, and Roy doesn't expect it. Verify what can be checked statically, then push:
+- `node --check` the extracted inline `<script>` (the app is one file, so a syntax error takes the whole page down).
+- Confirm CSS `{`/`}` balance and that every `$('id')` in the script has a matching `id="…"` in the markup.
+- For visual/SVG work, render to PNG offline and actually look at it — e.g. write a standalone `.svg` and `qlmanage -t -s 1400 -o . file.svg`. This has caught real defects that reasoning alone missed.
+- Say plainly what was and wasn't verified in the summary.
 
 ## Notes
 - No SysEx in either direction: the app can't read the SP's current state (effect, knob positions, sample names, or audio routing). It owns its own UI state and only sends.
