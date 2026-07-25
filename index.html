@@ -383,19 +383,18 @@
     <svg class="squig" viewBox="0 0 400 16" preserveAspectRatio="none" aria-hidden="true">
       <path d="M4,11 C40,4 62,14 96,9 C132,4 152,14 190,9 C226,4 250,14 288,8 C320,3 352,13 396,7"/>
     </svg>
-    <p class="tag">a browser MIDI sketchpad · play the buttons</p>
   </div>
 </header>
 
 <nav id="nav">
   <div class="navrow">
     <button data-t="setup">Setup</button>
+    <button data-t="transport">Transport</button>
     <button data-t="fx">Effects</button>
     <button data-t="pads">Pads</button>
     <button data-t="keys">Keys</button>
     <button data-t="patterns">Patterns</button>
     <button data-t="looper">Looper</button>
-    <button data-t="transport">Transport</button>
     <button data-t="dj">DJ</button>
     <button data-t="shortcuts">Shortcuts</button>
     <button data-t="dev">Dev</button>
@@ -413,14 +412,21 @@
     <button id="rescanBtn" class="sbtn sm" type="button">Rescan</button></div>
 </section>
 
+<section id="transport" class="card">
+  <h2><span class="n">2</span>Transport</h2>
+  <div class="row" id="rtMount"></div>
+  <div class="row" id="clockMount"></div>
+  <div class="knob-row" id="volMount"></div>
+</section>
+
 <section id="fx" class="card">
-  <h2><span class="n">2</span>Effects</h2>
+  <h2><span class="n">3</span>Effects</h2>
   <div id="fxRouting"></div>
   <div id="fxCols"></div>
 </section>
 
 <section id="pads" class="card">
-  <h2><span class="n">3</span>Pads</h2>
+  <h2><span class="n">4</span>Pads</h2>
   <div class="row"><b class="mini">Bank</b><div class="bankrow" id="padBanks"></div></div>
   <div class="row" id="padVelRow"><span id="padVelMount"></span></div>
   <div class="padgrid" id="padGrid"></div>
@@ -431,7 +437,7 @@
 </section>
 
 <section id="keys" class="card">
-  <h2><span class="n">4</span>Keys</h2>
+  <h2><span class="n">5</span>Keys</h2>
   <div class="keys-top">
     <div class="seg" id="keysSeg">
       <button type="button" class="seg-btn on" data-m="samples">Samples</button>
@@ -450,20 +456,14 @@
 </section>
 
 <section id="patterns" class="card">
-  <h2><span class="n">5</span>Patterns</h2>
+  <h2><span class="n">6</span>Patterns</h2>
   <div class="row"><b class="mini">Bank</b><div class="bankrow" id="patBanks"></div></div>
   <div class="patgrid" id="patGrid"></div>
 </section>
 
 <section id="looper" class="card">
-  <h2><span class="n">6</span>Looper</h2>
+  <h2><span class="n">7</span>Looper</h2>
   <div id="looperRows"></div>
-</section>
-
-<section id="transport" class="card">
-  <h2><span class="n">7</span>Transport</h2>
-  <div class="row" id="rtMount"></div>
-  <div class="row" id="clockMount"></div>
 </section>
 
 <section id="dj" class="card">
@@ -1006,6 +1006,14 @@ BUSES.forEach(bus=>{
     const sel = fx.selected(); const name = sel ? sel.name : null;
     busEffect[bus.ch] = name;
     const ps = name ? PARAMS[name] : null;
+    /* effect 0 is OFF — nothing to drive, so the knobs go dead at zero rather
+       than sitting live and sending CC that does nothing */
+    const isOff = !sel || sel.value === '0' || /^\(?off\)?$/i.test(name || '');
+    if(isOff){
+      bus.knobs.forEach((k,i)=>{ k.set(0, true); k.setLabel('CTRL '+(i+1));
+        k.setTitle('Effect is OFF — pick an effect to enable this control'); k.setEnabled(false); });
+      return;
+    }
     bus.knobs.forEach((k,i)=>{
       const p = ps ? ps.find(pp=>pp.cc===k.cc) : null;
       if(p){ k.setLabel(p.name); k.setTitle(p.value_range+(p.hint?' — '+p.hint:'')+' (CC'+k.cc+')'); k.setEnabled(true); }
@@ -1102,13 +1110,24 @@ for(let pad=1; pad<=16; pad++){
   const extBtn = sbtn('EXT SOURCE','accent2'); $('extMount').appendChild(extBtn);
   const modeBtn = $('extModeToggle');
   let gateMode = false;
-  modeBtn.addEventListener('click', ()=>{ gateMode = !gateMode; modeBtn.textContent = 'mode: '+(gateMode?'gate (hold)':'toggle'); });
-  let gateCh = null;
+  /* toggle (default): press latches on and stays lit until pressed again.
+     gate: sounds only while held. */
+  let onCh = null;              // channel the latched/held note went out on
+  function extOff(){ if(onCh === null) return; sendOff(onCh, EXT_NOTE); onCh = null;
+    extBtn.classList.remove('on','held'); extBtn.setAttribute('aria-pressed','false'); }
+  function extOn(){ onCh = padCh(); sendOn(onCh, EXT_NOTE, padVel());
+    extBtn.classList.add(gateMode ? 'held' : 'on'); extBtn.setAttribute('aria-pressed','true'); }
+  extBtn.setAttribute('aria-pressed','false');
+  modeBtn.addEventListener('click', ()=>{
+    extOff();                   // never leave a latched note behind on a mode change
+    gateMode = !gateMode; modeBtn.textContent = 'mode: '+(gateMode?'gate (hold)':'toggle');
+  });
   extBtn.addEventListener('pointerdown', e=>{ e.preventDefault();
-    if(!gateMode){ sendOn(padCh(), EXT_NOTE, padVel()); }
-    else{ gateCh = padCh(); extBtn.classList.add('held'); sendOn(gateCh, EXT_NOTE, padVel()); } });
-  const up = ()=>{ if(gateCh === null) return; sendOff(gateCh, EXT_NOTE); gateCh = null; extBtn.classList.remove('held'); };
-  extBtn.addEventListener('pointerup', up); extBtn.addEventListener('pointerleave', up); extBtn.addEventListener('pointercancel', up);
+    if(gateMode){ extOn(); } else { onCh === null ? extOn() : extOff(); } });
+  const up = ()=>{ if(gateMode) extOff(); };
+  extBtn.addEventListener('pointerup', up);
+  extBtn.addEventListener('pointerleave', up);
+  extBtn.addEventListener('pointercancel', up);
 }
 
 /* ---------- KEYS — real piano layout, one mode at a time ---------- */
@@ -1186,7 +1205,6 @@ Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).forEach(([ccStr, def])=>{
 });
 
 /* ---------- TRANSPORT ---------- */
-hint('transport', MAP.system_realtime.start_stop);
 [['Start (FA)',0xFA],['Stop (FC)',0xFC],['Continue (FB) — untested',0xFB]].forEach(([label,byte])=>{ const b = sbtn(label); b.addEventListener('click', ()=> sendBytes([byte], null)); $('rtMount').appendChild(b); });
 const clock = {running:false, next:0, timer:null, count:0, bpm:120};
 const bpmKnob = makeKnob({ label:'BPM', min:40, max:300, value:120, defaultVal:120, step:1, onChange:v=>{ clock.bpm=v; } });
@@ -1215,7 +1233,22 @@ clockBtn.addEventListener('click', ()=>{
 
 /* ---------- DJ ---------- */
 hint('dj', MAP.dj_mode.warning);
-DJ_ROWS.forEach(({cc, ch})=>{ const k = makeKnob({ label:'CC'+cc+' ch'+ch, min:0, max:127, value: cc===8?64:100, defaultVal: cc===8?64:100, onChange:v=>sendCC(ch, cc, v, null) }); k.setTitle(DJ_REC[String(cc)]); $('djRows').appendChild(k.el); });
+/* CC7 is the closest thing the SP has to a volume control — it is per-channel
+   (CH1 deck / CH2 deck / pattern sequencer) and only answered in DJ mode. There
+   is no master-volume CC in the implementation chart. */
+const VOL_LABELS = { 1:'VOL CH1', 2:'VOL CH2', 3:'VOL SEQ' };
+DJ_ROWS.forEach(({cc, ch})=>{
+  const isVol = cc === 7;
+  const k = makeKnob({
+    label: isVol ? VOL_LABELS[ch] : 'X-FADE',
+    min:0, max:127, value: cc===8?64:100, defaultVal: cc===8?64:100,
+    onChange:v=>sendCC(ch, cc, v, null) });
+  k.setTitle(DJ_REC[String(cc)] + ' (CC'+cc+' ch'+ch+')');
+  (isVol ? $('volMount') : $('djRows')).appendChild(k.el);
+});
+hint('transport', MAP.system_realtime.start_stop
+  + ' Volume is CC7 — per channel (CH1 deck / CH2 deck / pattern sequencer), answered in DJ mode only.'
+  + ' The SP has no master-volume CC.');
 
 /* ---------- raw sender ---------- */
 $('rawSend').addEventListener('click', ()=>{
