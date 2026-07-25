@@ -5,7 +5,7 @@
     "generated": "2026-07-24",
     "notes": [
       "All mappings below are firmware-native. No assign setup, no SysEx, no .tsl needed.",
-      "Ctrl knob positions per effect are inferred from MFX List display order: main parameters (screen row 1-3) = CTRL 1-3 = CC 16/17/18; sub-parameters (VALUE knob held + CTRL 1-3 on hardware) = CTRL 4-6 = CC 80/81/82. Verify a couple of effects on hardware before shipping; the Roland support example confirms CC 80 = Ctrl 4.",
+      "Ctrl knob positions per effect follow MFX List display order: main parameters (screen row 1-3) = CTRL 1-3 = CC 16/17/18; sub-parameters (hold VALUE + CTRL 1-3 on hardware) = CTRL 4-6 = CC 80/81/82. CONFIRMED against the v5.50 manual: p.33 'Editing the effects' states CTRL 1-3 edit main params and hold-VALUE+CTRL 1-3 edit sub-params, and the implementation chart example 0xB2 50 7F = 'BUS 3 Ctrl 4=127' fixes CC80=Ctrl4. All 46 effect parameter lists below were verified line-by-line against the MFX List (manual pp.143-157).",
       "No SysEx transmitted or received. App must own its own state; no readback of current effect, knob positions, or sample names.",
       "MIDI over USB-C (class compliant) or 5-pin MIDI IN. Web MIDI works in Chromium browsers."
     ]
@@ -538,8 +538,14 @@
   "pads_and_patterns": {
     "midi_mode_A": {
       "recommended": true,
-      "notes": "Note 36-51 = pads 1-16 (C2-D#3), channel selects bank: CH1=A ... CH10=J. Chart lists received range 35-51.",
-      "pad_formula": "note = 36 + (pad_index_0_based); channel = bank_index_1_based"
+      "notes": "Received range 35-51. Note 35 (B1) = EXT SOURCE; notes 36-51 (C2-D#3) = the 16 pads, but NOT in pad-number order. Channel selects bank: CH1=A ... CH10=J. Per the manual note map (pp.170-172), the pads are grouped by physical row: the lowest 4 notes (36-39) are the TOP row (pads 13-16) and the highest 4 (48-51) are the BOTTOM row (pads 1-4). Iterating notes 36->51 across a 4-wide grid therefore reproduces the hardware layout with pad 1 at bottom-left.",
+      "pad_note_map": [
+        { "note": 36, "pad": 13 }, { "note": 37, "pad": 14 }, { "note": 38, "pad": 15 }, { "note": 39, "pad": 16 },
+        { "note": 40, "pad": 9 },  { "note": 41, "pad": 10 }, { "note": 42, "pad": 11 }, { "note": 43, "pad": 12 },
+        { "note": 44, "pad": 5 },  { "note": 45, "pad": 6 },  { "note": 46, "pad": 7 },  { "note": 47, "pad": 8 },
+        { "note": 48, "pad": 1 },  { "note": 49, "pad": 2 },  { "note": 50, "pad": 3 },  { "note": 51, "pad": 4 }
+      ],
+      "pad_formula": "For note n in 36-51: k = n - 36; pad = 13 - 4*floor(k/4) + (k%4). Inverse, for pad P in 1-16: note = 48 - 4*floor((P-1)/4) + ((P-1)%4). channel = bank_index_1_based (CH1=A ... CH10=J). The pad_note_map above is the authoritative table; render pads from it, not from a note=36+index assumption."
     },
     "midi_mode_B": {
       "recommended": false,

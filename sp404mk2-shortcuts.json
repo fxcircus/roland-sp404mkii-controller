@@ -1,0 +1,909 @@
+{
+  "meta": {
+    "device": "Roland SP-404MK2",
+    "manual_version": "v5.50",
+    "manual_base_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/",
+    "notes": [
+      "Descriptions are original wording; combos and function names are factual. Each entry deep-links to Roland's hosted manual page for full detail.",
+      "app_midi.can: full = the app replaces this combo entirely over MIDI, partial = related capability with caveats, absent = hardware only.",
+      "Update manual_base_url version segment when Roland ships a new firmware manual, then re-verify links."
+    ]
+  },
+  "categories": [
+    "DJ Mode",
+    "Effects",
+    "Patterns & TR-REC",
+    "Playback & Performance",
+    "Sample Editing",
+    "Sampling & Looper",
+    "System & Settings",
+    "Tempo & Metronome",
+    "Velocity & Dynamics"
+  ],
+  "shortcuts": [
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 4"
+      ],
+      "name": "Chromatic mode",
+      "desc": "Play the selected sample as a chromatic scale across the pads.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7893338778457227.html",
+      "app_midi": {
+        "can": "partial",
+        "how": "App plays chromatically anytime via notes 36-60 on CH 16; enabling pad chromatic mode itself is hardware only"
+      }
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 7"
+      ],
+      "name": "Pad link",
+      "desc": "Trigger every pad in a link group from a single pad.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7895130778458763.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 8"
+      ],
+      "name": "Mute group",
+      "desc": "Keep chosen samples from ever playing on top of each other.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7895796378459531.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "HOLD"
+      ],
+      "name": "Pause sample",
+      "desc": "Pause the currently playing sample.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7897050778461067.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "EXIT"
+      ],
+      "name": "Stop all samples",
+      "desc": "Kill all sample playback at once.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7896385178460299.html",
+      "app_midi": {
+        "can": "partial",
+        "how": "CC85=127 on CH 1 stops all samples while in Looper mode"
+      }
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "REVERSE",
+        "PADS 1-16"
+      ],
+      "name": "Pad mute",
+      "desc": "Mute or unmute individual pads while they keep running.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7894388378457995.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "REVERSE",
+        "REMAIN"
+      ],
+      "name": "Pad mute latch",
+      "desc": "Latch the pad mute combo so both buttons stay held for you.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7894388378457995.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "LOOP"
+      ],
+      "name": "Ping-pong loop",
+      "desc": "Loop the sample forward then backward instead of restarting.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7888500378452619.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "GATE"
+      ],
+      "name": "Gate all on/off",
+      "desc": "Flip the GATE setting for every sample in the current bank.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7887245978451083.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "BPM SYNC"
+      ],
+      "name": "Sync all on/off",
+      "desc": "Flip BPM SYNC for every sample in the current bank.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7886580378450315.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "VALUE (hold)",
+        "GATE"
+      ],
+      "name": "One-shot playback",
+      "desc": "Toggle one-shot mode so a tap always plays the sample through.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7887911578451851.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "VALUE (hold)",
+        "PADS 1-16"
+      ],
+      "name": "Silent select",
+      "desc": "Select a pad's sample or pattern without triggering it.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8004929178586251.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "VALUE (hold)",
+        "SUB PAD"
+      ],
+      "name": "Timing align",
+      "desc": "Minimize timing drift when several pads are played together.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8004929178586251.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "ROLL"
+      ],
+      "name": "Roll interval",
+      "desc": "Set how fast the roll retriggers.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7890497178454923.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "REMAIN (3s)"
+      ],
+      "name": "Live mode",
+      "desc": "Lock out sampling and edit buttons so nothing derails a live set.",
+      "category": "Playback & Performance",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7897639578461835.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 1"
+      ],
+      "name": "Fixed velocity",
+      "desc": "Force the sample to always play at full volume (127).",
+      "category": "Velocity & Dynamics",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7891700378455691.html",
+      "app_midi": {
+        "can": "partial",
+        "how": "App can simply send any velocity it wants per note, making this setting unnecessary when triggering from the app"
+      }
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 2"
+      ],
+      "name": "16 velocity",
+      "desc": "Spread one sample across all 16 pads at stepped volumes.",
+      "category": "Velocity & Dynamics",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7892519578456459.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "MFX (hold)",
+        "VALUE / CTRL 3"
+      ],
+      "name": "Select MFX effect",
+      "desc": "Scroll and pick any effect while holding MFX.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7900737178465675.html",
+      "app_midi": {
+        "can": "full",
+        "how": "CC83 on the bus channel selects the effect by number, no scrolling"
+      }
+    },
+    {
+      "combo": [
+        "MFX (hold)",
+        "DJFX LOOPER"
+      ],
+      "name": "MFX list page 2",
+      "desc": "Jump the pad-select list to effects #17 and up.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8007079578588555.html",
+      "app_midi": {
+        "can": "full",
+        "how": "CC83 selects any effect directly, paging is unnecessary"
+      }
+    },
+    {
+      "combo": [
+        "MFX (hold)",
+        "ISOLATOR"
+      ],
+      "name": "MFX list page 3",
+      "desc": "Jump the pad-select list to effects #33 and up.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8007079578588555.html",
+      "app_midi": {
+        "can": "full",
+        "how": "CC83 selects any effect directly"
+      }
+    },
+    {
+      "combo": [
+        "VALUE (hold)",
+        "CTRL 1-3"
+      ],
+      "name": "Edit sub-parameters",
+      "desc": "Reach effect parameters 4-6 behind the three physical knobs.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7901249178466443.html",
+      "app_midi": {
+        "can": "full",
+        "how": "CC80/81/82 on the bus channel drive Ctrl 4-6 directly"
+      }
+    },
+    {
+      "combo": [
+        "VALUE (hold)",
+        "EFFECT BUTTONS"
+      ],
+      "name": "Effect grab",
+      "desc": "Apply an effect only while the button is held down.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7902733978467211.html",
+      "app_midi": {
+        "can": "full",
+        "how": "Momentary CC19 (127 on press, 0 on release) on the bus channel"
+      }
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "BUS FX"
+      ],
+      "name": "Mute bus",
+      "desc": "Cut the dry signal to a bus and keep only the effect tail.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7903245978467979.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "MARK (3s)"
+      ],
+      "name": "Save EFX parameters",
+      "desc": "Store the current main parameter values for BUS 1 and 2 effects.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7901249178466443.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 16"
+      ],
+      "name": "EFX settings",
+      "desc": "Open the EFX SET utility screen.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7953677978530955.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "REMAIN (hold)",
+        "MFX"
+      ],
+      "name": "Pin effect edit screen",
+      "desc": "Keep the effect edit screen from timing out.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8004340378585483.html",
+      "app_midi": {
+        "can": "partial",
+        "how": "Irrelevant in the app: all five buses are always visible"
+      }
+    },
+    {
+      "combo": [
+        "REMAIN (hold)",
+        "BUS FX"
+      ],
+      "name": "Swap BUS 1/2 effects",
+      "desc": "Trade the effects between BUS 1 and BUS 2, parameters intact.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8004340378585483.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "VALUE (hold)",
+        "BUS FX"
+      ],
+      "name": "Bypass BUS 3/4",
+      "desc": "Temporarily bypass buses 3 and 4.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8004929178586251.html",
+      "app_midi": {
+        "can": "full",
+        "how": "CC19=0 on channels 3 and 4"
+      }
+    },
+    {
+      "combo": [
+        "REMAIN (hold)",
+        "PADS 1-16"
+      ],
+      "name": "Sample bus routing",
+      "desc": "Choose which bus each sample's audio feeds.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7900225178464907.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "REMAIN (hold)",
+        "BANK A/F-E/J"
+      ],
+      "name": "Bank bus routing",
+      "desc": "Route a whole bank to a bus in one move.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7900225178464907.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "REMAIN (hold)",
+        "EXT SOURCE"
+      ],
+      "name": "Input bus routing",
+      "desc": "Choose which bus the external input feeds.",
+      "category": "Effects",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7957645978536331.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 10"
+      ],
+      "name": "Count-in",
+      "desc": "Add a 1 or 2 measure count-in, or auto-trigger, before recording.",
+      "category": "Sampling & Looper",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7906113178471819.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 9"
+      ],
+      "name": "Metronome on/off",
+      "desc": "Toggle the click during sampling or pattern recording.",
+      "category": "Sampling & Looper",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7964634778545547.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "VALUE (press)"
+      ],
+      "name": "MARK button mode",
+      "desc": "Switch the MARK button between skip-back sampling and Looper.",
+      "category": "Sampling & Looper",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7907879578474123.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "RESAMPLE"
+      ],
+      "name": "Sample merge mode",
+      "desc": "Bounce several pads down to one sample.",
+      "category": "Sampling & Looper",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8563623593603339.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "RECORD SETTING"
+      ],
+      "name": "Sound generator mode",
+      "desc": "Switch to the built-in bass/lead sound generator.",
+      "category": "Sampling & Looper",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8584218789853707.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "EXT SOURCE"
+      ],
+      "name": "Input settings",
+      "desc": "Open the external input settings screen.",
+      "category": "Sampling & Looper",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7943233178517131.html",
+      "app_midi": {
+        "can": "partial",
+        "how": "Note 35 toggles/gates the EXT SOURCE input itself; the settings screen is hardware only"
+      }
+    },
+    {
+      "combo": [
+        "REC"
+      ],
+      "name": "Start sampling flow",
+      "desc": "Arm sampling; pick a blinking pad, press REC again to roll.",
+      "category": "Sampling & Looper",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7905601178471051.html",
+      "app_midi": {
+        "can": "partial",
+        "how": "MIDI Start (FA) / Stop (FC) start and stop the recording once the sampling screen is armed"
+      }
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 5"
+      ],
+      "name": "Exchange pads",
+      "desc": "Swap the samples or patterns saved on two pads.",
+      "category": "Sample Editing",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7916737178482571.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 6"
+      ],
+      "name": "Init parameters",
+      "desc": "Reset the selected pad's sample parameters to defaults.",
+      "category": "Sample Editing",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7915789978481035.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PITCH/SPEED"
+      ],
+      "name": "Envelope",
+      "desc": "Shape attack, hold and release for the sample.",
+      "category": "Sample Editing",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7913255578478731.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "START/END"
+      ],
+      "name": "Chop",
+      "desc": "Split a sample at its markers and spread the slices across pads.",
+      "category": "Sample Editing",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7912513178477963.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "COPY"
+      ],
+      "name": "Bank protect",
+      "desc": "Lock a bank against overwrites, edits and deletes.",
+      "category": "Sample Editing",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7918273178484875.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "REMAIN (hold)",
+        "(pitch/speed screen)"
+      ],
+      "name": "Bulk edit bank",
+      "desc": "Edit speed, pitch, volume, pan and more for a whole bank at once.",
+      "category": "Sample Editing",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8004340378585483.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "COPY (hold)",
+        "(pitch/speed screen)"
+      ],
+      "name": "Bulk edit mute group",
+      "desc": "Edit the same parameters for every sample in a mute group.",
+      "category": "Sample Editing",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8006490778587787.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "DEL (hold)",
+        "EXIT"
+      ],
+      "name": "Delete bank",
+      "desc": "Erase every sample or pattern in the current bank.",
+      "category": "Sample Editing",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7918785178485643.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "COPY (hold)",
+        "EXIT"
+      ],
+      "name": "Copy bank",
+      "desc": "Copy every sample or pattern in the bank to another bank.",
+      "category": "Sample Editing",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7917761178484107.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "REC"
+      ],
+      "name": "Enter TR-REC",
+      "desc": "Step-record onto the playing pattern.",
+      "category": "Patterns & TR-REC",
+      "mode": "Pattern playback",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7921805978489483.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PATTERN SELECT"
+      ],
+      "name": "Undo pattern input",
+      "desc": "Undo the notes you just recorded into a pattern.",
+      "category": "Patterns & TR-REC",
+      "mode": "Pattern recording",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7920321178487947.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "DEL (hold)",
+        "MARK"
+      ],
+      "name": "Erase EFX motion",
+      "desc": "Remove recorded effect-knob motion from a pattern.",
+      "category": "Patterns & TR-REC",
+      "mode": "Pattern edit",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7926465178494859.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "DEL (hold)",
+        "REVERSE"
+      ],
+      "name": "Erase pad mute motion",
+      "desc": "Remove recorded pad mute moves from a pattern.",
+      "category": "Patterns & TR-REC",
+      "mode": "Pattern edit",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7928001178497163.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "DEL (hold)",
+        "BANK A/F"
+      ],
+      "name": "TR-REC: clear pad notes",
+      "desc": "Delete one measure of notes for the selected pad.",
+      "category": "Patterns & TR-REC",
+      "mode": "TR-REC",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8008257178590091.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "DEL (hold)",
+        "BANK B/G"
+      ],
+      "name": "TR-REC: clear all notes",
+      "desc": "Delete one measure of notes for every pad.",
+      "category": "Patterns & TR-REC",
+      "mode": "TR-REC",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8008257178590091.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "ROLL (hold)",
+        "CTRL 1-3"
+      ],
+      "name": "TR-REC: record knob motion",
+      "desc": "Record knob movement into the steps (TRIG mode).",
+      "category": "Patterns & TR-REC",
+      "mode": "TR-REC",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8008257178590091.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "VALUE (press)",
+        "SUB PAD",
+        "PADS 1-16"
+      ],
+      "name": "TR-REC: silent sample select",
+      "desc": "Pick samples in TR-REC without triggering them.",
+      "category": "Patterns & TR-REC",
+      "mode": "TR-REC",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8008257178590091.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 11"
+      ],
+      "name": "Tap tempo",
+      "desc": "Tap the pad in time to set the tempo.",
+      "category": "Tempo & Metronome",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7936961178509451.html",
+      "app_midi": {
+        "can": "full",
+        "how": "App sends MIDI clock at any BPM; the SP follows when MIDI Sync is Auto/MIDI/USB"
+      }
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "BANK A/F-E/J"
+      ],
+      "name": "Bank volume",
+      "desc": "Set the overall level for a bank.",
+      "category": "Tempo & Metronome",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7885761178449547.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PADS 1-16"
+      ],
+      "name": "Play from marker",
+      "desc": "Launch the sample from a stored marker position.",
+      "category": "DJ Mode",
+      "mode": "DJ mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7939623578512523.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "REVERSE",
+        "PAD 13"
+      ],
+      "name": "Mute deck CH1",
+      "desc": "Mute the sample playing on channel 1.",
+      "category": "DJ Mode",
+      "mode": "DJ mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8007668378589323.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "REVERSE",
+        "PAD 15"
+      ],
+      "name": "Mute deck CH2",
+      "desc": "Mute the sample playing on channel 2.",
+      "category": "DJ Mode",
+      "mode": "DJ mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8007668378589323.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "REMAIN"
+      ],
+      "name": "Latch SHIFT",
+      "desc": "Hold SHIFT down for you while you pick markers.",
+      "category": "DJ Mode",
+      "mode": "DJ mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/8007668378589323.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "MARK"
+      ],
+      "name": "Add marker",
+      "desc": "Drop a marker while the sample plays.",
+      "category": "DJ Mode",
+      "mode": "DJ mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7940212378513291.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "START/END"
+      ],
+      "name": "Edit markers",
+      "desc": "Adjust markers during playback.",
+      "category": "DJ Mode",
+      "mode": "DJ mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7940724378514059.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "DEL",
+        "PADS 1-16"
+      ],
+      "name": "Delete markers",
+      "desc": "Clear a sample's markers.",
+      "category": "DJ Mode",
+      "mode": "DJ mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7941389978514827.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 3"
+      ],
+      "name": "Cue monitoring",
+      "desc": "Balance what you hear in the headphones vs the main out.",
+      "category": "System & Settings",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7942721178516363.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 12"
+      ],
+      "name": "Gain",
+      "desc": "Open the SYSTEM gain tab.",
+      "category": "System & Settings",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7964634778545547.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 13"
+      ],
+      "name": "Utility menu",
+      "desc": "Open the utility menu.",
+      "category": "System & Settings",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7951757978528651.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 14"
+      ],
+      "name": "Import/export",
+      "desc": "Open SD card import and export.",
+      "category": "System & Settings",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7958234778537099.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "PAD 15"
+      ],
+      "name": "Pad settings",
+      "desc": "Open the PAD SET screen.",
+      "category": "System & Settings",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7952935578530187.html",
+      "app_midi": null
+    },
+    {
+      "combo": [
+        "SHIFT",
+        "SUB PAD"
+      ],
+      "name": "Select project",
+      "desc": "Open the project select screen.",
+      "category": "System & Settings",
+      "mode": "Sample mode",
+      "manual_url": "https://static.roland.com/manuals/sp-404mk2_reference_v550/en-US/7944487578518667.html",
+      "app_midi": null
+    }
+  ]
+}
