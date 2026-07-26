@@ -28,6 +28,7 @@
     --hand:'Patrick Hand','Segoe UI',system-ui,sans-serif;
     --mono:ui-monospace,Menlo,Consolas,monospace;
     --bd:3px; --bd-heavy:4px; --off:4px; --off-lg:7px;
+    --ptr-w:7.5;
     /* rectangles with a wobble, not lozenges */
     --r-panel:9px 5px 8px 6px/6px 8px 5px 9px;
     --r-panel-alt:5px 9px 6px 8px/8px 6px 9px 5px;
@@ -186,7 +187,13 @@
   .k-flute{stroke:#fff;stroke-width:2.2;stroke-linecap:round;opacity:.9;fill:none}
   .k-body{fill:var(--white);stroke:var(--ink);stroke-width:5.5;stroke-linejoin:round}
   .k-notch{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;opacity:.55;fill:none}
-  .k-ptr,.k-ptr-side{fill:none;stroke:var(--ink);stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round}
+  .k-ptr,.k-ptr-side{fill:none;stroke:var(--ink);stroke-width:var(--ptr-w);
+    stroke-linecap:round;stroke-linejoin:round}
+  /* A vertical stripe on a cylinder foreshortens HORIZONTALLY as it wraps away
+     from you — widest facing the viewer, nothing at all edge-on. Same sin()
+     that drives the overhang's length, applied to its weight, so it tapers off
+     in both dimensions instead of ending as a blunt full-width stub. */
+  .k-ptr-side{stroke-width:calc(var(--ptr-w) * var(--side-scale,1))}
   /* The overhang is a hardware-theme detail. Zine's skirt is solid --ink, so a
      black line lands on black and reads as nothing — it earned no keep there. */
   .k-ptr-side{display:none}
@@ -708,6 +715,7 @@
     --marker:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
     --hand:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
     --bd:2px; --bd-heavy:2px; --off:2px; --off-lg:3px;
+    --ptr-w:5.5;
     --dot:none;
     /* per-pad colour is an inline custom property, which no stylesheet rule can
        outrank — so a theme wanting uniform pads sets this inherited override
@@ -956,7 +964,7 @@
   /* the ridge clears the cap edge by ~2 units only. Cap top is y=21; scaled
      about the line's inner end (52,34), so only the outer tip travels. */
   [data-zn-theme='hardware'] .k-ptr,
-  [data-zn-theme='hardware'] .k-ptr-side{stroke:#fdfbf7;stroke-width:5.5}
+  [data-zn-theme='hardware'] .k-ptr-side{stroke:#fdfbf7}
   [data-zn-theme='hardware'] .k-ptr-side{display:block}
   [data-zn-theme='hardware'] .knob-row{gap:18px}
 
@@ -1494,6 +1502,7 @@ function makeKnob(opts){
     const rimX = 52 + 27*cs, rimY = 46 + 25*sn;      // the cap's edge at this angle
     ptrEl.setAttribute('d', 'M'+f1(inX)+','+f1(inY)+' L'+f1(rimX)+','+f1(rimY));
     if(sn <= 0.02){ sideEl.setAttribute('d',''); return; }
+    sideEl.style.setProperty('--side-scale', sn.toFixed(3));
     sideEl.setAttribute('d', 'M'+f1(rimX)+','+f1(rimY)+' L'+f1(rimX)+','+f1(rimY + h*sn));
   }
   function paint(){
