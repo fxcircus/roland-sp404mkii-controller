@@ -50,8 +50,7 @@
   a{color:var(--accent2);text-decoration-thickness:2px;text-underline-offset:3px}
 
   /* hero */
-  #hero{display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;padding:22px 10px 6px}
-  #heroDisp{width:132px;height:132px;flex:0 0 auto;overflow:visible}
+  #hero{display:flex;align-items:center;justify-content:center;padding:22px 10px 6px}
   #hero .hero-txt{text-align:left}
   #hero h1{font-family:var(--marker);font-size:44px;margin:0;letter-spacing:.6px;line-height:1.05;
     text-transform:uppercase;color:var(--white);background:var(--ink);display:inline-block;
@@ -342,7 +341,6 @@
   }
   @media(max-width:700px){
     #hero h1{font-size:26px;padding:7px 14px 9px}
-    #heroDisp{width:84px;height:84px}
     #hero{gap:14px;padding:14px 6px 4px}
     #wrap{padding:0 12px 50px}
     #nav{margin:8px auto 18px;padding:7px 8px;border-radius:6px 4px 5px 4px/4px 5px 4px 6px}
@@ -396,7 +394,7 @@
     --marker:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
     --hand:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
     --bd:2px; --bd-heavy:2px; --off:2px; --off-lg:3px;
-    --dot:radial-gradient(rgba(255,255,255,.06) 1.2px,transparent 1.3px);
+    --dot:none;
     /* per-pad colour is an inline custom property, which no stylesheet rule can
        outrank — so a theme wanting uniform pads sets this inherited override
        instead of resorting to !important */
@@ -491,14 +489,20 @@
      real LED bloom, machined knobs. These intentionally re-declare a few
      properties above and win on source order, so colour and material decisions
      stay separately readable. ------------------------------------------- */
+  /* Chassis: the same treatment as a panel face, just darker — a top sheen over
+     a vertical gradient. No grain, no dots.
+     background-size MUST be reset: the base body rule sets 17px 17px for the
+     zine dot grid, and without this the gradients tile into 17px squares and
+     read as a grid. */
   [data-zn-theme='hardware'] body,
   body[data-zn-theme='hardware']{
     background-color:#15181b;
     background-image:
-      linear-gradient(178deg,rgba(255,255,255,.035),rgba(255,255,255,0) 22%),
-      radial-gradient(130% 55% at 50% -8%,rgba(255,255,255,.028),transparent 62%),
-      repeating-linear-gradient(90deg,rgba(255,255,255,.011) 0 1px,rgba(0,0,0,.014) 1px 3px,transparent 3px 6px),
-      linear-gradient(#1c2024,#0f1215)}
+      linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0) 13%),
+      linear-gradient(#191d21,#0e1114);
+    background-size:auto,auto;
+    background-repeat:no-repeat;
+    background-attachment:fixed}
   [data-zn-theme='hardware'] .card{
     background-color:#22262b;
     background-image:
@@ -581,9 +585,14 @@
     text-shadow:0 0 7px rgba(255,110,90,.7), 0 0 20px rgba(255,60,45,.42)}
   [data-zn-theme='hardware'] .sbtn.danger:active{color:#fffaf9;
     text-shadow:0 0 8px rgba(255,130,110,.85), 0 0 24px rgba(255,60,45,.5)}
+  /* keycaps are legends too — same dim backlight as the button caps */
   [data-zn-theme='hardware'] .sc-key{
+    color:#d99a55;
+    text-shadow:0 0 4px rgba(255,150,45,.32), 0 0 10px rgba(255,140,35,.18);
     background-image:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,0) 50%),linear-gradient(#31363d,#21252a);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 2px 0 #0a0d10}
+  [data-zn-theme='hardware'] .sc-item:hover .sc-key{
+    color:#ffb974;text-shadow:0 0 6px rgba(255,160,60,.55), 0 0 16px rgba(255,140,35,.3)}
   [data-zn-theme='hardware'] .lamp{
     background-image:radial-gradient(circle at 34% 30%,rgba(255,255,255,.22),transparent 60%);
     box-shadow:inset 0 2px 4px rgba(0,0,0,.8)}
@@ -661,7 +670,6 @@
 <div id="loadError"></div>
 <div id="app" hidden>
 <header id="hero">
-  <svg id="heroDisp" viewBox="0 0 160 160" aria-hidden="true"></svg>
   <div class="hero-txt">
     <h1>SP&#8209;404 <span>MKII</span></h1>
     <svg class="squig" viewBox="0 0 400 16" preserveAspectRatio="none" aria-hidden="true">
@@ -1729,27 +1737,6 @@ if('IntersectionObserver' in window){
   const obs = new IntersectionObserver(entries=>{ entries.forEach(en=>{ if(en.isIntersecting){ navBtns.forEach(x=>x.classList.remove('active')); const b = byId[en.target.id]; if(b) b.classList.add('active'); } }); }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
   ['setup','fx','pads','keys','patterns','looper','transport','dj','shortcuts','dev'].forEach(id=>{ const s=$(id); if(s) obs.observe(s); });
 }
-
-/* ---------- hero display: black disc, white jagged waveform, 45° hatch ---------- */
-(function heroDisplay(){
-  const svg = $('heroDisp'); if(!svg) return;
-  const face = inkBlob(80, 80, 70, 4242, 2.6, 24);
-  let hatch = '';
-  for(let x=-170; x<=170; x+=11) hatch += '<path d="M'+x+',0L'+(x+160)+',160"/>';
-  const rnd = rngFrom(90210), pts = [], N = 74;
-  for(let i=0;i<=N;i++){
-    const t = i/N, env = Math.sin(Math.PI*t);          // taper the burst at both ends
-    const amp = (i%2 ? 1 : -1) * (0.3 + 0.7*rnd()) * 40 * env;   // alternate = audio zigzag
-    pts.push((12 + t*136).toFixed(1) + ',' + (80 + amp).toFixed(1));
-  }
-  svg.innerHTML =
-      '<defs><clipPath id="heroClip"><path d="'+face+'"/></clipPath></defs>'
-    + '<path d="'+face+'" fill="#111"/>'
-    + '<g clip-path="url(#heroClip)" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="1.6">'+hatch+'</g>'
-    + '<path d="'+inkBlob(80, 80, 60, 777, 1.6, 20)+'" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="2"/>'
-    + '<polyline points="'+pts.join(' ')+'" fill="none" stroke="#fff" stroke-width="3.2" '
-    + 'stroke-linejoin="round" stroke-linecap="round"/>';
-})();
 
 /* ---------- theme switch ----------
    hardware (default) emulates the real unit; zine is the blue paper look. The
