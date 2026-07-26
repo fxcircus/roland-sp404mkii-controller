@@ -453,6 +453,30 @@
     background-image:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 13%),linear-gradient(#272b31,#1a1d21);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.11), 0 7px 16px rgba(0,0,0,.55)}
 
+  /* ---- MIDI monitor ----
+     Built from the shared tokens, so the theme inversion carries it: --paper2
+     and --ink swap and the log reads correctly in both. Only the recessed
+     screen look is hardware-specific. */
+  .mon-ctl{gap:9px;margin-top:4px}
+  .monlog{width:100%;max-height:260px;overflow-y:auto;margin-top:2px;
+    font-family:var(--mono);font-size:12px;line-height:1.5;
+    background:var(--paper2);color:var(--ink);
+    border:var(--bd) solid var(--ink);border-radius:var(--r-btn);padding:7px 10px}
+  .mrow{display:grid;grid-template-columns:32px 40px minmax(0,1fr) auto;gap:9px;
+    align-items:baseline;padding:2px 0}
+  .mrow + .mrow{border-top:1px dashed var(--ink2)}
+  .mdir{font-size:9px;font-weight:700;letter-spacing:.7px;text-align:center;
+    border-radius:var(--r-chip);padding:2px 0}
+  .mdir.out{background:var(--ink);color:var(--paper2)}
+  .mdir.in{background:var(--accent);color:#fff}
+  .mch{color:var(--ink2);font-size:11px}
+  .mtxt{overflow-wrap:anywhere;white-space:pre-wrap}
+  .mhex{color:var(--ink2);font-size:11px;white-space:nowrap}
+  .mempty{color:var(--ink2);font-family:var(--hand);font-size:14px}
+  [data-zn-theme='hardware'] .monlog{background:#111417;border-color:#05070a;
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.65)}
+  [data-zn-theme='hardware'] .mdir.in{color:#16181b}
+
   @media (prefers-reduced-motion: reduce){
     .dd-fold,.dd-leaf::before{transition-duration:1ms!important;transition-delay:0ms!important}
   }
@@ -489,6 +513,10 @@
     .midi-ports #inMount .dd,
     .midi-ports #outMount .dd{width:100%}
     .midi-ports #rescanBtn{grid-column:1 / -1;grid-row:3;width:100%}
+    /* the raw bytes are the first thing worth dropping when space is tight */
+    .mrow{grid-template-columns:30px 36px minmax(0,1fr);gap:7px}
+    .mhex{display:none}
+    .monlog{max-height:220px;font-size:11px}
     /* A dropdown mid-row puts its absolutely-positioned panel at left+width,
        which runs off a phone screen — and it counts even while hidden. Full
        width on its own line keeps the panel inside the card. */
@@ -867,6 +895,12 @@
     <span class="portpair"><b class="mini">Input</b><span id="inMount"></span></span>
     <button id="rescanBtn" class="sbtn sm" type="button">Rescan</button>
   </div>
+  <div class="row mon-ctl">
+    <button id="monToggle" class="sbtn sm" type="button" aria-pressed="false">Monitor</button>
+    <button id="monClear" class="sbtn sm" type="button" hidden>Clear</button>
+    <span class="note" id="monCount" hidden></span>
+  </div>
+  <div id="monLog" class="monlog" hidden></div>
 </section>
 
 <!-- TRANSPORT — parked for now. Uncomment this section, its nav button and
@@ -1296,6 +1330,12 @@ function setStatus(){
 function setInput(inp){
   if(midiIn) midiIn.onmidimessage = null;
   midiIn = inp || null;
+  if(midiIn) midiIn.onmidimessage = onMidiIn;
+}
+function onMidiIn(e){
+  const d = e.data;
+  if(!d || !d.length) return;
+  logMidi('in', d);
 }
 const ddOut = makeDropdown({ options:[{value:'',label:'—'}], placeholder:'—', onChange:id=>{
   const outs=[...midiAccess.outputs.values()]; midiOut = outs.find(o=>o.id===id)||null;
@@ -1332,10 +1372,114 @@ async function initMIDI(){
   catch(e){ const m='MIDI access denied — reload and allow MIDI access'; $('lamp').title=m; $('lamp').setAttribute('aria-label',m); }
 }
 
+/* ---------- MIDI MONITOR ----------
+   Off by default, and when it is off logMidi() returns on its first line — so
+   the send path costs exactly what it did before. Rows batch through one rAF
+   because a busy SP delivers messages faster than the DOM wants to grow.
+
+   Clock (F8) and active sensing (FE) never get a row: at 24ppqn clock alone
+   fills the whole buffer in a few seconds and buries everything you opened the
+   monitor to see. Clock is still counted, and the counter says so. */
+const MON_MAX = 250;
+let monOn = false, monSeq = 0, monClockSeen = false, monFlushQueued = false;
+const monPending = [];
+const RT_NAMES = {0xF8:'Clock', 0xFA:'Start', 0xFB:'Continue', 0xFC:'Stop',
+                  0xFE:'Active sensing', 0xFF:'System reset', 0xF2:'Song position'};
+
+function ccLabel(ch, cc){
+  const bus = busByCh[ch];
+  if(bus){
+    if(cc === CC_SEL) return 'EFX select · ' + bus.label;
+    if(cc === CC_SW)  return 'EFX switch · ' + bus.label;
+    const i = CTRL_CCS.indexOf(cc);
+    if(i >= 0) return 'CTRL ' + (i+1) + ' · ' + bus.label;
+  }
+  if(ch === LOOP.channel && LOOP.cc[String(cc)]) return LOOP.cc[String(cc)].function;
+  if(DJ_REC && DJ_REC[String(cc)]) return DJ_REC[String(cc)];
+  if(DJ_TX  && DJ_TX[String(cc)])  return DJ_TX[String(cc)] + ' (SP→host)';
+  if(cc === 120) return 'All Sound Off';
+  if(cc === 121) return 'Reset All Controllers';
+  if(cc === 123) return 'All Notes Off';
+  return '';
+}
+function noteLabel(ch, note){
+  if(note === EXT_NOTE) return 'EXT SOURCE';
+  if(ch === CHROMA_CH){ const s = note - CHROMA_ROOT; return 'chromatic ' + (s > 0 ? '+' : '') + s; }
+  if(ch === VOC_CH) return 'vocoder';
+  if(ch >= 1 && ch <= 10 && padNumForNote[note]) return 'bank ' + BANK_LETTERS[ch-1] + ' pad ' + padNumForNote[note];
+  return '';
+}
+function describeMidi(d){
+  const s0 = d[0], st = s0 & 0xF0, ch = (s0 & 0x0F) + 1;
+  if(s0 >= 0xF0) return { ch:null, text: RT_NAMES[s0] || ('system ' + s0.toString(16).toUpperCase()) };
+  if(st === 0x90 && d[2] > 0){ const x = noteLabel(ch, d[1]); return { ch, text:'Note on  ' + noteName(d[1]) + ' vel ' + d[2] + (x ? ' · ' + x : '') }; }
+  if(st === 0x80 || st === 0x90){ const x = noteLabel(ch, d[1]); return { ch, text:'Note off ' + noteName(d[1]) + (x ? ' · ' + x : '') }; }
+  if(st === 0xB0){ const x = ccLabel(ch, d[1]); return { ch, text:'CC' + d[1] + ' = ' + d[2] + (x ? ' · ' + x : '') }; }
+  if(st === 0xC0) return { ch, text:'Program ' + d[1] + (ch <= 10 ? ' · pattern ' + (d[1]+1) + ' bank ' + BANK_LETTERS[ch-1] : '') };
+  if(st === 0xE0){ const v = ((d[2] << 7) | d[1]) - 8192; return { ch, text:'Pitch bend ' + (v > 0 ? '+' : '') + v }; }
+  if(st === 0xA0) return { ch, text:'Aftertouch ' + noteName(d[1]) + ' ' + d[2] };
+  if(st === 0xD0) return { ch, text:'Channel pressure ' + d[1] };
+  return { ch, text:'raw' };
+}
+function logMidi(dir, bytes){
+  if(!monOn) return;
+  const s0 = bytes[0];
+  if(s0 === 0xFE) return;
+  if(s0 === 0xF8){ monClockSeen = true; return; }
+  monPending.push({ dir, bytes: Array.from(bytes) });
+  if(monPending.length > MON_MAX) monPending.splice(0, monPending.length - MON_MAX);
+  if(monFlushQueued) return;
+  monFlushQueued = true;
+  requestAnimationFrame(flushMonitor);
+}
+function flushMonitor(){
+  monFlushQueued = false;
+  const log = $('monLog');
+  if(!monOn || !log){ monPending.length = 0; return; }
+  const empty = log.querySelector('.mempty');
+  if(empty && monPending.length) empty.remove();
+  /* prepend one at a time: newest first, and a batch inserted as a fragment
+     would land oldest-on-top within itself */
+  for(const m of monPending){
+    const d = describeMidi(m.bytes);
+    const row = div('mrow');
+    row.append(span('mdir ' + m.dir, m.dir), span('mch', d.ch ? 'ch' + d.ch : '—'),
+               span('mtxt', d.text), span('mhex', hex(m.bytes)));
+    log.insertBefore(row, log.firstChild);
+    monSeq++;
+  }
+  monPending.length = 0;
+  while(log.children.length > MON_MAX) log.removeChild(log.lastChild);
+  $('monCount').textContent = monSeq + ' message' + (monSeq === 1 ? '' : 's')
+    + (monClockSeen ? ' · clock running (not listed)' : '');
+}
+function monitorClear(){
+  const log = $('monLog');
+  log.innerHTML = ''; monSeq = 0; monClockSeen = false; monPending.length = 0;
+  log.appendChild(div('mempty','Waiting for MIDI — play something here, or on the SP.'));
+  $('monCount').textContent = '';
+}
+function setMonitor(on){
+  monOn = !!on;
+  const t = $('monToggle');
+  t.classList.toggle('on', monOn);
+  t.setAttribute('aria-pressed', monOn ? 'true' : 'false');
+  $('monLog').hidden = !monOn;
+  $('monClear').hidden = !monOn;
+  $('monCount').hidden = !monOn;
+  if(monOn){ if(!$('monLog').children.length) monitorClear(); }
+  else monPending.length = 0;
+}
+$('monToggle').addEventListener('click', ()=> setMonitor(!monOn));
+$('monToggle').title = 'Log every MIDI message in and out. Clock and active sensing are counted but not listed — at 24 ticks a beat they bury everything else.';
+$('monClear').addEventListener('click', monitorClear);
+setMonitor(false);
+
 /* ---------- sending ---------- */
 function sendBytes(bytes, hexEl, timestamp){
   let err = null;
   if(midiOut){ try{ midiOut.send(bytes, timestamp); }catch(ex){ err = ex.message; } }
+  logMidi('out', bytes);
   if(hexEl) hexEl.textContent = hex(bytes);
   return !err && !!midiOut;
 }
@@ -1358,9 +1502,10 @@ function panicAll(){
   for(let ch=1; ch<=16; ch++){ const st=(ch-1)&0x0F; msgs.push([0xB0|st,120,0],[0xB0|st,123,0],[0xB0|st,121,0],[0xE0|st,0,64]); }
   let sent = 0, failed = false;
   if(midiOut){
-    for(const m of msgs){ try{ midiOut.send(m); sent++; }catch(e){ failed = true; } }
+    for(const m of msgs){ try{ midiOut.send(m); sent++; logMidi('out', m); }catch(e){ failed = true; } }
     /* second hit — one press does not always take */
-    setTimeout(()=>{ try{ midiOut.send([0xB0|st0, STOP_ALL_CC, STOP_ALL_VAL]); }catch(e){} }, 60);
+    setTimeout(()=>{ const m = [0xB0|st0, STOP_ALL_CC, STOP_ALL_VAL];
+      try{ midiOut.send(m); logMidi('out', m); }catch(e){} }, 60);
   }
   document.querySelectorAll('.active-key').forEach(el=>el.classList.remove('active-key'));
 }
@@ -1466,33 +1611,28 @@ const bankBtns = [];
 for(let i=0;i<10;i++){
   const b = sbtn(BANK_LETTERS[i], 'sm'); if(i===0) b.classList.add('on');
   b.title = 'Bank '+BANK_LETTERS[i]+' (ch'+(i+1)+')';
-  b.addEventListener('click', ()=>{ padBank = i+1; bankBtns.forEach(x=>x.classList.remove('on')); b.classList.add('on'); refreshChromaTarget(); });
+  b.addEventListener('click', ()=> setPadBank(i+1));
   bankBtns.push(b); $('padBanks').appendChild(b);
 }
 const padVelKnob = makeKnob({ label:'VELOCITY', min:1, max:127, value:100, defaultVal:100 });
 $('padVelMount').appendChild(padVelKnob.el);
 const padCh = ()=> padBank;
-/* Chromatic mode plays whatever sample the SP last had SELECTED, and the only
-   way to select one is to press its pad (manual p.25 step 1) — there is no
-   select-without-playing message. So remember the last pad pressed per bank
-   and let the Keys section point the SP at it. */
-const lastPadByBank = {};
-let selectedOnSP = null;          // what we last told the SP to select
-function noteBankLabel(){
-  const pad = lastPadByBank[padBank];
-  return pad ? 'BANK '+BANK_LETTERS[padBank-1]+' / PAD '+pad : 'BANK '+BANK_LETTERS[padBank-1]+' / —';
+function setPadBank(n){
+  padBank = Math.max(1, Math.min(10, n));
+  bankBtns.forEach((x,i)=> x.classList.toggle('on', i === padBank - 1));
 }
 const padVel = ()=> padVelKnob.get();
 /* candy set lifted from the reference sketch's pad colours, saturation +15% */
 const PAD_COLORS = ['#89e9a3','#fda2d0','#ffd977','#ffb287','#bea3f4','#88dcf6','#fe98b1','#a4ebc3',
                     '#ffcf6b','#f2a1ef','#99c9fb','#b8ef85','#ffab9e','#ccadf7','#78e6d5','#ffc2da'];
+const padEls = {};
 for(let pad=1; pad<=16; pad++){
   const note = padToNote[pad];
   const p = div('pad'); p.style.setProperty('--pad', PAD_COLORS[(pad-1) % PAD_COLORS.length]);
   p.title = 'Pad '+pad+' — '+noteName(note)+' (note '+note+')';
   p.append(span('num', String(pad)));
-  p.addEventListener('pointerdown', ()=>{ lastPadByBank[padBank] = pad; selectedOnSP = {bank:padBank, pad}; refreshChromaTarget(); });
   pressable(p, padCh, note, padVel);
+  padEls[pad] = p;
   $('padGrid').appendChild(p);
 }
 
