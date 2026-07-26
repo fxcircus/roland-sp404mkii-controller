@@ -254,6 +254,11 @@
   .pad *{pointer-events:none}
   .pad .num{font-size:34px;text-shadow:2px 2px 0 rgba(255,255,255,.6)}
   .pad.active-key{transform:translate(4px,5px);box-shadow:0 0 0 var(--shadow);filter:brightness(1.12)}
+  /* EXT SOURCE and its mode toggle are a pair — same size and same width, so
+     the row does not go ragged when the mode label changes length.
+     display:contents on the mount lets the button itself be the flex item. */
+  .ext-row #extMount{display:contents}
+  .ext-row .sbtn{flex:0 0 220px;min-width:220px;text-align:center}
   .bankrow{display:flex;flex-wrap:wrap;gap:6px}
   .bankrow .sbtn{min-width:44px;text-align:center}
 
@@ -725,9 +730,9 @@
   <div class="row"><b class="mini">Bank</b><div class="bankrow" id="padBanks"></div></div>
   <div class="row" id="padVelRow"><span id="padVelMount"></span></div>
   <div class="padgrid" id="padGrid"></div>
-  <div class="row">
+  <div class="row ext-row">
     <span id="extMount"></span>
-    <button class="sbtn sm" id="extModeToggle" type="button">mode: toggle</button>
+    <button class="sbtn" id="extModeToggle" type="button">mode: toggle</button>
   </div>
 </section>
 
