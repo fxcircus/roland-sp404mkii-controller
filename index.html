@@ -802,7 +802,7 @@
 <nav id="nav">
   <div class="navrow">
     <button data-t="setup">MIDI</button>
-    <button data-t="transport">Transport</button>
+    <!-- <button data-t="transport">Transport</button> -->
     <button data-t="fx">Effects</button>
     <button data-t="pads">Pads</button>
     <button data-t="chromatic">Chromatic</button>
@@ -838,21 +838,24 @@
   </div>
 </section>
 
+<!-- TRANSPORT — parked for now. Uncomment this section, its nav button and
+     the two JS blocks marked "TRANSPORT (parked)" to bring it back.
 <section id="transport" class="card">
   <h2><span class="n">2</span>Transport</h2>
   <div class="zn-steps" id="rtSteps"></div>
   <div class="row" id="rtMount"></div>
   <div class="row" id="clockMount"></div>
 </section>
+-->
 
 <section id="fx" class="card">
-  <h2><span class="n">3</span>Effects</h2>
+  <h2><span class="n">2</span>Effects</h2>
   <div id="fxRouting"></div>
   <div id="fxCols"></div>
 </section>
 
 <section id="pads" class="card">
-  <h2><span class="n">4</span>Pads</h2>
+  <h2><span class="n">3</span>Pads</h2>
   <div class="row"><b class="mini">Bank</b><div class="bankrow" id="padBanks"></div></div>
   <div class="row ext-row" id="padVelRow"><span id="padVelMount"></span>
     <span id="extMount"></span>
@@ -862,32 +865,32 @@
 </section>
 
 <section id="chromatic" class="card">
-  <h2><span class="n">5</span>Chromatic</h2>
+  <h2><span class="n">4</span>Chromatic</h2>
   <div class="zn-steps" id="chromaSteps"></div>
   <div class="row"><span id="chromaVelMount"></span></div>
   <div class="chromagrid" id="chromaPads"></div>
 </section>
 
 <section id="vocoder" class="card">
-  <h2><span class="n">6</span>Vocoder</h2>
+  <h2><span class="n">5</span>Vocoder</h2>
   <div class="zn-steps" id="vocSteps"></div>
   <div class="row"><span id="vocVelMount"></span><span id="vocBendMount"></span></div>
   <div class="piano-case"><div class="piano" id="vocKbd"></div></div>
 </section>
 
 <section id="patterns" class="card">
-  <h2><span class="n">7</span>Patterns</h2>
+  <h2><span class="n">6</span>Patterns</h2>
   <div class="row"><b class="mini">Bank</b><div class="bankrow" id="patBanks"></div></div>
   <div class="patgrid" id="patGrid"></div>
 </section>
 
 <section id="looper" class="card">
-  <h2><span class="n">8</span>Looper</h2>
+  <h2><span class="n">7</span>Looper</h2>
   <div id="looperRows"></div>
 </section>
 
 <section id="dj" class="card">
-  <h2><span class="n">9</span>DJ mode</h2>
+  <h2><span class="n">8</span>DJ mode</h2>
   <div class="zn-steps" id="djSteps"></div>
   <div class="dj-layout">
     <div class="dj-deck" id="djDecks"></div>
@@ -896,7 +899,7 @@
 </section>
 
 <section id="shortcuts" class="card">
-  <h2><span class="n">10</span>Shortcut Finder</h2>
+  <h2><span class="n">9</span>Shortcut Finder</h2>
   <div id="scCtrls" class="row">
     <input type="text" id="scSearch" placeholder="Search combos, names, descriptions…">
     <b class="mini">Category</b><span id="scCatMount"></span>
@@ -1663,36 +1666,37 @@ const LOOP_GROUPS = [
   $('looperRows').appendChild(grid);
 }
 
-/* ---------- TRANSPORT ---------- */
-[['Start',0xFA,'System Realtime Start (FA)'],
- ['Stop',0xFC,'System Realtime Stop (FC)'],
- ['Continue',0xFB,'System Realtime Continue (FB) — untested on hardware']
-].forEach(([label,byte,tip])=>{ const b = sbtn(label); b.title = tip;
-  b.addEventListener('click', ()=> sendBytes([byte], null)); $('rtMount').appendChild(b); });
-const clock = {running:false, next:0, timer:null, count:0, bpm:120};
-const bpmKnob = makeKnob({ label:'BPM', min:40, max:300, value:120, defaultVal:120, step:1, onChange:v=>{ clock.bpm=v; } });
-$('clockMount').appendChild(bpmKnob.el);
-const clockBtn = sbtn('Start clock');
-clockBtn.title = 'Timing Clock (F8) at 24 ppqn';
-const clockStatus = span('note','clock stopped'); clockStatus.style.marginLeft='6px';
-$('clockMount').append(clockBtn, clockStatus);
-function clockPump(){
-  if(!clock.running || !midiOut) return;
-  const bpm = Math.max(40, Math.min(300, clock.bpm || 120));
-  const tick = 60000/(bpm*24);
-  const now = performance.now();
-  if(clock.next < now) clock.next = now;
-  const horizon = now + 150;
-  while(clock.next < horizon){
-    try{ midiOut.send([0xF8], clock.next); }catch(e){}
-    clock.count++; clock.next += tick;
-  }
-  clockStatus.textContent = 'running — '+clock.count+' ticks sent';
-}
-clockBtn.addEventListener('click', ()=>{
-  if(clock.running){ clock.running = false; clearInterval(clock.timer); clockBtn.textContent = 'Start clock'; clockBtn.classList.remove('on'); clockStatus.textContent = 'clock stopped — '+clock.count+' ticks sent'; }
-  else{ if(!midiOut){ clockStatus.textContent = 'no output port'; return; } clock.running = true; clock.count = 0; clock.next = performance.now() + 20; clock.timer = setInterval(clockPump, 50); clockBtn.textContent = 'Stop clock'; clockBtn.classList.add('on'); clockPump(); }
-});
+/* ---------- TRANSPORT (parked) ---------- */
+// /* ---------- TRANSPORT ---------- */
+// [['Start',0xFA,'System Realtime Start (FA)'],
+//  ['Stop',0xFC,'System Realtime Stop (FC)'],
+//  ['Continue',0xFB,'System Realtime Continue (FB) — untested on hardware']
+// ].forEach(([label,byte,tip])=>{ const b = sbtn(label); b.title = tip;
+//   b.addEventListener('click', ()=> sendBytes([byte], null)); $('rtMount').appendChild(b); });
+// const clock = {running:false, next:0, timer:null, count:0, bpm:120};
+// const bpmKnob = makeKnob({ label:'BPM', min:40, max:300, value:120, defaultVal:120, step:1, onChange:v=>{ clock.bpm=v; } });
+// $('clockMount').appendChild(bpmKnob.el);
+// const clockBtn = sbtn('Start clock');
+// clockBtn.title = 'Timing Clock (F8) at 24 ppqn';
+// const clockStatus = span('note','clock stopped'); clockStatus.style.marginLeft='6px';
+// $('clockMount').append(clockBtn, clockStatus);
+// function clockPump(){
+//   if(!clock.running || !midiOut) return;
+//   const bpm = Math.max(40, Math.min(300, clock.bpm || 120));
+//   const tick = 60000/(bpm*24);
+//   const now = performance.now();
+//   if(clock.next < now) clock.next = now;
+//   const horizon = now + 150;
+//   while(clock.next < horizon){
+//     try{ midiOut.send([0xF8], clock.next); }catch(e){}
+//     clock.count++; clock.next += tick;
+//   }
+//   clockStatus.textContent = 'running — '+clock.count+' ticks sent';
+// }
+// clockBtn.addEventListener('click', ()=>{
+//   if(clock.running){ clock.running = false; clearInterval(clock.timer); clockBtn.textContent = 'Start clock'; clockBtn.classList.remove('on'); clockStatus.textContent = 'clock stopped — '+clock.count+' ticks sent'; }
+//   else{ if(!midiOut){ clockStatus.textContent = 'no output port'; return; } clock.running = true; clock.count = 0; clock.next = performance.now() + 20; clock.timer = setInterval(clockPump, 50); clockBtn.textContent = 'Stop clock'; clockBtn.classList.add('on'); clockPump(); }
+// });
 
 /* ---------- DJ ---------- */
 hint('dj', MAP.dj_mode.warning
@@ -1770,21 +1774,22 @@ function makeXFade({ cc, ch, min=0, max=127, value=64 }){
 }
 $('djDecks').append(volKnob(1), makeXFade({ cc:8, ch:1 }), volKnob(2));
 $('djSeq').appendChild(volKnob(3));
-{
-  /* Chart p.168: Recognized Clock and Commands both carry footnote *4,
-     "Enabled when this unit is in remote mode (when a tempo signal is received
-     from an external device)" — so the SP ignores Start/Stop until clock is
-     already flowing, and it only follows clock when MIDI Sync is not Internal. */
-  const box = $('rtSteps');
-  box.append(el('b',null,'On the SP'),
-    span(null,'set'), span('k','MIDI SYNC'), span(null,'to'), span('k','AUTO'),
-    span(null,'(or USB / MIDI) — then Start clock here and the SP follows this BPM.'),
-    span(null,'Start / Stop only drive its transport once the clock is running.'));
-}
-hint('transport', MAP.system_realtime.start_stop
-  + ' There is no MIDI control for the unit\'s output volume: the front-panel [VOLUME] knob is not in the'
-  + ' implementation chart, and CC7 is answered only in DJ mode (chart footnote *8), where it is the per-channel'
-  + ' fader — those knobs are in the DJ section.');
+/* ---------- TRANSPORT steps + hint (parked) ---------- */
+// {
+//   /* Chart p.168: Recognized Clock and Commands both carry footnote *4,
+//      "Enabled when this unit is in remote mode (when a tempo signal is received
+//      from an external device)" — so the SP ignores Start/Stop until clock is
+//      already flowing, and it only follows clock when MIDI Sync is not Internal. */
+//   const box = $('rtSteps');
+//   box.append(el('b',null,'On the SP'),
+//     span(null,'set'), span('k','MIDI SYNC'), span(null,'to'), span('k','AUTO'),
+//     span(null,'(or USB / MIDI) — then Start clock here and the SP follows this BPM.'),
+//     span(null,'Start / Stop only drive its transport once the clock is running.'));
+// }
+// hint('transport', MAP.system_realtime.start_stop
+//   + ' There is no MIDI control for the unit\'s output volume: the front-panel [VOLUME] knob is not in the'
+//   + ' implementation chart, and CC7 is answered only in DJ mode (chart footnote *8), where it is the per-channel'
+//   + ' fader — those knobs are in the DJ section.');
 
 /* ---------- SHORTCUT FINDER ---------- */
 (async function shortcutFinder(){
