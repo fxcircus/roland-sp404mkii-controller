@@ -538,21 +538,29 @@
       radial-gradient(135% 105% at 28% 16%,rgba(255,255,255,.075),rgba(255,255,255,0) 58%),
       radial-gradient(105% 75% at 50% 120%,rgba(0,0,0,.34),rgba(0,0,0,0) 64%),
       linear-gradient(#35393f,#23272c);
-    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14), inset 0 -4px 6px rgba(0,0,0,.34), 0 2px 0 #0a0d10, 0 3px 5px rgba(0,0,0,.28);
-    transition:transform .07s ease, box-shadow .07s ease, background-color .12s ease}
+    /* taller wall under the cap so there is somewhere to travel to */
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14), inset 0 -4px 6px rgba(0,0,0,.34), 0 5px 0 #0a0d10, 0 7px 9px rgba(0,0,0,.32);
+    /* release decays quickly; the press itself is instant (see .active-key) */
+    transition:transform .05s ease, box-shadow .05s ease}
   [data-zn-theme='hardware'] .pad::after{border-color:rgba(255,255,255,.05)}
   /* numerals sit top-right as printed on the unit, filling about half the quadrant */
   [data-zn-theme='hardware'] .pad .num{
     position:absolute;top:3px;right:10px;
     font-size:30px;line-height:1;letter-spacing:1.2px;color:#d08a3a;
     text-shadow:0 0 4px rgba(255,150,45,.34), 0 0 11px rgba(255,140,35,.2), 0 1px 1px rgba(0,0,0,.75);
-    transition:color .14s ease, text-shadow .14s ease}
+    transition:color .07s ease, text-shadow .07s ease}
   /* struck: the pad sinks, but only the NUMERAL lights — a dim LED diffusing up
      through rubber, so the glow is wide and soft rather than bright */
+  /* The press must land on the SAME frame as the hit, or fast finger-drumming
+     reads as dropped presses — the cap is still easing down when the next one
+     arrives. transition:none on the struck state gives an instant attack while
+     the rule above keeps a short decay on release. */
   [data-zn-theme='hardware'] .pad.active-key{
-    transform:translateY(2px);
-    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14), inset 0 -4px 6px rgba(0,0,0,.34), 0 0 0 #0a0d10, 0 1px 3px rgba(0,0,0,.26)}
+    transform:translateY(5px);
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.62), inset 0 -1px 0 rgba(255,255,255,.05), 0 0 0 #0a0d10, 0 1px 2px rgba(0,0,0,.24);
+    transition:none}
   [data-zn-theme='hardware'] .pad.active-key .num{
+    transition:none;
     color:#ffc98a;
     text-shadow:0 0 6px rgba(255,170,80,.8), 0 0 16px rgba(255,150,45,.55), 0 0 34px rgba(255,140,35,.36), 0 0 58px rgba(255,132,28,.2)}
   /* the zine skirt hatch is redundant here — the knurl already textures the wall */
