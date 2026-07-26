@@ -422,9 +422,16 @@
      colliding with #wrap (max-width 1140 + 24px gap + 168px sidebar). */
   @media (min-width:1560px){
     #nav .navrow{
-      position:fixed;
-      top:104px;
-      left:max(16px, calc((100vw - 1140px) / 2 - 192px));
+    /* absolute inside the sticky #nav rather than fixed to the viewport, so
+       the sidebar's top edge tracks the nav bar's own top edge at every scroll
+       position — including once the bar is stuck — instead of guessing one
+       offset that only lined up at scroll 0. An absolute offset resolves
+       against #nav's padding box, so only its border has to be backed out —
+       the padding sits inside that box and doesn't shift us. 192px is the
+       sidebar's own 168px plus a 24px gutter. */
+      position:absolute;
+      top:calc(-1 * var(--bd-heavy));
+      left:calc(-1 * (var(--bd-heavy) + 192px));
       width:168px;
       flex-direction:column;
       align-items:stretch;
