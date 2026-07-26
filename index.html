@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-zn-theme="hardware">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -244,7 +244,8 @@
   /* pads */
   .padgrid{display:grid;grid-template-columns:repeat(4,minmax(74px,1fr));gap:12px;margin:10px 0;max-width:640px}
   .pad{position:relative;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
-    font-family:var(--marker);color:var(--ink);border:var(--bd-heavy) solid var(--ink);
+    font-family:var(--marker);color:var(--ink);background:var(--pad-force,var(--pad,var(--white)));
+    border:var(--bd-heavy) solid var(--ink);
     border-radius:var(--r-pad);box-shadow:var(--off) 5px 0 var(--shadow);cursor:pointer;padding:0;
     user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;
     touch-action:none;transition:none}
@@ -370,6 +371,272 @@
     .bus{padding:10px 11px}
     #fxRouting{padding:10px 11px}
   }
+
+  /* ==========================================================================
+     THEME: hardware — <html data-zn-theme="hardware">   (the default)
+     Ported from Claude Design templates/zine-v2. Emulates the real SP-404MKII:
+     graphite body, machined panels, amber silkscreen, black knobs with a single
+     white pointer.
+
+     It INVERTS the two structural tokens rather than restyling every component:
+     --ink becomes the light value (borders + text) and --white becomes
+     near-black (fills), so every "dark ink on white" component flips to "light
+     ink on graphite" for free. Only the places that hardcode a light or dark
+     literal need explicit rules below.
+
+     The attribute lives on <html>, not on the paper element, so every rule here
+     is a plain descendant selector — the design's own note warns that putting it
+     on the paper host needs compound selectors and fails silently otherwise.
+     ========================================================================== */
+  :root[data-zn-theme='hardware']{
+    --paper:#16181b; --paper2:#33383f; --panel:#23262b; --white:#1b1e22;
+    --ink:#e4e1da; --ink2:#9aa0a8; --shadow:#000;
+    --accent:#ff8a1f; --accent2:#b34d00;
+    /* machined, not hand-drawn: every legend is condensed mono silkscreen */
+    --marker:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --hand:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --bd:2px; --bd-heavy:2px; --off:2px; --off-lg:3px;
+    --dot:radial-gradient(rgba(255,255,255,.06) 1.2px,transparent 1.3px);
+    /* per-pad colour is an inline custom property, which no stylesheet rule can
+       outrank — so a theme wanting uniform pads sets this inherited override
+       instead of resorting to !important */
+    --pad-force:#2e3238;
+    --hatch-ink:repeating-linear-gradient(56deg,rgba(255,255,255,.16) 0 1.5px,rgba(255,255,255,0) 1.5px 6px);
+    --r-panel:7px; --r-panel-alt:7px; --r-btn:4px; --r-btn-sm:3px;
+    --r-chip:3px; --r-keycap:3px; --r-pad:7px; --r-sheet:4px; --r-display:3px;
+  }
+
+  /* ---- colour block ---- */
+  [data-zn-theme='hardware'] .card{border-color:#05070a;
+    box-shadow:var(--off-lg) var(--off-lg) 0 var(--shadow), inset 0 1px 0 rgba(255,255,255,.09)}
+  [data-zn-theme='hardware'] .card::after{inset:2px;border-color:rgba(255,255,255,.07);opacity:1;border-radius:6px}
+  /* silkscreen chip: light plate, dark legend — the boxed labels on the unit */
+  [data-zn-theme='hardware'] .card > h2,
+  [data-zn-theme='hardware'] .label,
+  [data-zn-theme='hardware'] b.mini,
+  [data-zn-theme='hardware'] .zn-steps b,
+  [data-zn-theme='hardware'] #fxRouting .title,
+  [data-zn-theme='hardware'] .sc-cat,
+  [data-zn-theme='hardware'] .devpanel h3,
+  [data-zn-theme='hardware'] details#dev > summary{
+    background:#cfcbc2;color:#14171a;border-radius:3px;font-size:12px;letter-spacing:1.2px}
+  [data-zn-theme='hardware'] .card > h2 .n{background:#14171a;color:#cfcbc2}
+  [data-zn-theme='hardware'] .sc-cat .cnt{color:rgba(20,23,26,.6)}
+  /* nameplate: dark with an amber edge, like the printed logo area */
+  [data-zn-theme='hardware'] #hero h1{background:#0f1216;color:var(--ink);border-radius:5px;
+    transform:none;box-shadow:var(--off) var(--off) 0 var(--accent);text-shadow:none}
+  [data-zn-theme='hardware'] #hero h1 span{color:var(--accent)}
+  /* buttons: graphite caps, amber legend; lit state is amber-filled */
+  [data-zn-theme='hardware'] .sbtn,
+  [data-zn-theme='hardware'] .seg-btn,
+  [data-zn-theme='hardware'] #nav button{background:#2b2f35;color:#f0b57a;border-color:#05070a;
+    border-radius:4px;letter-spacing:1.2px}
+  [data-zn-theme='hardware'] .sbtn:hover,
+  [data-zn-theme='hardware'] .seg-btn:hover,
+  [data-zn-theme='hardware'] #nav button:hover{background:#363b42}
+  [data-zn-theme='hardware'] .sbtn.on,
+  [data-zn-theme='hardware'] .seg-btn.on,
+  [data-zn-theme='hardware'] #nav button.active{background:var(--accent);color:#14171a;
+    box-shadow:var(--off) var(--off) 0 var(--shadow)}
+  /* readouts stay a real backlit LCD — they must not follow the ink inversion */
+  [data-zn-theme='hardware'] .knob-val,
+  [data-zn-theme='hardware'] .dd.lcd .dd-trigger{background-color:#0a0d10;background-image:none;
+    color:#d8f4ea;border-color:#05070a;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+  [data-zn-theme='hardware'] .sc-key{background:#2b2f35;color:var(--ink2);border-color:#05070a}
+  [data-zn-theme='hardware'] .lamp{background:#2b2f35;border-color:#05070a}
+  [data-zn-theme='hardware'] .lamp.on{background:#ff3b30;box-shadow:0 0 9px rgba(255,59,48,.85)}
+  /* pads: uniform graphite with amber numerals, as on the unit */
+  [data-zn-theme='hardware'] .pad{color:var(--accent);border-color:#05070a;border-radius:5px}
+  [data-zn-theme='hardware'] .pad::after{inset:2px;border-color:rgba(255,255,255,.08);opacity:1}
+  [data-zn-theme='hardware'] .pad.active-key{filter:none}
+  /* knobs: black body, single white pointer */
+  [data-zn-theme='hardware'] .k-body{fill:#14171a;stroke:#05070a}
+  [data-zn-theme='hardware'] .k-skirt{fill:#0b0e11;stroke:#05070a}
+  [data-zn-theme='hardware'] .k-ptr{stroke:#f2efe8}
+  [data-zn-theme='hardware'] .k-notch{stroke:rgba(255,255,255,.3)}
+  [data-zn-theme='hardware'] .k-track{stroke:rgba(255,255,255,.14)}
+  /* dropdown paper becomes a graphite menu plate */
+  [data-zn-theme='hardware'] .dd-leaf{background:#23262b;border-color:#05070a}
+  [data-zn-theme='hardware'] .dd-trigger{background:#2b2f35;border-color:#05070a;border-radius:4px}
+  [data-zn-theme='hardware'] .dd-opt:hover{background:#33383f}
+  [data-zn-theme='hardware'] .dd-opt.sel{background:var(--accent);color:#14171a}
+  /* the piano has no hardware counterpart; keep it readable rather than letting
+     the ink inversion flip white keys dark and black keys light */
+  [data-zn-theme='hardware'] .wkey{background:#c9c5bd;color:#2a2d31;border-color:#05070a}
+  [data-zn-theme='hardware'] .wkey.c-key{color:#b34d00}
+  [data-zn-theme='hardware'] .wkey.active-key{background:var(--accent);color:#14171a}
+  [data-zn-theme='hardware'] .bkey{background:#15181b;border-color:#05070a;color:rgba(255,255,255,.5)}
+  [data-zn-theme='hardware'] .bkey.active-key{background:var(--accent);color:#14171a}
+  [data-zn-theme='hardware'] #fxRouting{border-color:rgba(255,255,255,.22)}
+  [data-zn-theme='hardware'] .bus{background:#23262b;border-color:#05070a}
+  [data-zn-theme='hardware'] .bus-ch{background:#cfcbc2;color:#14171a}
+  [data-zn-theme='hardware'] #monLog{background:#0a0d10;color:#d8f4ea;border-color:#05070a}
+  [data-zn-theme='hardware'] #monLog .in{color:#7fb0ff}
+  [data-zn-theme='hardware'] #monLog .out{color:#7ad9a0}
+  [data-zn-theme='hardware'] #monLog .err{color:#ff7a6e}
+  [data-zn-theme='hardware'] .devpanel,
+  [data-zn-theme='hardware'] .checkitem{background:#23262b;border-color:#05070a}
+  [data-zn-theme='hardware'] .checkitem textarea,
+  [data-zn-theme='hardware'] .devpanel input[type=text],
+  [data-zn-theme='hardware'] #scSearch{background:#1b1e22;color:var(--ink);border-color:#05070a}
+  [data-zn-theme='hardware'] .sc-cap.full{background:var(--accent);color:#14171a;border-color:#05070a}
+  [data-zn-theme='hardware'] .sc-cap.partial,
+  [data-zn-theme='hardware'] .sc-cap.hw{background:#2b2f35;color:var(--ink);border-color:#05070a}
+  [data-zn-theme='hardware'] .sc-item{border-bottom-color:rgba(255,255,255,.09)}
+  [data-zn-theme='hardware'] .looprow{border-bottom-color:rgba(255,255,255,.09)}
+  [data-zn-theme='hardware'] a{color:#ffb974}
+
+  /* ---- material pass ---------------------------------------------------
+     Same theme, second layer: brushed-metal chassis, moulded rubber pads with a
+     real LED bloom, machined knobs. These intentionally re-declare a few
+     properties above and win on source order, so colour and material decisions
+     stay separately readable. ------------------------------------------- */
+  [data-zn-theme='hardware'] body,
+  body[data-zn-theme='hardware']{
+    background-color:#15181b;
+    background-image:
+      linear-gradient(178deg,rgba(255,255,255,.035),rgba(255,255,255,0) 22%),
+      radial-gradient(130% 55% at 50% -8%,rgba(255,255,255,.028),transparent 62%),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.011) 0 1px,rgba(0,0,0,.014) 1px 3px,transparent 3px 6px),
+      linear-gradient(#1c2024,#0f1215)}
+  [data-zn-theme='hardware'] .card{
+    background-color:#22262b;
+    background-image:
+      linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 13%),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.008) 0 1px,transparent 1px 4px),
+      linear-gradient(#272b31,#1a1d21);
+    border-color:#05070a;border-radius:8px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.11), inset 0 -1px 0 rgba(0,0,0,.65), 0 7px 16px rgba(0,0,0,.55)}
+  [data-zn-theme='hardware'] .card::before{border-top-color:#05070a;
+    background:linear-gradient(#0d1013,#05070a);opacity:1}
+  [data-zn-theme='hardware'] #nav{background-color:#22262b;
+    background-image:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 13%),linear-gradient(#272b31,#1a1d21);
+    border-color:#05070a;border-radius:8px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.11), 0 7px 16px rgba(0,0,0,.55)}
+  /* engraved nameplate */
+  [data-zn-theme='hardware'] #hero h1{
+    background-image:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 40%),linear-gradient(#1a1e22,#0d1013);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.13), 0 4px 10px rgba(0,0,0,.6);
+    text-shadow:0 -1px 0 rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.09)}
+
+  /* moulded rubber pads: matte crosshatch, domed top light, seated in the panel */
+  [data-zn-theme='hardware'] .pad{
+    border-width:1px;border-color:#05070a;border-radius:7px;
+    background-color:#2a2e34;
+    background-image:
+      radial-gradient(135% 105% at 28% 16%,rgba(255,255,255,.075),rgba(255,255,255,0) 58%),
+      radial-gradient(105% 75% at 50% 120%,rgba(0,0,0,.34),rgba(0,0,0,0) 64%),
+      linear-gradient(#35393f,#23272c);
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14), inset 0 -4px 6px rgba(0,0,0,.34), 0 2px 0 #0a0d10, 0 3px 5px rgba(0,0,0,.28);
+    transition:transform .07s ease, box-shadow .07s ease, background-color .12s ease}
+  [data-zn-theme='hardware'] .pad::after{border-color:rgba(255,255,255,.05)}
+  /* numerals sit top-right as printed on the unit, filling about half the quadrant */
+  [data-zn-theme='hardware'] .pad .num{
+    position:absolute;top:3px;right:10px;
+    font-size:30px;line-height:1;letter-spacing:1.2px;color:#d08a3a;
+    text-shadow:0 0 4px rgba(255,150,45,.34), 0 0 11px rgba(255,140,35,.2), 0 1px 1px rgba(0,0,0,.75);
+    transition:color .14s ease, text-shadow .14s ease}
+  /* struck: the pad sinks, but only the NUMERAL lights — a dim LED diffusing up
+     through rubber, so the glow is wide and soft rather than bright */
+  [data-zn-theme='hardware'] .pad.active-key{
+    transform:translateY(2px);
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14), inset 0 -4px 6px rgba(0,0,0,.34), 0 0 0 #0a0d10, 0 1px 3px rgba(0,0,0,.26)}
+  [data-zn-theme='hardware'] .pad.active-key .num{
+    color:#ffc98a;
+    text-shadow:0 0 6px rgba(255,170,80,.8), 0 0 16px rgba(255,150,45,.55), 0 0 34px rgba(255,140,35,.36), 0 0 58px rgba(255,132,28,.2)}
+  /* the zine skirt hatch is redundant here — the knurl already textures the wall */
+  [data-zn-theme='hardware'] .k-skirt-tex{display:none}
+
+  /* buttons: moulded caps with a bevel, sinking on press. Legends idle at a low
+     ember and brighten when pressed — the unit's backlighting is always on. */
+  [data-zn-theme='hardware'] .sbtn,
+  [data-zn-theme='hardware'] .seg-btn,
+  [data-zn-theme='hardware'] #nav button{
+    border-width:1px;color:#d99a55;
+    text-shadow:0 0 4px rgba(255,150,45,.32), 0 0 10px rgba(255,140,35,.18);
+    background-image:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,0) 46%),linear-gradient(#33383f,#22262b);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.15), 0 3px 0 #0a0d10, 0 5px 10px rgba(0,0,0,.5);
+    transition:color .12s ease, text-shadow .12s ease, transform .07s ease, box-shadow .07s ease}
+  [data-zn-theme='hardware'] .sbtn:hover,
+  [data-zn-theme='hardware'] .seg-btn:hover,
+  [data-zn-theme='hardware'] #nav button:hover{color:#ffb974;
+    text-shadow:0 0 6px rgba(255,160,60,.55), 0 0 16px rgba(255,140,35,.3)}
+  [data-zn-theme='hardware'] .sbtn:active,
+  [data-zn-theme='hardware'] .sbtn.held{
+    transform:translateY(3px);box-shadow:inset 0 2px 6px rgba(0,0,0,.75), 0 0 0 #0a0d10;
+    color:#ffd7a5;text-shadow:0 0 7px rgba(255,175,85,.8), 0 0 20px rgba(255,150,45,.5), 0 0 38px rgba(255,140,35,.3)}
+  [data-zn-theme='hardware'] .sbtn.on,
+  [data-zn-theme='hardware'] .seg-btn.on,
+  [data-zn-theme='hardware'] #nav button.active{
+    background-image:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0) 50%),linear-gradient(#ff9a2e,#e07000);
+    color:#2a1600;text-shadow:0 1px 0 rgba(255,255,255,.28);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 3px 0 #0a0d10, 0 0 20px rgba(255,140,30,.5)}
+  /* Danger must be restated HERE, after the generic .sbtn rule above: both are
+     (0,2,0), so the later one wins outright and a colour set earlier never lands. */
+  [data-zn-theme='hardware'] .sbtn.danger{
+    color:#ffe4de;text-shadow:0 0 5px rgba(255,90,70,.55), 0 0 14px rgba(255,60,45,.3);
+    background-image:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,0) 48%),linear-gradient(#cc2a22,#8e1712);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 3px 0 #0a0d10, 0 0 18px rgba(220,50,40,.45)}
+  [data-zn-theme='hardware'] .sbtn.danger:hover{color:#fff4f1;
+    text-shadow:0 0 7px rgba(255,110,90,.7), 0 0 20px rgba(255,60,45,.42)}
+  [data-zn-theme='hardware'] .sbtn.danger:active{color:#fffaf9;
+    text-shadow:0 0 8px rgba(255,130,110,.85), 0 0 24px rgba(255,60,45,.5)}
+  [data-zn-theme='hardware'] .sc-key{
+    background-image:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,0) 50%),linear-gradient(#31363d,#21252a);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 2px 0 #0a0d10}
+  [data-zn-theme='hardware'] .lamp{
+    background-image:radial-gradient(circle at 34% 30%,rgba(255,255,255,.22),transparent 60%);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.8)}
+  [data-zn-theme='hardware'] .lamp.on{
+    background-image:radial-gradient(circle at 34% 30%,rgba(255,255,255,.65),transparent 62%);
+    box-shadow:0 0 12px 3px rgba(255,59,48,.8), inset 0 1px 0 rgba(255,255,255,.5)}
+
+  /* backlit LCD: recessed, faint scanlines, phosphor glow on the glyphs */
+  [data-zn-theme='hardware'] .knob-val,
+  [data-zn-theme='hardware'] .dd.lcd .dd-trigger{
+    background-image:repeating-linear-gradient(180deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px);
+    text-shadow:0 0 7px rgba(150,255,220,.55);
+    box-shadow:inset 0 2px 7px rgba(0,0,0,.9), inset 0 0 0 1px rgba(255,255,255,.07)}
+
+  /* machined knobs: top-down cap, single white index line. No value ring — the
+     real unit has no light collar — so the knob scales up to fill that space.
+     Scale the <svg>, NOT its children: the pointer lives in a
+     <g transform="rotate(...)"> and a CSS transform there freezes the rotation. */
+  [data-zn-theme='hardware'] .k-track,
+  [data-zn-theme='hardware'] .k-fill{display:none}
+  [data-zn-theme='hardware'] .knob-svg{transform:scale(1.6);transform-origin:50% 47%;
+    filter:drop-shadow(0 5px 6px rgba(0,0,0,.65));margin-bottom:7px}
+  [data-zn-theme='hardware'] .k-skirt,
+  [data-zn-theme='hardware'] .k-notch{display:none}
+  [data-zn-theme='hardware'] .k-body{fill:url(#znCapGrad);stroke:#05070a;stroke-width:3}
+  [data-zn-theme='hardware'] .k-flute{stroke:rgba(255,255,255,.3);stroke-width:1.6;opacity:1}
+  /* the index line is a raised plastic ridge running past the cap edge. Scaled
+     about its inner endpoint so only the outer end travels; safe because the
+     rotation lives on the parent <g>, which this never touches. */
+  [data-zn-theme='hardware'] .k-ptr{stroke:#fdfbf7;stroke-width:5.5;
+    transform:scaleY(2.15);transform-origin:52px 34px}
+  [data-zn-theme='hardware'] .knob{width:132px}
+  [data-zn-theme='hardware'] .knob-row{gap:22px}
+
+  /* hardware dropdown: a plain drawer, not origami. clip-path needs !important
+     because the shared rule kills it outright to stop the base reveal fighting
+     the fold. */
+  [data-zn-theme='hardware'] .dd-fold{transform:rotateX(0deg);transition:none}
+  [data-zn-theme='hardware'] .dd-panel{
+    clip-path:inset(0 0 100% 0) !important;transform:translateY(-5px);
+    filter:drop-shadow(0 10px 18px rgba(0,0,0,.6))}
+  /* The shared open/closing rule sets `transition:none` — fine for origami where
+     the motion is on .dd-fold, fatal for a drawer animating the panel itself. It
+     outranks a plain [theme] .dd-panel rule, so declare it on selectors that
+     beat (0,3,0). */
+  [data-zn-theme='hardware'] .dd.open .dd-panel,
+  [data-zn-theme='hardware'] .dd.closing .dd-panel{transition:clip-path .19s ease, transform .19s ease}
+  [data-zn-theme='hardware'] .dd.open .dd-panel{clip-path:inset(0 0 0 0) !important;transform:translateY(0)}
+  /* one continuous plate: no creases, no fold shading */
+  [data-zn-theme='hardware'] .dd-leaf{border-top-width:0;border-bottom-width:0;border-radius:0;box-shadow:none}
+  [data-zn-theme='hardware'] .dd-leaf.first{border-top-width:1px;border-radius:4px 4px 0 0}
+  [data-zn-theme='hardware'] .dd-leaf.last{border-bottom-width:1px;border-radius:0 0 4px 4px}
+  [data-zn-theme='hardware'] .dd-leaf::before{display:none}
 </style>
 </head>
 <body>
@@ -377,6 +644,16 @@
   <pattern id="znSkirtHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(56)">
     <line x1="0" y1="0" x2="0" y2="6" stroke="#ffffff" stroke-width="1.5" opacity=".95"></line>
   </pattern>
+  <pattern id="znKnurl" width="5" height="5" patternUnits="userSpaceOnUse">
+    <rect width="5" height="5" fill="#0b0e11"></rect>
+    <rect x="0" width="1.5" height="5" fill="#31363d"></rect>
+    <rect x="2.6" width="1" height="5" fill="#000000" opacity=".65"></rect>
+  </pattern>
+  <linearGradient id="znCapGrad" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2d323a"></stop>
+    <stop offset="52%" stop-color="#212529"></stop>
+    <stop offset="100%" stop-color="#181c20"></stop>
+  </linearGradient>
 </defs></svg>
 
 <div id="loadError"></div>
@@ -405,6 +682,7 @@
     <button data-t="dev">Dev</button>
   </div>
   <div class="status"><span class="lamp" id="lamp"></span><span id="connStatus">starting…</span>
+    <button id="themeBtn" class="sbtn sm" type="button">Theme</button>
     <button id="panicBtn" class="sbtn sm danger" type="button">Stop All</button></div>
 </nav>
 
@@ -794,7 +1072,7 @@ function makeKnob(opts){
     + '<path class="k-track" d="M22.3,75.7 A42,42 0 1 1 81.7,75.7"/>'
     + '<path class="k-fill" d=""/>'
     + '<path class="k-skirt" d="'+skirt+'"/>'
-    + '<path d="'+skirt+'" fill="url(#znSkirtHatch)" stroke="none"/>'
+    + '<path class="k-skirt-tex" d="'+skirt+'" fill="url(#znSkirtHatch)" stroke="none"/>'
     + (prof==='profile' ? '<g class="k-flute">'+FLUTES.map(f=>'<line x1="'+f[0]+'" y1="'+f[1]+'" x2="'+f[0]+'" y2="'+f[2]+'"/>').join('')+'</g>' : '')
     + '<ellipse class="k-body" cx="52" cy="46" rx="27" ry="25"/>'
     + '<circle class="k-notch" cx="52" cy="46" r="21" fill="none" stroke-dasharray="2.5 8.5"/>'
@@ -1145,7 +1423,7 @@ const PAD_COLORS = ['#89e9a3','#fda2d0','#ffd977','#ffb287','#bea3f4','#88dcf6',
                     '#ffcf6b','#f2a1ef','#99c9fb','#b8ef85','#ffab9e','#ccadf7','#78e6d5','#ffc2da'];
 for(let pad=1; pad<=16; pad++){
   const note = padToNote[pad];
-  const p = div('pad'); p.style.background = PAD_COLORS[(pad-1) % PAD_COLORS.length];
+  const p = div('pad'); p.style.setProperty('--pad', PAD_COLORS[(pad-1) % PAD_COLORS.length]);
   p.title = 'Pad '+pad+' — '+noteName(note)+' (note '+note+')';
   p.append(span('num', String(pad)));
   p.addEventListener('pointerdown', ()=>{ lastPadByBank[padBank] = pad; selectedOnSP = {bank:padBank, pad}; refreshChromaTarget(); });
@@ -1470,6 +1748,30 @@ if('IntersectionObserver' in window){
     + '<polyline points="'+pts.join(' ')+'" fill="none" stroke="#fff" stroke-width="3.2" '
     + 'stroke-linejoin="round" stroke-linecap="round"/>';
 })();
+
+/* ---------- theme switch ----------
+   hardware (default) emulates the real unit; zine is the blue paper look. The
+   attribute sits on <html> and is set in the markup too, so there is no flash
+   of the wrong theme before this runs. */
+const THEMES = [
+  { id:'hardware', label:'Hardware' },
+  { id:'zine',     label:'Zine'     },
+];
+function applyTheme(id){
+  const t = THEMES.find(x=>x.id===id) || THEMES[0];
+  /* zine is what :root already carries, so it is the absence of the attribute */
+  if(t.id === 'hardware') document.documentElement.setAttribute('data-zn-theme','hardware');
+  else document.documentElement.removeAttribute('data-zn-theme');
+  $('themeBtn').textContent = t.label;
+  $('themeBtn').title = 'Theme: '+t.label+' — click to switch';
+  lsSet('sp404_theme', t.id);
+}
+$('themeBtn').addEventListener('click', ()=>{
+  const cur = lsGet('sp404_theme') || 'hardware';
+  const i = THEMES.findIndex(x=>x.id===cur);
+  applyTheme(THEMES[(i+1) % THEMES.length].id);
+});
+applyTheme(lsGet('sp404_theme') || 'hardware');
 
 /* ---------- go ---------- */
 $('dev').open = false;     // developer tools always start collapsed
