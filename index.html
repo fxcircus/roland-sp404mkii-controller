@@ -190,9 +190,12 @@
   .k-ptr,.k-ptr-side{fill:none;stroke:var(--ink);stroke-width:var(--ptr-w);
     stroke-linecap:round;stroke-linejoin:round}
   /* A vertical stripe on a cylinder foreshortens HORIZONTALLY as it wraps away
-     from you — widest facing the viewer, nothing at all edge-on. Same sin()
+     from you — nothing at all edge-on, widest where it faces you. Same sin()
      that drives the overhang's length, applied to its weight, so it tapers off
-     in both dimensions instead of ending as a blunt full-width stub. */
+     in both dimensions instead of ending as a blunt full-width stub.
+     Normalised so full weight lands at the ends of the sweep (see the JS): the
+     raw sin never exceeds 0.707 there, which left a visible step at the rim
+     even at the extremes, where the line should read as one continuous stroke. */
   .k-ptr-side{stroke-width:calc(var(--ptr-w) * var(--side-scale,1))}
   /* The overhang is a hardware-theme detail. Zine's skirt is solid --ink, so a
      black line lands on black and reads as nothing — it earned no keep there. */
@@ -1495,6 +1498,7 @@ function makeKnob(opts){
      Travel runs 7:30 to 4:30, so the pointer never reaches 6 o'clock — the
      overhang is longest at both ends of the sweep and gone by the horizontal. */
   const f1 = n => n.toFixed(1);
+  const SIDE_MAX_SIN = Math.SQRT1_2;      // sin(45deg): the sweep's front-most reach
   function paintPointer(frac){
     const rad = (135 + 270*frac) * Math.PI/180;
     const sn = Math.sin(rad), cs = Math.cos(rad);
@@ -1502,7 +1506,11 @@ function makeKnob(opts){
     const rimX = 52 + 27*cs, rimY = 46 + 25*sn;      // the cap's edge at this angle
     ptrEl.setAttribute('d', 'M'+f1(inX)+','+f1(inY)+' L'+f1(rimX)+','+f1(rimY));
     if(sn <= 0.02){ sideEl.setAttribute('d',''); return; }
-    sideEl.style.setProperty('--side-scale', sn.toFixed(3));
+    /* 0.707 is the most the pointer's sin ever reaches — travel stops at 7:30
+       and 4:30, so 6 o'clock is never in range. Normalising by it puts FULL
+       weight at both ends of the sweep, where the overhang should be a seamless
+       continuation of the line, and keeps the taper for everything between. */
+    sideEl.style.setProperty('--side-scale', Math.min(1, sn / SIDE_MAX_SIN).toFixed(3));
     sideEl.setAttribute('d', 'M'+f1(rimX)+','+f1(rimY)+' L'+f1(rimX)+','+f1(rimY + h*sn));
   }
   function paint(){
