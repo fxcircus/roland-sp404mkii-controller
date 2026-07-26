@@ -186,12 +186,10 @@
   .k-flute{stroke:#fff;stroke-width:2.2;stroke-linecap:round;opacity:.9;fill:none}
   .k-body{fill:var(--white);stroke:var(--ink);stroke-width:5.5;stroke-linejoin:round}
   .k-notch{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;opacity:.55;fill:none}
-  /* The wall segment is the same stroke as the cap portion — it is one index
-     line bending over an edge, so it takes one colour. In zine that means black
-     on the inked skirt, which merges the way ink on ink does; the overhang
-     reads mainly in the hardware theme, where the wall is dark and the line
-     is light. */
   .k-ptr,.k-ptr-side{fill:none;stroke:var(--ink);stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round}
+  /* The overhang is a hardware-theme detail. Zine's skirt is solid --ink, so a
+     black line lands on black and reads as nothing — it earned no keep there. */
+  .k-ptr-side{display:none}
   .knob.drag .k-fill{stroke:var(--accent2)}
   .knob:focus-visible{outline:none}
   .knob:focus-visible .k-body{stroke:var(--accent2)}
@@ -939,7 +937,12 @@
      real unit has no light collar — so the knob scales up to fill that space.
      Scale the <svg>, NOT its children: the pointer lives in a
      <g transform="rotate(...)"> and a CSS transform there freezes the rotation. */
-  [data-zn-theme='hardware'] .k-fill{display:none}
+  /* The value arc was hidden here so a knob looked like a knob. Modulation
+     changed the maths: a knob with an LFO gets a teal collar, so an unmodulated
+     one was the only control on the panel with no position readout at all.
+     It comes back as an amber LED ring, and steps aside when the collar takes
+     over so the two never state the same thing twice. */
+  [data-zn-theme='hardware'] .knob.modulated .k-fill{display:none}
   [data-zn-theme='hardware'] .knob-svg{margin-bottom:2px}
   [data-zn-theme='hardware'] .k-notch{display:none}
   /* flat fill, not a gradient: at natural size the gradient banded across the
@@ -953,6 +956,7 @@
      about the line's inner end (52,34), so only the outer tip travels. */
   [data-zn-theme='hardware'] .k-ptr,
   [data-zn-theme='hardware'] .k-ptr-side{stroke:#fdfbf7;stroke-width:5.5}
+  [data-zn-theme='hardware'] .k-ptr-side{display:block}
   [data-zn-theme='hardware'] .knob-row{gap:18px}
 
   /* hardware dropdown: a plain drawer, not origami. clip-path needs !important
