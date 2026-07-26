@@ -1627,19 +1627,21 @@ BUSES.forEach(bus=>{
     });
   }
   applyParams();
-  bus.fx = fx; bus.setEfx = on=>{ efxOn=on; efx.classList.toggle('on',on); };
+  bus.fx = fx; bus.setEfx = on=>{ efxOn=on; efx.classList.toggle('on',on); }; bus.efxOn = ()=>efxOn;
   bus.applyParams = applyParams; bus.stripEl = strip; bus.annEl = ann;
   $('fxCols').appendChild(strip);
 });
 
 /* ---------- declared audio routing ---------- */
 const ROUTING = MAP.audio_routing;
+let routeApi = null;
 if(ROUTING && Array.isArray(ROUTING.params)){
   const routeState = (function(){
     let saved = {}; try{ saved = JSON.parse(lsGet('sp404_routing')) || {}; }catch(e){}
     const st = {}; ROUTING.params.forEach(p=>{ st[p.key] = (p.options.includes(saved[p.key]) ? saved[p.key] : p.ui_default); });
     return st;
   })();
+  const routeDDs = {};
   const wrap = $('fxRouting');
   wrap.appendChild(div('title','Your SP audio routing — declare it (the app can’t read it; it always sends on ch1-5)'));
   const grid = div('rgrid');
@@ -1647,6 +1649,7 @@ if(ROUTING && Array.isArray(ROUTING.params)){
     const lab = el('label','rlab'); lab.appendChild(document.createTextNode(p.label));
     const dd = makeDropdown({ options:p.options, value:routeState[p.key], onChange:v=>{ routeState[p.key]=v; lsSet('sp404_routing', JSON.stringify(routeState)); applyRouting(); } });
     if(p.note) dd.el.title = p.note;
+    routeDDs[p.key] = dd;
     lab.appendChild(dd.el); grid.appendChild(lab);
   });
   wrap.appendChild(grid);
@@ -1672,6 +1675,19 @@ if(ROUTING && Array.isArray(ROUTING.params)){
       + '.  Hardware-only settings; nothing here is sent over MIDI.';
   }
   applyRouting();
+  routeApi = {
+    get: ()=> Object.assign({}, routeState),
+    set: obj=>{
+      if(!obj) return;
+      ROUTING.params.forEach(p=>{
+        if(!p.options.includes(obj[p.key])) return;
+        routeState[p.key] = obj[p.key];
+        if(routeDDs[p.key]) routeDDs[p.key].set(obj[p.key]);
+      });
+      lsSet('sp404_routing', JSON.stringify(routeState));
+      applyRouting();
+    },
+  };
 }
 
 /* ---------- pressable key helper ---------- */
@@ -1717,6 +1733,7 @@ for(let pad=1; pad<=16; pad++){
   $('padGrid').appendChild(p);
 }
 
+let extApi = null;
 {
   const extBtn = sbtn('EXT SOURCE','accent2'); $('extMount').appendChild(extBtn);
   const modeBtn = $('extModeToggle');
@@ -1739,6 +1756,30 @@ for(let pad=1; pad<=16; pad++){
   extBtn.addEventListener('pointerup', up);
   extBtn.addEventListener('pointerleave', up);
   extBtn.addEventListener('pointercancel', up);
+  function setGate(g){
+    if(!!g === gateMode) return;
+    extOff();
+    gateMode = !!g; modeBtn.textContent = 'mode: '+(gateMode?'gate (hold)':'toggle');
+  }
+  /* Restoring "on" silently is the CORRECT reading, not a fudge: a latched note
+     was already sent and nothing sent note-off, so the SP is still holding it
+     across the refresh. Keeping the channel matters — a later toggle has to
+     send note-off on the channel the note actually went out on. */
+  extApi = {
+    get: ()=> ({ on: onCh !== null, ch: onCh, gate: gateMode }),
+    set: (st, send)=>{
+      if(!st) return;
+      setGate(st.gate);
+      if(st.on){
+        if(send){ extOff(); extOn(); }
+        else{ onCh = st.ch || padCh();
+          extBtn.classList.add(gateMode ? 'held' : 'on'); extBtn.setAttribute('aria-pressed','true'); }
+      }else{
+        if(send) extOff();
+        else{ onCh = null; extBtn.classList.remove('on','held'); extBtn.setAttribute('aria-pressed','false'); }
+      }
+    },
+  };
 }
 
 /* ---------- CHROMATIC ----------
@@ -1871,8 +1912,12 @@ const patBankBtns = [];
 for(let i=0;i<10;i++){
   const b = sbtn(BANK_LETTERS[i], 'sm'); if(i===0) b.classList.add('on');
   b.title = 'Bank '+BANK_LETTERS[i]+' (ch'+(i+1)+')';
-  b.addEventListener('click', ()=>{ patBank = i+1; patBankBtns.forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
+  b.addEventListener('click', ()=> setPatBank(i+1));
   patBankBtns.push(b); $('patBanks').appendChild(b);
+}
+function setPatBank(n){
+  patBank = Math.max(1, Math.min(10, n));
+  patBankBtns.forEach((x,i)=> x.classList.toggle('on', i === patBank - 1));
 }
 for(let p=PC_LO; p<=PC_HI; p++){ const b = sbtn(String(p+1)); b.title = 'Pattern '+(p+1)+' (PC'+p+')'; b.addEventListener('click', ()=> sendPC(patBank, p, null)); $('patGrid').appendChild(b); }
 
@@ -1882,6 +1927,7 @@ hint('looper', LOOP.description+' All CCs on ch'+LOOP.channel+'. '
 /* One row of buttons grouped by what they do, plus a row for the knob. The old
    layout printed the hardware key ([EXIT], [DEL]…) as a chip beside a button
    that already said the same thing; that name is now the button's tooltip. */
+let loopTempoKnob = null;
 const LOOP_GROUPS = [
   { title:'Sampling', ccs:[88, 89, 87] },
   { title:'Playback', ccs:[85, 86] },
@@ -1926,6 +1972,7 @@ const LOOP_GROUPS = [
       const k = makeKnob({ label:rangeM[3].split(/\s*\/\s*/)[0], min:+rangeM[1], max:+rangeM[2],
         value:64, defaultVal:64, onChange:v=>sendCC(LOOP.channel, cc, v, null) });
       k.setTitle(rangeM[3] + ' — ' + def.function + ' · CC' + cc + ' on ch' + LOOP.channel);
+      loopTempoKnob = k;
       knobGroup.appendChild(k.el); hasKnob = true;
     } else if(!placed.has(ccStr)){
       const g = group('Other'); addButtons(cc, def, g); grid.appendChild(g);
@@ -2203,6 +2250,102 @@ $('themeBtn').addEventListener('click', ()=>{
   applyTheme(THEMES[(i+1) % THEMES.length].id);
 });
 applyTheme(lsGet('sp404_theme') || 'hardware');
+
+/* ---------- STATE ----------
+   One object describes the whole panel, and it does three jobs: it survives a
+   refresh, it fills a snapshot slot, and it rides in a share link.
+
+   The send/silent split is the important part.
+
+   * Restoring on BOOT is silent. The SP still holds whatever we last sent it —
+     a latched EXT note is still latched, BUS 1 is still on Vinyl Sim — so
+     re-sending on every page load would be noise at best, and at worst would
+     stamp a stale panel over knobs you have since moved on the unit. Silent
+     restore is the accurate reading of the situation, not a shortcut.
+   * Loading a SNAPSHOT sends. That is the entire point of pressing Load: you
+     want the unit reconfigured to match.
+
+   Saving polls rather than hooking every control. There are ~40 places state
+   can change and a missed hook is a silent data-loss bug; a 1.5s diff of a
+   small object costs nothing and cannot miss one.                            */
+const STATE_KEY = 'sp404_state';
+const STATE_V = 1;
+
+function collectState(){
+  return {
+    v: STATE_V,
+    fx: BUSES.map(b=>({ ch:b.ch, code:b.fx.get(), efx:b.efxOn(), k:b.knobs.map(k=>k.get()) })),
+    pads: { bank:padBank, vel:padVelKnob.get(), ext:extApi ? extApi.get() : null },
+    chroma: { vel:chromaVel.get() },
+    voc: { vel:vocVel.get() },
+    pat: { bank:patBank },
+    dj: { a:djVol[1].get(), b:djVol[2].get(), c:djVol[3].get(), x:djXfade.get() },
+    loop: loopTempoKnob ? { tempo:loopTempoKnob.get() } : null,
+    routing: routeApi ? routeApi.get() : null,
+    ui: { monitor:monOn, follow:followOn },
+  };
+}
+
+function applyState(st, send){
+  if(!st || typeof st !== 'object') return false;
+  const quiet = !send;                       // knob.set(v, silent)
+
+  if(Array.isArray(st.fx)) st.fx.forEach(f=>{
+    const bus = busByCh[f.ch]; if(!bus) return;
+    const code = String(f.code);
+    if(f.code != null && TABLES[bus.table] && TABLES[bus.table][code] != null){
+      bus.fx.set(code);
+      if(send) sendCC(bus.ch, CC_SEL, +code, null);
+    }
+    /* relabels and re-enables the knobs for the new effect — must run before
+       the values go in, or an OFF effect would zero what we just restored */
+    bus.applyParams();
+    if(Array.isArray(f.k)) f.k.forEach((v,i)=>{ if(bus.knobs[i] && v != null) bus.knobs[i].set(v, quiet); });
+    bus.setEfx(!!f.efx);
+    if(send) sendCC(bus.ch, CC_SW, f.efx ? 127 : 0, null);
+  });
+
+  if(st.pads){
+    if(st.pads.bank) setPadBank(st.pads.bank);
+    if(st.pads.vel != null) padVelKnob.set(st.pads.vel, true);
+    if(extApi) extApi.set(st.pads.ext, send);
+  }
+  if(st.chroma && st.chroma.vel != null) chromaVel.set(st.chroma.vel, true);
+  if(st.voc && st.voc.vel != null) vocVel.set(st.voc.vel, true);
+  if(st.pat && st.pat.bank) setPatBank(st.pat.bank);
+  if(st.dj){
+    if(st.dj.a != null) djVol[1].set(st.dj.a, quiet);
+    if(st.dj.b != null) djVol[2].set(st.dj.b, quiet);
+    if(st.dj.c != null) djVol[3].set(st.dj.c, quiet);
+    if(st.dj.x != null) djXfade.set(st.dj.x, quiet);
+  }
+  if(st.loop && loopTempoKnob && st.loop.tempo != null) loopTempoKnob.set(st.loop.tempo, quiet);
+  if(st.routing && routeApi) routeApi.set(st.routing);   // hardware-only; never sent
+  if(st.ui){
+    if(st.ui.monitor != null) setMonitor(!!st.ui.monitor);
+    if(st.ui.follow  != null){ followOn = !!st.ui.follow; paintFollow(); }
+  }
+  return true;
+}
+
+let lastSaved = null;
+function persistState(){
+  try{
+    const json = JSON.stringify(collectState());
+    if(json === lastSaved) return;
+    lastSaved = json;
+    lsSet(STATE_KEY, json);
+  }catch(e){}
+}
+{
+  let saved = null;
+  try{ saved = JSON.parse(lsGet(STATE_KEY)); }catch(e){}
+  if(saved && saved.v === STATE_V) applyState(saved, false);
+  lastSaved = JSON.stringify(collectState());
+}
+setInterval(persistState, 1500);
+window.addEventListener('pagehide', persistState);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') persistState(); });
 
 /* ---------- go ---------- */
 initMIDI();
