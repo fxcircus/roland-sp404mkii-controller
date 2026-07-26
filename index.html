@@ -52,7 +52,7 @@
   /* hero */
   #hero{display:flex;align-items:center;justify-content:center;padding:22px 10px 6px}
   #hero .hero-txt{text-align:left}
-  #hero h1{font-family:var(--marker);font-size:44px;margin:0;letter-spacing:.6px;line-height:1.05;
+  #hero h1{font-family:var(--marker);font-size:44px;margin:0;letter-spacing:.6px;line-height:1.05;white-space:nowrap;
     text-transform:uppercase;color:var(--white);background:var(--ink);display:inline-block;
     padding:9px 22px 11px;border-radius:6px 4px 5px 4px/4px 5px 4px 6px;
     box-shadow:var(--off) var(--off) 0 var(--accent);transform:rotate(-.7deg)}
@@ -671,7 +671,7 @@
 <div id="app" hidden>
 <header id="hero">
   <div class="hero-txt">
-    <h1>SP&#8209;404 <span>MKII</span></h1>
+    <h1>SP-404 <span>MKII</span></h1>
     <svg class="squig" viewBox="0 0 400 16" preserveAspectRatio="none" aria-hidden="true">
       <path d="M4,11 C40,4 62,14 96,9 C132,4 152,14 190,9 C226,4 250,14 288,8 C320,3 352,13 396,7"/>
     </svg>
@@ -1751,8 +1751,9 @@ function applyTheme(id){
   /* zine is what :root already carries, so it is the absence of the attribute */
   if(t.id === 'hardware') document.documentElement.setAttribute('data-zn-theme','hardware');
   else document.documentElement.removeAttribute('data-zn-theme');
-  $('themeBtn').textContent = t.label;
+  $('themeBtn').textContent = 'Theme';
   $('themeBtn').title = 'Theme: '+t.label+' — click to switch';
+  $('themeBtn').setAttribute('aria-label','Theme: '+t.label+', click to switch');
   lsSet('sp404_theme', t.id);
 }
 $('themeBtn').addEventListener('click', ()=>{
