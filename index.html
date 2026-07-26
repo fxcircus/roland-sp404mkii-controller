@@ -421,7 +421,6 @@
   <h2><span class="n">2</span>Transport</h2>
   <div class="row" id="rtMount"></div>
   <div class="row" id="clockMount"></div>
-  <div class="knob-row" id="volMount"></div>
 </section>
 
 <section id="fx" class="card">
@@ -1308,23 +1307,28 @@ clockBtn.addEventListener('click', ()=>{
 });
 
 /* ---------- DJ ---------- */
-hint('dj', MAP.dj_mode.warning);
-/* CC7 is the closest thing the SP has to a volume control — it is per-channel
-   (CH1 deck / CH2 deck / pattern sequencer) and only answered in DJ mode. There
-   is no master-volume CC in the implementation chart. */
+hint('dj', MAP.dj_mode.warning
+  + ' CC7 (VOL CH1 / CH2 / SEQ) and CC8 (X-FADE) are recognised, but only while the unit is in DJ mode'
+  + ' — implementation chart footnote *8. Outside DJ mode they do nothing.');
+/* There is NO MIDI control for the unit's output volume. The implementation
+   chart (p.168) lists CC#07 as "o *8 / o *8", and *8 is "control change message
+   numbers and corresponding controllers in DJ mode" — so CC7 is answered only
+   in DJ mode, and only as the CH1 / CH2 / pattern-sequencer channel faders. The
+   front-panel [VOLUME] knob that sets overall output level (p.19) appears
+   nowhere in the chart. These therefore live in DJ mode, where they work. */
 const VOL_LABELS = { 1:'VOL CH1', 2:'VOL CH2', 3:'VOL SEQ' };
 DJ_ROWS.forEach(({cc, ch})=>{
-  const isVol = cc === 7;
   const k = makeKnob({
-    label: isVol ? VOL_LABELS[ch] : 'X-FADE',
+    label: cc === 7 ? VOL_LABELS[ch] : 'X-FADE',
     min:0, max:127, value: cc===8?64:100, defaultVal: cc===8?64:100,
     onChange:v=>sendCC(ch, cc, v, null) });
-  k.setTitle(DJ_REC[String(cc)] + ' (CC'+cc+' ch'+ch+')');
-  (isVol ? $('volMount') : $('djRows')).appendChild(k.el);
+  k.setTitle(DJ_REC[String(cc)] + ' (CC'+cc+' ch'+ch+') — DJ mode only');
+  $('djRows').appendChild(k.el);
 });
 hint('transport', MAP.system_realtime.start_stop
-  + ' Volume is CC7 — per channel (CH1 deck / CH2 deck / pattern sequencer), answered in DJ mode only.'
-  + ' The SP has no master-volume CC.');
+  + ' There is no MIDI control for the unit\'s output volume: the front-panel [VOLUME] knob is not in the'
+  + ' implementation chart, and CC7 is answered only in DJ mode (chart footnote *8), where it is the per-channel'
+  + ' fader — those knobs are in the DJ section.');
 
 /* ---------- raw sender ---------- */
 $('rawSend').addEventListener('click', ()=>{
