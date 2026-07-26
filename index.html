@@ -190,23 +190,32 @@
   .xfade{width:250px;text-align:center;user-select:none}
   .xfade__track{position:relative;height:66px;cursor:ew-resize;touch-action:none}
   .xfade__slot{position:absolute;left:14px;right:14px;top:50%;height:13px;margin-top:-6.5px;
-    background:#0a0d10;border:2px solid #05070a;border-radius:2px;
-    box-shadow:inset 0 2px 5px rgba(0,0,0,.9)}
+    background:var(--ink);border-radius:2px}
   .xfade__post{position:absolute;top:5px;bottom:5px;width:5px;border-radius:1px;
-    background:linear-gradient(90deg,#8d8a83,#e7e3da 45%,#8d8a83);
-    box-shadow:0 1px 2px rgba(0,0,0,.6)}
+    background:var(--ink)}
   .xfade__post--l{left:4px}
   .xfade__post--r{right:4px}
   /* the cap travels along this inset rail so it never rides over the posts */
   .xfade__rail{position:absolute;left:26px;right:26px;top:0;bottom:0}
   .xfade__cap{position:absolute;top:0;bottom:0;width:32px;margin-left:-16px;
-    border:2px solid #05070a;border-radius:4px;
-    background-image:linear-gradient(90deg,#0d1014,#464c55 18%,#2c3138 50%,#464c55 82%,#0d1014);
-    box-shadow:0 4px 9px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.18);
+    border:var(--bd) solid var(--ink);border-radius:var(--r-btn-sm);
+    background:var(--white);
+    box-shadow:var(--off) var(--off) 0 var(--shadow);
     pointer-events:none}
   /* the index line belongs to the cap, so it moves with it */
-  .xfade__cap::after{content:'';position:absolute;left:50%;top:8px;bottom:8px;width:6px;
-    margin-left:-3px;border-radius:1px;
+  .xfade__cap::after{content:'';position:absolute;left:50%;top:7px;bottom:7px;width:4px;
+    margin-left:-2px;border-radius:1px;background:var(--ink)}
+
+  /* hardware keeps the machined part; the base above is the drawn one */
+  [data-zn-theme='hardware'] .xfade__slot{background:#0a0d10;border:2px solid #05070a;
+    box-shadow:inset 0 2px 5px rgba(0,0,0,.9)}
+  [data-zn-theme='hardware'] .xfade__post{
+    background:linear-gradient(90deg,#8d8a83,#e7e3da 45%,#8d8a83);
+    box-shadow:0 1px 2px rgba(0,0,0,.6)}
+  [data-zn-theme='hardware'] .xfade__cap{border:2px solid #05070a;border-radius:4px;
+    background-image:linear-gradient(90deg,#0d1014,#464c55 18%,#2c3138 50%,#464c55 82%,#0d1014);
+    box-shadow:0 4px 9px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.18)}
+  [data-zn-theme='hardware'] .xfade__cap::after{width:6px;margin-left:-3px;
     background:linear-gradient(90deg,#cfcbc2,#fdfbf7 45%,#cfcbc2);
     box-shadow:0 0 5px rgba(0,0,0,.6)}
   .xfade__ends{display:flex;justify-content:space-between;font-family:var(--mono);
@@ -382,6 +391,37 @@
   .sc-cap.hw{background:var(--white);color:var(--ink2)}
   .sc-link{font-family:var(--marker);font-size:12px;margin-left:8px;color:var(--accent2)}
   .sc-none{font-family:var(--hand);color:var(--ink2);padding:8px 4px}
+
+  /* Wide screens: the section list leaves the bar and becomes a fixed sidebar
+     in the left gutter. Because it is fixed it takes no layout space, so the
+     cards stay exactly where they are rather than being pushed right. The gate
+     is 1560px — below that the gutter is too narrow to hold it without
+     colliding with #wrap (max-width 1140 + 24px gap + 168px sidebar). */
+  @media (min-width:1560px){
+    #nav .navrow{
+      position:fixed;
+      top:104px;
+      left:max(16px, calc((100vw - 1140px) / 2 - 192px));
+      width:168px;
+      flex-direction:column;
+      align-items:stretch;
+      justify-content:flex-start;
+      gap:4px;
+      max-height:calc(100vh - 130px);
+      overflow-y:auto;
+      padding:10px;
+      background:var(--panel);
+      border:var(--bd) solid var(--ink);
+      border-radius:var(--r-panel);
+      box-shadow:var(--off-lg) var(--off-lg) 0 var(--shadow);
+    }
+    #nav .navrow button{text-align:left;padding:6px 11px}
+    #nav{padding:7px 14px}
+  }
+  [data-zn-theme='hardware'] #nav .navrow{
+    background-color:#22262b;border-color:#05070a;
+    background-image:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 13%),linear-gradient(#272b31,#1a1d21);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.11), 0 7px 16px rgba(0,0,0,.55)}
 
   @media (prefers-reduced-motion: reduce){
     .dd-fold,.dd-leaf::before{transition-duration:1ms!important;transition-delay:0ms!important}
@@ -1756,15 +1796,28 @@ hint('transport', MAP.system_realtime.start_stop
   render();
 })();
 
-/* ---------- jump menu ---------- */
-const navBtns = [...document.querySelectorAll('#nav button')];
+/* ---------- jump menu ----------
+   The hash tracks whichever section you are in, via replaceState so it never
+   piles up history entries, and is restored on load — refresh keeps you put. */
+const navBtns = [...document.querySelectorAll('#nav button[data-t]')];
+function markSection(id){
+  if(!id) return;
+  try{ history.replaceState(null, '', '#' + id); }catch(e){}
+}
 navBtns.forEach(b=> b.addEventListener('click', ()=>{
   const t = $(b.dataset.t); if(!t) return;
+  markSection(b.dataset.t);
   t.scrollIntoView({behavior:'smooth', block:'start'});
 }));
+{
+  /* restore before the observer starts firing, or it immediately rewrites the
+     hash to whatever is at the top of the page */
+  const want = decodeURIComponent(location.hash.replace('#',''));
+  if(want && $(want)) requestAnimationFrame(()=> $(want).scrollIntoView({block:'start'}));
+}
 if('IntersectionObserver' in window){
   const byId = {}; navBtns.forEach(b=> byId[b.dataset.t] = b);
-  const obs = new IntersectionObserver(entries=>{ entries.forEach(en=>{ if(en.isIntersecting){ navBtns.forEach(x=>x.classList.remove('active')); const b = byId[en.target.id]; if(b) b.classList.add('active'); } }); }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
+  const obs = new IntersectionObserver(entries=>{ entries.forEach(en=>{ if(en.isIntersecting){ navBtns.forEach(x=>x.classList.remove('active')); const b = byId[en.target.id]; if(b){ b.classList.add('active'); markSection(en.target.id); } } }); }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
   ['setup','transport','fx','pads','chromatic','vocoder','patterns','looper','dj','shortcuts'].forEach(id=>{ const s=$(id); if(s) obs.observe(s); });
 }
 
