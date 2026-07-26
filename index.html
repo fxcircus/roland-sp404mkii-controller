@@ -168,7 +168,9 @@
   .zn-steps b{font-family:var(--marker);font-size:12px;letter-spacing:1px;text-transform:uppercase;
     color:var(--white);background:var(--ink);border-radius:var(--r-chip);padding:3px 9px 4px}
   .zn-steps .k{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink);
-    background:var(--white);border:2px solid var(--ink);border-radius:var(--r-keycap);padding:2px 7px 3px}
+    background:var(--white);border:2px solid var(--ink);border-radius:var(--r-keycap);
+    box-shadow:2px 2px 0 var(--shadow);padding:2px 7px 3px;white-space:nowrap}
+  .zn-steps .plus{color:var(--ink2);font-size:12px;margin:0 -3px}
 
   /* effect bus strips */
   .bus{position:relative;border:var(--bd) solid var(--ink);background:var(--white);
@@ -447,7 +449,8 @@
   [data-zn-theme='hardware'] .knob-val,
   [data-zn-theme='hardware'] .dd.lcd .dd-trigger{background-color:#0a0d10;background-image:none;
     color:#d8f4ea;border-color:#05070a;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
-  [data-zn-theme='hardware'] .sc-key{background:#2b2f35;color:var(--ink2);border-color:#05070a}
+  [data-zn-theme='hardware'] .sc-key,
+  [data-zn-theme='hardware'] .zn-steps .k{background:#2b2f35;color:var(--ink2);border-color:#05070a}
   [data-zn-theme='hardware'] .lamp{background:#2b2f35;border-color:#05070a}
   [data-zn-theme='hardware'] .lamp.on{background:#ff3b30;box-shadow:0 0 9px rgba(255,59,48,.85)}
   /* pads: uniform graphite with amber numerals, as on the unit */
@@ -601,7 +604,8 @@
   [data-zn-theme='hardware'] .sbtn.danger:active{color:#fffaf9;
     text-shadow:0 0 8px rgba(255,130,110,.85), 0 0 24px rgba(255,60,45,.5)}
   /* keycaps are legends too — same dim backlight as the button caps */
-  [data-zn-theme='hardware'] .sc-key{
+  [data-zn-theme='hardware'] .sc-key,
+  [data-zn-theme='hardware'] .zn-steps .k{
     color:#d99a55;
     text-shadow:0 0 4px rgba(255,150,45,.32), 0 0 10px rgba(255,140,35,.18);
     background-image:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,0) 50%),linear-gradient(#31363d,#21252a);
@@ -1522,7 +1526,8 @@ function refreshChromaTarget(){
   box.innerHTML = '';
   box.append(
     el('b',null,'On the SP'),
-    span(null,'1. press the pad you want'), span('k','2. SHIFT + PAD 4'),
+    span(null,'1. press the pad you want'),
+    span(null,'2.'), span('k','SHIFT'), span('plus','+'), span('k','PAD 4'),
     span(null,'3. play here — these keys are ignored until the unit is in chromatic mode'));
 }
 buildPiano($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI);
