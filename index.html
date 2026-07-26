@@ -407,6 +407,23 @@
   #scSearch{width:270px;font-size:15px;padding:8px 12px;border:var(--bd) solid var(--ink);
     border-radius:var(--r-btn);font-family:var(--hand)}
   #scSearch:focus{outline:none;box-shadow:var(--off) var(--off) 0 var(--accent)}
+  /* ---- snapshots ---- */
+  #snapshots .row{justify-content:center}
+  .snap-new,.snap-io{gap:9px}
+  #snapName,#snapShareOut{width:270px;max-width:100%;font-size:15px;padding:8px 12px;
+    border:var(--bd) solid var(--ink);border-radius:var(--r-btn);font-family:var(--hand);
+    background:var(--white);color:var(--ink)}
+  #snapName:focus{outline:none;box-shadow:var(--off) var(--off) 0 var(--accent)}
+  #snapShareOut{width:min(560px,100%);font-family:var(--mono);font-size:12px}
+  .snaplist{display:flex;flex-direction:column;gap:8px;margin:12px auto;max-width:620px}
+  .snaprow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:9px;align-items:center;
+    background:var(--paper2);border:var(--bd) solid var(--ink);border-radius:var(--r-btn);padding:7px 11px}
+  .snaprow .sname{font-family:var(--hand);font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .snaprow .swhen{font-family:var(--mono);font-size:11px;color:var(--ink2);white-space:nowrap}
+  .snap-empty{font-family:var(--hand);color:var(--ink2);text-align:center;padding:6px 0}
+  #snapMsg{display:block;text-align:center;margin-top:9px;min-height:1.2em}
+  [data-zn-theme='hardware'] #snapName,
+  [data-zn-theme='hardware'] #snapShareOut{background:#1b1e22;border-color:#05070a}
   #scList{margin-top:10px}
   .sc-cat{display:inline-block;font-family:var(--marker);font-size:var(--s-label);letter-spacing:1.1px;
     text-transform:uppercase;color:var(--white);background:var(--ink);border-radius:var(--r-chip);
@@ -555,6 +572,13 @@
     .patgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
     .piano-case{max-width:100%}
     #scSearch{width:100%}
+    #snapName{width:100%}
+    /* name, then when, then the two buttons side by side — letting Load and
+       Delete auto-place after two full-width rows */
+    .snaprow{grid-template-columns:1fr 1fr;gap:7px 8px}
+    .snaprow .sname,
+    .snaprow .swhen{grid-column:1 / -1}
+    .snaprow .sbtn{width:100%;text-align:center}
     .bus{padding:10px 11px}
     #fxRouting{padding:10px 11px}
   }
@@ -891,6 +915,7 @@
     <button data-t="patterns">Patterns</button>
     <button data-t="looper">Looper</button>
     <button data-t="dj">DJ</button>
+    <button data-t="snapshots">Snapshots</button>
     <button data-t="shortcuts">Shortcuts</button>
   </div>
   <div class="status">
@@ -990,8 +1015,26 @@
   </div>
 </section>
 
+<section id="snapshots" class="card">
+  <h2><span class="n">9</span>Snapshots</h2>
+  <div class="row snap-new">
+    <input type="text" id="snapName" placeholder="Name this setup…" maxlength="40">
+    <button id="snapSave" class="sbtn sm" type="button">Save snapshot</button>
+  </div>
+  <div id="snapList" class="snaplist"></div>
+  <div class="row snap-io">
+    <button id="snapSend" class="sbtn sm" type="button">Send panel to SP</button>
+    <button id="snapLink" class="sbtn sm" type="button">Copy share link</button>
+    <button id="snapExport" class="sbtn sm" type="button">Export file</button>
+    <button id="snapImport" class="sbtn sm" type="button">Import file</button>
+    <input type="file" id="snapFile" accept="application/json,.json" hidden>
+  </div>
+  <div class="row"><input type="text" id="snapShareOut" readonly hidden aria-label="Share link"></div>
+  <span class="note" id="snapMsg"></span>
+</section>
+
 <section id="shortcuts" class="card">
-  <h2><span class="n">9</span>Shortcut Finder</h2>
+  <h2><span class="n">10</span>Shortcut Finder</h2>
   <div id="scCtrls" class="row">
     <input type="text" id="scSearch" placeholder="Search combos, names, descriptions…">
     <b class="mini">Category</b><span id="scCatMount"></span>
@@ -2067,7 +2110,7 @@ const LOOP_GROUPS = [
     if(rangeM){
       /* the full name wraps the caption chip and squeezes the value onto two
          lines, so the chip shows the first term and the tooltip carries it all */
-      const k = makeKnob({ label:rangeM[3].split(/\s*\/\s*/)[0], min:+rangeM[1], max:+rangeM[2],
+      const k = makeKnob({ label:rangeM[3].split(/\s*\/\s*/)[0], cc, min:+rangeM[1], max:+rangeM[2],
         value:64, defaultVal:64, onChange:v=>sendCC(LOOP.channel, cc, v, null) });
       k.setTitle(rangeM[3] + ' — ' + def.function + ' · CC' + cc + ' on ch' + LOOP.channel);
       loopTempoKnob = k;
@@ -2349,6 +2392,167 @@ $('themeBtn').addEventListener('click', ()=>{
 });
 applyTheme(lsGet('sp404_theme') || 'hardware');
 
+/* ---------- SNAPSHOTS, EXPORT, SHARE ----------
+   Three ways out of the same state object (see the STATE section below).
+
+   Who sends and who doesn't is deliberate:
+   * Load  — sends. Recalling a preset you saved is exactly a request to put
+             the unit back the way it was.
+   * Import / share link — silent. That state arrived from somewhere else, and
+             firing MIDI at someone's rig the moment a link opens is rude. It
+             lands in the UI and "Send panel to SP" is right there.
+
+   Pad names ride in the exported FILE but not in the share LINK: 160 slots of
+   free text would bloat a URL past what is comfortable to paste, while the
+   file has no such limit.                                                    */
+const SNAP_KEY = 'sp404_snaps';
+const SNAP_MAX = 24;
+const SHARE_PARAM = 's';
+
+function b64urlEncode(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  bytes.forEach(b=> bin += String.fromCharCode(b));
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64urlDecode(str){
+  const t = str.replace(/-/g,'+').replace(/_/g,'/');
+  const bin = atob(t + '==='.slice((t.length + 3) % 4));
+  return new TextDecoder().decode(Uint8Array.from(bin, c=>c.charCodeAt(0)));
+}
+
+let snaps = [];
+try{ const raw = JSON.parse(lsGet(SNAP_KEY)); if(Array.isArray(raw)) snaps = raw; }catch(e){}
+function saveSnaps(){ lsSet(SNAP_KEY, JSON.stringify(snaps.slice(0, SNAP_MAX))); }
+
+let snapMsgT = null;
+function snapMsg(text, sticky){
+  const el = $('snapMsg'); if(!el) return;
+  el.textContent = text || '';
+  clearTimeout(snapMsgT);
+  if(text && !sticky) snapMsgT = setTimeout(()=>{ el.textContent = ''; }, 6000);
+}
+function whenLabel(ts){
+  const d = new Date(ts);
+  if(isNaN(d)) return '';
+  const p = n => String(n).padStart(2,'0');
+  return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+function renderSnaps(){
+  const list = $('snapList'); if(!list) return;
+  list.innerHTML = '';
+  if(!snaps.length){
+    list.appendChild(div('snap-empty','No snapshots yet — set the panel up, name it, and press Save.'));
+    return;
+  }
+  snaps.forEach(sn=>{
+    const row = div('snaprow');
+    const load = sbtn('Load','sm');
+    load.title = 'Restore this setup AND send it to the SP';
+    load.addEventListener('click', ()=>{
+      applyState(sn.state, true);
+      snapMsg('Loaded “' + sn.name + '” and sent it to the SP.');
+    });
+    const del = sbtn('Delete','sm');
+    del.title = 'Remove this snapshot';
+    del.addEventListener('click', ()=>{
+      snaps = snaps.filter(x=> x.id !== sn.id);
+      saveSnaps(); renderSnaps();
+      snapMsg('Deleted “' + sn.name + '”.');
+    });
+    row.append(span('sname', sn.name), span('swhen', whenLabel(sn.at)), load, del);
+    list.appendChild(row);
+  });
+}
+$('snapSave').addEventListener('click', ()=>{
+  const field = $('snapName');
+  const name = (field.value || '').trim() || ('Setup ' + (snaps.length + 1));
+  snaps.unshift({ id: 'sn' + Date.now() + Math.floor(Math.random()*1000), name, at: Date.now(), state: collectState() });
+  snaps = snaps.slice(0, SNAP_MAX);
+  saveSnaps(); renderSnaps();
+  field.value = '';
+  snapMsg('Saved “' + name + '”.');
+});
+$('snapName').addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); $('snapSave').click(); } });
+
+$('snapSend').addEventListener('click', ()=>{
+  applyState(collectState(), true);
+  snapMsg('Sent the whole panel to the SP.');
+});
+$('snapSend').title = 'Re-send every effect, switch and knob on this page to the unit. Useful after loading a share link, or when the SP and the app have drifted apart — which they can, because the app cannot read the SP back.';
+
+function shareURL(){
+  const u = new URL(location.href);
+  u.hash = '';
+  u.searchParams.set(SHARE_PARAM, b64urlEncode(JSON.stringify(collectState())));
+  return u.toString();
+}
+$('snapLink').addEventListener('click', async ()=>{
+  const url = shareURL();
+  const out = $('snapShareOut');
+  out.hidden = false; out.value = url;
+  try{
+    await navigator.clipboard.writeText(url);
+    snapMsg('Share link copied. It carries the panel, but not pad names — those go in the export file.');
+  }catch(e){
+    out.focus(); out.select();
+    snapMsg('Clipboard was blocked — the link is selected above, copy it by hand.');
+  }
+});
+
+$('snapExport').addEventListener('click', ()=>{
+  const payload = { app:'roland-sp404mkii-controller', v:STATE_V, at:new Date().toISOString(),
+                    state:collectState(), padNames:padNames, snapshots:snaps };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = el('a'); a.href = url;
+  a.download = 'sp404mk2-setup.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=> URL.revokeObjectURL(url), 2000);
+  snapMsg('Exported the panel, your pad names and every snapshot.');
+});
+
+$('snapImport').addEventListener('click', ()=> $('snapFile').click());
+$('snapFile').addEventListener('change', async e=>{
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  try{
+    const data = JSON.parse(await file.text());
+    let did = [];
+    if(data.state && applyState(data.state, false)) did.push('the panel');
+    if(data.padNames && typeof data.padNames === 'object'){
+      padNames = data.padNames;
+      lsSet(PADNAMES_KEY, JSON.stringify(padNames));
+      renderPadNames();
+      did.push('pad names');
+    }
+    if(Array.isArray(data.snapshots)){
+      /* merge rather than replace — an import should not silently bin slots
+         you already had on this machine */
+      const have = new Set(snaps.map(x=>x.id));
+      snaps = snaps.concat(data.snapshots.filter(x=> x && x.id && !have.has(x.id))).slice(0, SNAP_MAX);
+      saveSnaps(); renderSnaps();
+      did.push('snapshots');
+    }
+    snapMsg(did.length
+      ? ('Imported ' + did.join(', ') + '. Nothing was sent — press “Send panel to SP” when you want it on the unit.')
+      : 'That file had nothing this app recognises.');
+  }catch(err){
+    snapMsg('Could not read that file — it needs to be JSON exported from here.');
+  }
+});
+
+function readShareParam(){
+  try{
+    const raw = new URL(location.href).searchParams.get(SHARE_PARAM);
+    if(!raw) return null;
+    const st = JSON.parse(b64urlDecode(raw));
+    return (st && typeof st === 'object') ? st : null;
+  }catch(e){ return null; }
+}
+renderSnaps();
+
 /* ---------- STATE ----------
    One object describes the whole panel, and it does three jobs: it survives a
    refresh, it fills a snapshot slot, and it rides in a share link.
@@ -2386,7 +2590,6 @@ function collectState(){
 
 function applyState(st, send){
   if(!st || typeof st !== 'object') return false;
-  const quiet = !send;                       // knob.set(v, silent)
 
   if(Array.isArray(st.fx)) st.fx.forEach(f=>{
     const bus = busByCh[f.ch]; if(!bus) return;
@@ -2398,7 +2601,15 @@ function applyState(st, send){
     /* relabels and re-enables the knobs for the new effect — must run before
        the values go in, or an OFF effect would zero what we just restored */
     bus.applyParams();
-    if(Array.isArray(f.k)) f.k.forEach((v,i)=>{ if(bus.knobs[i] && v != null) bus.knobs[i].set(v, quiet); });
+    /* Set silently ALWAYS, then send explicitly. Leaning on the knob's own
+       change detection would silently skip any value that already matches —
+       which is exactly the case for "Send panel to SP", where nothing has
+       moved and yet everything needs to go out. */
+    if(Array.isArray(f.k)) f.k.forEach((v,i)=>{
+      const k = bus.knobs[i]; if(!k || v == null) return;
+      k.set(v, true);
+      if(send) sendCC(bus.ch, k.cc, v, null);
+    });
     bus.setEfx(!!f.efx);
     if(send) sendCC(bus.ch, CC_SW, f.efx ? 127 : 0, null);
   });
@@ -2412,12 +2623,17 @@ function applyState(st, send){
   if(st.voc && st.voc.vel != null) vocVel.set(st.voc.vel, true);
   if(st.pat && st.pat.bank) setPatBank(st.pat.bank);
   if(st.dj){
-    if(st.dj.a != null) djVol[1].set(st.dj.a, quiet);
-    if(st.dj.b != null) djVol[2].set(st.dj.b, quiet);
-    if(st.dj.c != null) djVol[3].set(st.dj.c, quiet);
-    if(st.dj.x != null) djXfade.set(st.dj.x, quiet);
+    [[1,'a'],[2,'b'],[3,'c']].forEach(([ch,key])=>{
+      const v = st.dj[key]; if(v == null) return;
+      djVol[ch].set(v, true);
+      if(send) sendCC(ch, 7, v, null);
+    });
+    if(st.dj.x != null){ djXfade.set(st.dj.x, true); if(send) sendCC(1, 8, st.dj.x, null); }
   }
-  if(st.loop && loopTempoKnob && st.loop.tempo != null) loopTempoKnob.set(st.loop.tempo, quiet);
+  if(st.loop && loopTempoKnob && st.loop.tempo != null){
+    loopTempoKnob.set(st.loop.tempo, true);
+    if(send && loopTempoKnob.cc != null) sendCC(LOOP.channel, loopTempoKnob.cc, st.loop.tempo, null);
+  }
   if(st.routing && routeApi) routeApi.set(st.routing);   // hardware-only; never sent
   if(st.ui){
     if(st.ui.monitor != null) setMonitor(!!st.ui.monitor);
@@ -2437,9 +2653,15 @@ function persistState(){
   }catch(e){}
 }
 {
+  const shared = readShareParam();
   let saved = null;
   try{ saved = JSON.parse(lsGet(STATE_KEY)); }catch(e){}
-  if(saved && saved.v === STATE_V) applyState(saved, false);
+  if(shared){
+    applyState(shared, false);
+    snapMsg('Opened a shared setup. Nothing has been sent — press “Send panel to SP” to put it on your unit.', true);
+  }else if(saved && saved.v === STATE_V){
+    applyState(saved, false);
+  }
   lastSaved = JSON.stringify(collectState());
 }
 setInterval(persistState, 1500);
