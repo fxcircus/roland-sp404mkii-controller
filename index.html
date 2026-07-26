@@ -447,11 +447,7 @@
     <span id="keyVelMount"></span>
   </div>
   <div id="keysSamples">
-    <div class="row">
-      <b class="mini">Plays</b><span class="zn-target" id="chromaTarget">—</span>
-      <button class="sbtn sm" id="chromaSelect" type="button">Select pad</button>
-      <label class="chroma-auto"><input type="checkbox" id="chromaAuto" checked> auto-select</label>
-    </div>
+    <div class="row"><span class="zn-target" id="chromaTarget">—</span></div>
     <div class="piano-case"><div class="piano" id="chromaKbd"></div></div>
     <div class="row"><span id="asoMount"></span></div>
   </div>
@@ -897,7 +893,7 @@ function refreshPorts(){
 }
 $('rescanBtn').addEventListener('click', refreshPorts);
 $('panicBtn').addEventListener('click', panicAll);
-$('panicBtn').title = 'All Notes Off + All Sound Off + Reset Controllers + pitch-center on all 16 channels. The SP only honors All Sound Off on ch16 and ignores note-off for pads — to stop pad/looper playback use the Looper stop-all (CC85) or the hardware.';
+$('panicBtn').title = 'Stops everything: the looper [EXIT] stop-all (CC85=127 on ch'+LOOP.channel+', quad-press equivalent) sent twice, plus All Sound Off / All Notes Off / Reset Controllers / pitch-centre on all 16 channels.';
 async function initMIDI(){
   if(!navigator.requestMIDIAccess){ $('connStatus').textContent = 'Web MIDI not supported — use Chrome or Edge'; return; }
   try{ midiAccess = await navigator.requestMIDIAccess({sysex:false}); midiAccess.onstatechange = refreshPorts; refreshPorts(); }
@@ -919,13 +915,24 @@ const sendPC   = (ch, pgm, hexEl) => sendBytes([0xC0|((ch-1)&0x0F), pgm&0x7F], h
 function sendBend(ch, val, hexEl){ const v = Math.max(0, Math.min(16383, val+8192)); return sendBytes([0xE0|((ch-1)&0x0F), v&0x7F, (v>>7)&0x7F], hexEl); }
 
 /* ---------- panic ---------- */
+/* The standard channel-mode sweep does NOT silence the SP: it only honours All
+   Sound Off on ch16 and ignores note-off for pads. What actually stops it is
+   the looper's [EXIT] stop-all (CC85=127 on ch1, the quad-press equivalent),
+   so that leads here and is sent twice in quick succession. */
+const STOP_ALL_CC = 85, STOP_ALL_VAL = 127;
 function panicAll(){
-  const msgs = [];
+  const stopCh = (typeof LOOP !== 'undefined' && LOOP.channel) ? LOOP.channel : 1;
+  const st0 = (stopCh - 1) & 0x0F;
+  const msgs = [[0xB0|st0, STOP_ALL_CC, STOP_ALL_VAL]];
   for(let ch=1; ch<=16; ch++){ const st=(ch-1)&0x0F; msgs.push([0xB0|st,120,0],[0xB0|st,123,0],[0xB0|st,121,0],[0xE0|st,0,64]); }
   let sent = 0, failed = false;
-  if(midiOut){ for(const m of msgs){ try{ midiOut.send(m); sent++; }catch(e){ failed = true; } } }
+  if(midiOut){
+    for(const m of msgs){ try{ midiOut.send(m); sent++; }catch(e){ failed = true; } }
+    /* second hit — one press does not always take */
+    setTimeout(()=>{ try{ midiOut.send([0xB0|st0, STOP_ALL_CC, STOP_ALL_VAL]); }catch(e){} }, 60);
+  }
   document.querySelectorAll('.active-key').forEach(el=>el.classList.remove('active-key'));
-  const line = fmtTime()+' OUT PANIC     All Sound Off + All Notes Off + Reset Ctrls + pitch-center, ch1-16 ('
+  const line = fmtTime()+' OUT STOP ALL  CC'+STOP_ALL_CC+'='+STOP_ALL_VAL+' ch'+stopCh+' x2 + All Sound/Notes Off ch1-16 ('
     + (midiOut ? sent+' msgs'+(failed?' (some failed)':'') : 'NO OUTPUT PORT') + ')';
   monBuf.push({dir:'OUT', line}); if(monBuf.length > MON_CAP) monBuf.shift();
   if(monMatch(line)) appendMonLine('OUT', line);
@@ -1195,32 +1202,25 @@ const KEYS_HINT_A = 'Samples: ch'+CHROMA_CH+' — '+PADS.chromatic.notes;
 /* Selecting a sample means pressing its pad, which also sounds it once — same
    as on the hardware. So auto-select fires only when the target has actually
    changed since we last selected, not on every key press. */
+/* The app CANNOT choose which sample plays chromatically. Selecting one means
+   pressing its pad in SAMPLE mode (manual p.25 step 1) — and a MIDI note-on
+   triggers a pad without moving the SP's "selected sample" cursor, so sending
+   the pad note first does nothing for chromatic. Worse, once the unit is in
+   chromatic mode its pads play the scale (step 3), not select. Both [EXIT] and
+   SHIFT+[PAD 4] are front-panel only. So this just states what CH16 will do. */
 function refreshChromaTarget(){
   const t = $('chromaTarget'); if(!t) return;
-  t.textContent = noteBankLabel();
-  const pad = lastPadByBank[padBank];
-  $('chromaSelect').disabled = !pad;
+  t.textContent = 'PLAYS THE SAMPLE SELECTED ON THE UNIT';
 }
-function selectChromaPad(force){
-  const pad = lastPadByBank[padBank];
-  if(!pad) return false;
-  if(!force && selectedOnSP && selectedOnSP.bank === padBank && selectedOnSP.pad === pad) return false;
-  sendOn(padBank, padToNote[pad], padVel());
-  selectedOnSP = { bank: padBank, pad };
-  refreshChromaTarget();
-  return true;
-}
-buildPiano($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI, ()=>{
-  if($('chromaAuto').checked) selectChromaPad(false);
-});
-$('chromaSelect').addEventListener('click', ()=> selectChromaPad(true));
+buildPiano($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI);
 refreshChromaTarget();
 { const aso = sbtn('All Sound Off (CC120)','sm'); aso.addEventListener('click', ()=> sendCC(CHROMA_CH, 120, 0, null)); $('asoMount').appendChild(aso); }
 hint('keys', KEYS_HINT_A
-  + ' Chromatic plays whichever sample the SP currently has selected, and the only way to select one is to press its pad'
-  + ' (manual p.25) — there is no select-without-playing message, so selecting sounds the sample once, exactly as on the unit.'
-  + ' "Plays" follows the bank chosen in Pads and the last pad you pressed in that bank; auto-select points the SP at it'
-  + ' on your next key press, and only when the target actually changed.'
+  + ' These keys always play whichever sample the SP itself has selected — the app cannot change that.'
+  + ' Selecting a sample means pressing its pad in SAMPLE mode (manual p.25 step 1); a MIDI note-on triggers a pad'
+  + ' but does not move the unit\'s selected-sample cursor, and once the unit is in chromatic mode its pads play the'
+  + ' scale rather than select. [EXIT] and SHIFT+[PAD 4] are front-panel only. To change the sample, press its pad'
+  + ' on the unit, then play here.'
   + '  |  Vocoder: ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)]+' Pitch bend springs back to centre on release.');
 buildPiano($('vocKbd'), VOC_CH, 36, 72);
 { const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256, springBack:true, format:v=>(v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) }); $('vocBendMount').appendChild(bendKnob.el); }
@@ -1258,12 +1258,13 @@ for(let i=0;i<10;i++){
 for(let p=PC_LO; p<=PC_HI; p++){ const b = sbtn(String(p+1)); b.title = 'Pattern '+(p+1)+' (PC'+p+')'; b.addEventListener('click', ()=> sendPC(patBank, p, null)); $('patGrid').appendChild(b); }
 
 /* ---------- LOOPER ---------- */
-hint('looper', LOOP.description+' All CCs on ch'+LOOP.channel+'.');
+hint('looper', LOOP.description+' All CCs on ch'+LOOP.channel+'. '
+  + Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).map(([c,d])=>'CC'+c+' '+d.function).join(' · ')+'.');
 Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).forEach(([ccStr, def])=>{
-  const cc = +ccStr; const row = div('looprow'); row.appendChild(span(null, 'CC'+cc+' '+def.function));
+  const cc = +ccStr; const row = div('looprow'); row.appendChild(span('label', def.function));
   const rangeM = def.values.match(/^(\d+)-(\d+) = (.+)$/);
   if(rangeM){ const k = makeKnob({ label:rangeM[3], min:+rangeM[1], max:+rangeM[2], value:64, defaultVal:64, onChange:v=>sendCC(LOOP.channel, cc, v, null) }); row.appendChild(k.el); }
-  else{ def.values.split(', ').forEach(part=>{ const m = part.match(/^(\d+) = (.+)$/); if(!m) return; const b = sbtn(m[2]+' ('+m[1]+')','sm'); b.addEventListener('click', ()=> sendCC(LOOP.channel, cc, +m[1], null)); row.appendChild(b); }); }
+  else{ def.values.split(', ').forEach(part=>{ const m = part.match(/^(\d+) = (.+)$/); if(!m) return; const b = sbtn(m[2],'sm'); b.addEventListener('click', ()=> sendCC(LOOP.channel, cc, +m[1], null)); row.appendChild(b); }); }
   $('looperRows').appendChild(row);
 });
 
