@@ -375,11 +375,11 @@
   /* grouped columns: each block is one thing you might want to do, so the card
      reads as short lists rather than a stack of ragged rows with a mostly
      empty knob row at the bottom */
-  .loopgrid{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;margin-top:12px}
+  .loopgrid{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;margin-top:12px}
   .loopgroup{display:flex;flex-direction:column;gap:8px;flex:0 1 210px;min-width:170px}
-  .loopgroup > .label{align-self:flex-start;margin-bottom:2px}
+  .loopgroup > .label{align-self:center;margin-bottom:2px}
   .loopgroup .sbtn{width:100%;text-align:center}
-  .loopgroup--knob{flex:0 0 auto;min-width:0;align-items:flex-start}
+  .loopgroup--knob{flex:0 0 auto;min-width:0;align-items:center}
 
   /* dev tools */
   .note{font-family:var(--hand);color:var(--ink2);font-size:14px;margin:2px 0 6px;line-height:1.4}
