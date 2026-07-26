@@ -237,7 +237,8 @@
   .xfade:focus-visible .xfade__cap{border-color:var(--accent)}
 
   /* chromatic needs three steps on the unit first — spell them out */
-  .zn-steps{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--hand);font-size:15px;
+  .zn-steps{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;text-align:center;
+    gap:8px;font-family:var(--hand);font-size:15px;
     color:var(--ink);background:var(--paper2);border:var(--bd) dashed var(--ink);
     border-radius:var(--r-btn);padding:9px 13px;margin:2px 0 10px}
   .zn-steps b{font-family:var(--marker);font-size:12px;letter-spacing:1px;text-transform:uppercase;
@@ -319,7 +320,7 @@
   .dd.lcd .dd-opt.sel{background:var(--white);color:var(--ink)}
 
   /* pads */
-  .padgrid{display:grid;grid-template-columns:repeat(4,minmax(74px,1fr));gap:12px;margin:10px 0;max-width:640px}
+  .padgrid{display:grid;grid-template-columns:repeat(4,minmax(74px,1fr));gap:12px;margin:10px auto;max-width:640px}
   /* 25 semitones as pattern-style buttons: 13 per row puts -12..0 on the first
      row and +1..+12 on the second, so it is two short rows instead of five */
   .chromagrid{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:8px;
@@ -341,16 +342,20 @@
   /* EXT SOURCE and its mode toggle are a pair — same size and same width, so
      the row does not go ragged when the mode label changes length.
      display:contents on the mount lets the button itself be the flex item. */
+  #pads .row,
+  #pads .bankrow{justify-content:center}
   .ext-row #extMount{display:contents}
   .ext-row{align-items:center;gap:14px}
   .ext-row .sbtn{flex:0 0 220px;min-width:220px;text-align:center}
+  #chromatic > .row,
+  #vocoder > .row{justify-content:center}
   .bankrow{display:flex;flex-wrap:wrap;gap:6px}
   .bankrow .sbtn{min-width:44px;text-align:center}
 
   /* piano */
-  .piano-case{display:inline-block;max-width:100%;overflow-x:auto;background:var(--panel);
+  .piano-case{display:block;width:fit-content;max-width:100%;overflow-x:auto;background:var(--panel);
     border:var(--bd-heavy) solid var(--ink);border-radius:var(--r-panel);
-    box-shadow:var(--off-lg) var(--off-lg) 0 var(--shadow);padding:9px 13px 10px;margin:6px 0 10px}
+    box-shadow:var(--off-lg) var(--off-lg) 0 var(--shadow);padding:9px 13px 10px;margin:6px auto 10px}
   .piano{position:relative;display:inline-block}
   .piano-whites{display:flex;gap:3px}
   .wkey{width:42px;height:132px;flex:0 0 auto;display:flex;align-items:flex-end;justify-content:center;
@@ -460,9 +465,23 @@
     .knob{width:88px}
     .knob-svg{width:88px;height:83px}
     .knob-row{gap:10px}
-    .midi-ports{flex-direction:column;align-items:stretch;gap:12px}
-    .portpair{flex-direction:column;align-items:flex-start;gap:6px;width:100%}
-    .midi-ports #rescanBtn{width:100%}
+    /* three rows: both labels, both pickers, then Rescan across the bottom.
+       display:contents on the pairs lets each label and picker become a grid
+       item in its own right, so they can be placed independently while the
+       markup keeps each label grouped with its own control. */
+    .midi-ports{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;align-items:center}
+    .portpair{display:contents}
+    /* place the MOUNT spans, not the .dd inside them: display:contents promotes
+       each pair's direct children to grid items, and the dropdown is one level
+       deeper, so a rule on .dd places nothing and the mounts auto-flow in DOM
+       order — which put the pickers under the wrong labels. */
+    .midi-ports .portpair:nth-of-type(2) .mini{grid-column:1;grid-row:1}
+    .midi-ports #inMount{grid-column:1;grid-row:2}
+    .midi-ports .portpair:nth-of-type(1) .mini{grid-column:2;grid-row:1}
+    .midi-ports #outMount{grid-column:2;grid-row:2}
+    .midi-ports #inMount .dd,
+    .midi-ports #outMount .dd{width:100%}
+    .midi-ports #rescanBtn{grid-column:1 / -1;grid-row:3;width:100%}
     /* A dropdown mid-row puts its absolutely-positioned panel at left+width,
        which runs off a phone screen — and it counts even while hidden. Full
        width on its own line keeps the panel inside the card. */
