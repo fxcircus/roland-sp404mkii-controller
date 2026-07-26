@@ -339,6 +339,23 @@
   .pad *{pointer-events:none}
   .pad .num{font-size:34px;text-shadow:2px 2px 0 rgba(255,255,255,.6)}
   .pad.active-key{transform:translate(4px,5px);box-shadow:0 0 0 var(--shadow);filter:brightness(1.12)}
+  /* Pad names — opt-in, and the only way this app can ever show what is loaded
+     on a pad, since the SP has no SysEx to ask. `.pad *` is pointer-events:none
+     so the whole pad is one target; the label and its editor have to opt back
+     in, and then stop the event bubbling or renaming would fire the note. */
+  .pad-opts{gap:10px;margin-top:2px}
+  #padNameHint{font-size:13px}
+  .pad-name{display:none;position:absolute;left:5px;right:5px;bottom:4px;
+    font-family:var(--hand);font-size:12px;line-height:1.2;text-align:center;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pad-name.empty{opacity:.4}
+  .pads-named .pad-name{display:block;pointer-events:auto;cursor:text}
+  .pads-named .pad .num{transform:translateY(-7px)}
+  .pad-name-input{position:absolute;left:4px;right:4px;bottom:3px;z-index:2;
+    font-family:var(--hand);font-size:12px;text-align:center;
+    color:var(--ink);background:var(--white);
+    border:2px solid var(--ink);border-radius:var(--r-chip);padding:1px 3px;
+    pointer-events:auto}
   /* EXT SOURCE and its mode toggle are a pair — same size and same width, so
      the row does not go ragged when the mode label changes length.
      display:contents on the mount lets the button itself be the flex item. */
@@ -501,7 +518,11 @@
        display:contents on the pairs lets each label and picker become a grid
        item in its own right, so they can be placed independently while the
        markup keeps each label grouped with its own control. */
-    .midi-ports{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;align-items:center}
+    /* minmax(0,…), not 1fr: a bare 1fr floors at min-content, and a long port
+       name like "Scarlett 18i20 4th Gen" then refuses to shrink and pushes the
+       whole grid past the viewport. The trigger already ellipsises — it just
+       needs a track that will let it. */
+    .midi-ports{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 10px;align-items:center}
     .portpair{display:contents}
     /* place the MOUNT spans, not the .dd inside them: display:contents promotes
        each pair's direct children to grid items, and the dropdown is one level
@@ -927,6 +948,10 @@
   <div class="row ext-row" id="padVelRow"><span id="padVelMount"></span>
     <span id="extMount"></span>
     <button class="sbtn" id="extModeToggle" type="button">mode: toggle</button>
+  </div>
+  <div class="row pad-opts">
+    <button id="padNameToggle" class="sbtn sm" type="button" aria-pressed="false">Name pads</button>
+    <span class="note" id="padNameHint" hidden>Tap a pad's label to rename it. Names are per bank and live on this device.</span>
   </div>
   <div class="padgrid" id="padGrid"></div>
 </section>
@@ -1717,17 +1742,90 @@ const padCh = ()=> padBank;
 function setPadBank(n){
   padBank = Math.max(1, Math.min(10, n));
   bankBtns.forEach((x,i)=> x.classList.toggle('on', i === padBank - 1));
+  renderPadNames();
 }
 const padVel = ()=> padVelKnob.get();
 /* candy set lifted from the reference sketch's pad colours, saturation +15% */
 const PAD_COLORS = ['#89e9a3','#fda2d0','#ffd977','#ffb287','#bea3f4','#88dcf6','#fe98b1','#a4ebc3',
                     '#ffcf6b','#f2a1ef','#99c9fb','#b8ef85','#ffab9e','#ccadf7','#78e6d5','#ffc2da'];
+/* ---------- pad names ---------- */
+const PADNAMES_KEY = 'sp404_padnames';
+let padNames = {};
+try{ padNames = JSON.parse(lsGet(PADNAMES_KEY)) || {}; }catch(e){ padNames = {}; }
+let padNamesOn = false;
+
+function padNameOf(bank, pad){
+  const b = padNames[String(bank)];
+  return (b && b[String(pad)]) || '';
+}
+function setPadName(bank, pad, name){
+  const bk = String(bank), pk = String(pad);
+  name = String(name || '').trim().slice(0, 24);
+  if(!padNames[bk]) padNames[bk] = {};
+  if(name) padNames[bk][pk] = name; else delete padNames[bk][pk];
+  if(!Object.keys(padNames[bk]).length) delete padNames[bk];
+  lsSet(PADNAMES_KEY, JSON.stringify(padNames));
+}
+function renderPadNames(){
+  for(let pad=1; pad<=16; pad++){
+    const host = padEls[pad]; if(!host) continue;
+    const lab = host.querySelector('.pad-name'); if(!lab) continue;
+    const n = padNameOf(padBank, pad);
+    lab.textContent = n || '+ name';
+    lab.classList.toggle('empty', !n);
+    lab.title = n ? (n + ' — tap to rename') : 'Tap to name this pad';
+  }
+}
+function setPadNaming(on){
+  padNamesOn = !!on;
+  $('padGrid').classList.toggle('pads-named', padNamesOn);
+  const b = $('padNameToggle');
+  b.classList.toggle('on', padNamesOn);
+  b.setAttribute('aria-pressed', padNamesOn ? 'true' : 'false');
+  $('padNameHint').hidden = !padNamesOn;
+  if(padNamesOn) renderPadNames();
+}
+function editPadName(pad, lab){
+  if(lab._editing) return;
+  lab._editing = true;
+  const bank = padBank;                       // the bank as it was when editing began
+  const input = el('input','pad-name-input');
+  input.type = 'text'; input.maxLength = 24; input.value = padNameOf(bank, pad);
+  input.placeholder = 'name';
+  lab.hidden = true;
+  padEls[pad].appendChild(input);
+  input.focus(); input.select();
+  const done = commit=>{
+    if(!lab._editing) return;
+    lab._editing = false;
+    if(commit) setPadName(bank, pad, input.value);
+    input.remove(); lab.hidden = false; renderPadNames();
+  };
+  input.addEventListener('keydown', e=>{
+    e.stopPropagation();
+    if(e.key === 'Enter'){ e.preventDefault(); done(true); }
+    else if(e.key === 'Escape'){ e.preventDefault(); done(false); }
+  });
+  input.addEventListener('blur', ()=> done(true));
+  ['pointerdown','pointerup','pointerleave','click'].forEach(t=>
+    input.addEventListener(t, e=> e.stopPropagation()));
+}
+$('padNameToggle').addEventListener('click', ()=> setPadNaming(!padNamesOn));
+$('padNameToggle').title = 'Show an editable label on each pad. The SP cannot tell the app what sample is loaded — no SysEx, no readback — so this is you telling it. Saved per bank, on this device.';
+
 const padEls = {};
 for(let pad=1; pad<=16; pad++){
   const note = padToNote[pad];
   const p = div('pad'); p.style.setProperty('--pad', PAD_COLORS[(pad-1) % PAD_COLORS.length]);
   p.title = 'Pad '+pad+' — '+noteName(note)+' (note '+note+')';
-  p.append(span('num', String(pad)));
+  const lab = span('pad-name');
+  /* stopPropagation is load-bearing: pointer-events:auto makes the label the
+     target, but the event still bubbles to the pad and would fire the note */
+  lab.addEventListener('pointerdown', e=>{
+    e.stopPropagation(); e.preventDefault();
+    if(padNamesOn) editPadName(pad, lab);
+  });
+  p.append(span('num', String(pad)), lab);
   pressable(p, padCh, note, padVel);
   padEls[pad] = p;
   $('padGrid').appendChild(p);
@@ -2282,7 +2380,7 @@ function collectState(){
     dj: { a:djVol[1].get(), b:djVol[2].get(), c:djVol[3].get(), x:djXfade.get() },
     loop: loopTempoKnob ? { tempo:loopTempoKnob.get() } : null,
     routing: routeApi ? routeApi.get() : null,
-    ui: { monitor:monOn, follow:followOn },
+    ui: { monitor:monOn, follow:followOn, padNames:padNamesOn },
   };
 }
 
@@ -2324,6 +2422,7 @@ function applyState(st, send){
   if(st.ui){
     if(st.ui.monitor != null) setMonitor(!!st.ui.monitor);
     if(st.ui.follow  != null){ followOn = !!st.ui.follow; paintFollow(); }
+    if(st.ui.padNames != null) setPadNaming(!!st.ui.padNames);
   }
   return true;
 }
