@@ -72,7 +72,6 @@
   #nav button:hover{background:var(--paper2)}
   #nav button.active{background:var(--ink);color:var(--white);box-shadow:3px 3px 0 var(--accent)}
   #nav .status{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink2);max-width:100%}
-  #connStatus{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}
   .lamp{display:inline-block;width:15px;height:15px;border-radius:50%;background:var(--white);
     border:var(--bd) solid var(--ink);flex:0 0 auto}
   .lamp.on{background:var(--accent);box-shadow:0 0 0 3px var(--ink)}
@@ -94,6 +93,7 @@
     margin:0;font-family:var(--marker);font-size:var(--s-label);letter-spacing:1.1px;
     text-transform:uppercase;color:var(--white);background:var(--ink);
     border-radius:var(--r-chip);padding:5px 13px 6px;line-height:1.15}
+  .card > h2 .lamp{width:11px;height:11px;border-width:2px;margin-left:2px}
   .card > h2 .n{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;
     font-size:12px;color:var(--ink);background:var(--white);border-radius:50%}
   /* "?" hint — the explainer text moved off-screen until asked for */
@@ -154,7 +154,7 @@
   .knob.drag .k-fill{stroke:var(--accent2)}
   .knob:focus-visible{outline:none}
   .knob:focus-visible .k-body{stroke:var(--accent2)}
-  .knob-label{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:7px;
+  .knob-label{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:7px;white-space:nowrap;
     font-family:var(--hand);font-size:var(--s-label);letter-spacing:.9px;text-transform:uppercase;
     color:var(--white);background:var(--ink);border-radius:var(--r-chip);padding:3px 10px 4px;line-height:1.2}
   .knob-val{font-family:var(--mono);font-size:12px;font-weight:700;opacity:.85}
@@ -260,6 +260,7 @@
      the row does not go ragged when the mode label changes length.
      display:contents on the mount lets the button itself be the flex item. */
   .ext-row #extMount{display:contents}
+  .ext-row{align-items:center;gap:14px}
   .ext-row .sbtn{flex:0 0 220px;min-width:220px;text-align:center}
   .bankrow{display:flex;flex-wrap:wrap;gap:6px}
   .bankrow .sbtn{min-width:44px;text-align:center}
@@ -289,30 +290,7 @@
   #looperRows .looprow:last-child{border-bottom:0}
 
   /* dev tools */
-  details#dev{background:var(--panel);border:var(--bd-heavy) solid var(--ink);border-radius:var(--r-panel);
-    box-shadow:var(--off-lg) var(--off-lg) 0 var(--shadow);padding:16px 22px 18px}
-  details#dev::before,details#dev::after{display:none}
-  details#dev > summary{display:block;width:fit-content;max-width:100%;margin:0 auto;
-    font-family:var(--marker);font-size:var(--s-label);
-    letter-spacing:1.1px;text-transform:uppercase;color:var(--white);background:var(--ink);
-    border-radius:var(--r-chip);padding:5px 13px 6px;cursor:pointer;list-style:none}
-  details#dev > summary::-webkit-details-marker{display:none}
-  details#dev > summary::before{content:"▸ ";color:var(--accent)}
-  details#dev[open] > summary::before{content:"▾ "}
-  .devpanel{border:var(--bd) solid var(--ink);border-radius:var(--r-btn);padding:11px 13px;margin:12px 0;background:var(--white)}
-  .devpanel h3{display:inline-block;font-family:var(--marker);font-size:12px;letter-spacing:1px;
-    text-transform:uppercase;color:var(--white);background:var(--ink);border-radius:var(--r-chip);
-    padding:3px 10px 4px;margin:0 0 8px}
-  code.hx{font-family:var(--mono);font-size:12px;background:var(--ink);color:var(--white);border-radius:4px;padding:2px 6px}
-  #monLog{height:280px;overflow:auto;border:var(--bd) solid var(--ink);border-radius:5px;background:#f5f7fb;
-    font-family:var(--mono);font-size:12px;padding:6px;white-space:pre}
-  #monLog .in{color:#0a2fae}#monLog .out{color:#0b6b2f}#monLog .err{color:#b00}
-  .checkitem{border:var(--bd) solid var(--ink);border-radius:var(--r-btn);padding:9px 11px;margin:7px 0}
-  .checkitem textarea{width:100%;min-height:46px;font-size:14px;font-family:var(--hand);
-    border:var(--bd) solid var(--ink);border-radius:5px;padding:5px 7px}
   .note{font-family:var(--hand);color:var(--ink2);font-size:14px;margin:2px 0 6px;line-height:1.4}
-  .devpanel input[type=text]{font-family:var(--mono);font-size:13px;padding:4px 6px;
-    border:var(--bd) solid var(--ink);border-radius:4px}
 
   /* shortcut finder */
   #scCtrls{position:sticky;top:104px;background:var(--panel);padding:9px 0;z-index:3;
@@ -423,9 +401,7 @@
   [data-zn-theme='hardware'] b.mini,
   [data-zn-theme='hardware'] .zn-steps b,
   [data-zn-theme='hardware'] #fxRouting .title,
-  [data-zn-theme='hardware'] .sc-cat,
-  [data-zn-theme='hardware'] .devpanel h3,
-  [data-zn-theme='hardware'] details#dev > summary{
+  [data-zn-theme='hardware'] .sc-cat{
     background:#cfcbc2;color:#14171a;border-radius:3px;font-size:12px;letter-spacing:1.2px}
   [data-zn-theme='hardware'] .card > h2 .n{background:#14171a;color:#cfcbc2}
   [data-zn-theme='hardware'] .sc-cat .cnt{color:rgba(20,23,26,.6)}
@@ -478,14 +454,6 @@
   [data-zn-theme='hardware'] #fxRouting{border-color:rgba(255,255,255,.22)}
   [data-zn-theme='hardware'] .bus{background:#23262b;border-color:#05070a}
   [data-zn-theme='hardware'] .bus-ch{background:#cfcbc2;color:#14171a}
-  [data-zn-theme='hardware'] #monLog{background:#0a0d10;color:#d8f4ea;border-color:#05070a}
-  [data-zn-theme='hardware'] #monLog .in{color:#7fb0ff}
-  [data-zn-theme='hardware'] #monLog .out{color:#7ad9a0}
-  [data-zn-theme='hardware'] #monLog .err{color:#ff7a6e}
-  [data-zn-theme='hardware'] .devpanel,
-  [data-zn-theme='hardware'] .checkitem{background:#23262b;border-color:#05070a}
-  [data-zn-theme='hardware'] .checkitem textarea,
-  [data-zn-theme='hardware'] .devpanel input[type=text],
   [data-zn-theme='hardware'] #scSearch{background:#1b1e22;color:var(--ink);border-color:#05070a}
   [data-zn-theme='hardware'] .sc-cap.full{background:var(--accent);color:#14171a;border-color:#05070a}
   [data-zn-theme='hardware'] .sc-cap.partial,
@@ -708,7 +676,6 @@
     <button data-t="looper">Looper</button>
     <button data-t="dj">DJ</button>
     <button data-t="shortcuts">Shortcuts</button>
-    <button data-t="dev">Dev</button>
   </div>
   <div class="status">
     <button id="themeBtn" class="sbtn sm" type="button">Theme</button>
@@ -718,11 +685,10 @@
 <div id="wrap">
 
 <section id="setup" class="card">
-  <h2><span class="n">1</span>MIDI</h2>
+  <h2><span class="n">1</span>MIDI<span class="lamp" id="lamp"></span></h2>
   <div class="row"><b class="mini">Output</b><span id="outMount"></span>
     <b class="mini">Input</b><span id="inMount"></span>
     <button id="rescanBtn" class="sbtn sm" type="button">Rescan</button></div>
-  <div class="row"><span class="lamp" id="lamp"></span><span id="connStatus">starting…</span></div>
 </section>
 
 <section id="transport" class="card">
@@ -740,12 +706,11 @@
 <section id="pads" class="card">
   <h2><span class="n">4</span>Pads</h2>
   <div class="row"><b class="mini">Bank</b><div class="bankrow" id="padBanks"></div></div>
-  <div class="row" id="padVelRow"><span id="padVelMount"></span></div>
-  <div class="padgrid" id="padGrid"></div>
-  <div class="row ext-row">
+  <div class="row ext-row" id="padVelRow"><span id="padVelMount"></span>
     <span id="extMount"></span>
     <button class="sbtn" id="extModeToggle" type="button">mode: toggle</button>
   </div>
+  <div class="padgrid" id="padGrid"></div>
 </section>
 
 <section id="keys" class="card">
@@ -795,34 +760,6 @@
   <div id="scList"></div>
 </section>
 
-<details id="dev" class="card">
-  <summary>Developer tools — MIDI monitor · raw sender · verification checklist</summary>
-  <div class="devpanel" id="pMon">
-    <h3>MIDI monitor</h3>
-    <div class="row">
-      <label>Filter <input type="text" id="monFilter" placeholder="substring or regex, e.g. IN.*Ctrl[4-6]" style="width:280px"></label>
-      <button id="monClear" class="sbtn sm" type="button">Clear</button>
-      <label><input type="checkbox" id="monHideRt" checked> hide Clock (F8) / Active Sensing (FE)</label>
-      <span class="note" id="monSuppressed"></span>
-    </div>
-    <div id="monLog"></div>
-  </div>
-  <div class="devpanel">
-    <h3>Raw sender</h3>
-    <div class="row">
-      <label>Bytes (hex) <input type="text" id="raw0" placeholder="B0" size="4">
-      <input type="text" id="raw1" placeholder="13" size="4">
-      <input type="text" id="raw2" placeholder="7F" size="4"></label>
-      <button id="rawSend" class="sbtn sm" type="button">Send</button>
-      <code class="hx" id="rawHex">—</code>
-      <span id="rawErr" style="color:#b00"></span>
-    </div>
-  </div>
-  <div class="devpanel">
-    <h3>Verification checklist (open hardware questions)</h3>
-    <div id="checkItems"></div>
-  </div>
-</details>
 
 </div><!-- /wrap -->
 </div><!-- /app -->
@@ -1169,14 +1106,16 @@ function makeKnob(opts){
 function setStatus(){
   const ok = !!midiOut;
   $('lamp').classList.toggle('on', ok);
-  /* the pickers already name the ports — this line is state, not a readout */
-  $('connStatus').textContent = ok ? 'Connected' : 'No MIDI output';
-  $('connStatus').title = ok ? 'OUT: '+midiOut.name+' · IN: '+(midiIn?midiIn.name:'none') : '';
+  /* the lamp in the section title is the whole readout now — detail lives in
+     its tooltip so the card stays clean */
+  const why = ok ? 'MIDI connected — OUT: '+midiOut.name+' · IN: '+(midiIn?midiIn.name:'none')
+                 : 'No MIDI output — pick a port, or press Rescan';
+  $('lamp').title = why;
+  $('lamp').setAttribute('aria-label', why);
 }
 function setInput(inp){
   if(midiIn) midiIn.onmidimessage = null;
   midiIn = inp || null;
-  if(midiIn) midiIn.onmidimessage = e => logMsg('IN', [...e.data]);
 }
 const ddOut = makeDropdown({ options:[{value:'',label:'—'}], placeholder:'—', onChange:id=>{
   const outs=[...midiAccess.outputs.values()]; midiOut = outs.find(o=>o.id===id)||null;
@@ -1208,9 +1147,9 @@ $('rescanBtn').addEventListener('click', refreshPorts);
 $('panicBtn').addEventListener('click', panicAll);
 $('panicBtn').title = 'Stops everything: the looper [EXIT] stop-all (CC85=127 on ch'+LOOP.channel+', quad-press equivalent) sent twice, plus All Sound Off / All Notes Off / Reset Controllers / pitch-centre on all 16 channels.';
 async function initMIDI(){
-  if(!navigator.requestMIDIAccess){ $('connStatus').textContent = 'Web MIDI not supported — use Chrome or Edge'; return; }
+  if(!navigator.requestMIDIAccess){ { const m='Web MIDI not supported — use Chrome or Edge'; $('lamp').title=m; $('lamp').setAttribute('aria-label',m); } return; }
   try{ midiAccess = await navigator.requestMIDIAccess({sysex:false}); midiAccess.onstatechange = refreshPorts; refreshPorts(); }
-  catch(e){ $('connStatus').textContent = 'MIDI access denied'; }
+  catch(e){ const m='MIDI access denied — reload and allow MIDI access'; $('lamp').title=m; $('lamp').setAttribute('aria-label',m); }
 }
 
 /* ---------- sending ---------- */
@@ -1218,7 +1157,6 @@ function sendBytes(bytes, hexEl, timestamp){
   let err = null;
   if(midiOut){ try{ midiOut.send(bytes, timestamp); }catch(ex){ err = ex.message; } }
   if(hexEl) hexEl.textContent = hex(bytes);
-  logMsg('OUT', bytes, err ? ' [SEND FAILED: '+err+']' : (midiOut ? '' : ' [no output port]'));
   return !err && !!midiOut;
 }
 const sendCC   = (ch, cc, val, hexEl) => sendBytes([0xB0|((ch-1)&0x0F), cc&0x7F, val&0x7F], hexEl);
@@ -1245,92 +1183,7 @@ function panicAll(){
     setTimeout(()=>{ try{ midiOut.send([0xB0|st0, STOP_ALL_CC, STOP_ALL_VAL]); }catch(e){} }, 60);
   }
   document.querySelectorAll('.active-key').forEach(el=>el.classList.remove('active-key'));
-  const line = fmtTime()+' OUT STOP ALL  CC'+STOP_ALL_CC+'='+STOP_ALL_VAL+' ch'+stopCh+' x2 + All Sound/Notes Off ch1-16 ('
-    + (midiOut ? sent+' msgs'+(failed?' (some failed)':'') : 'NO OUTPUT PORT') + ')';
-  monBuf.push({dir:'OUT', line}); if(monBuf.length > MON_CAP) monBuf.shift();
-  if(monMatch(line)) appendMonLine('OUT', line);
 }
-
-/* ---------- monitor ---------- */
-const MON_CAP = 1500;
-const monBuf = [];
-let monMatch = () => true;
-let supClock = 0, supSense = 0;
-const monLog = $('monLog');
-function fmtTime(){ const d = new Date(); return d.toTimeString().slice(0,8) + '.' + String(d.getMilliseconds()).padStart(3,'0'); }
-function ctrlIdx(cc){ return CTRL_CCS.indexOf(cc); }
-function paramFor(ch, cc){ const eff = busEffect[ch]; const ps = eff && PARAMS[eff]; return ps ? ps.find(p=>p.cc===cc) : null; }
-function looperDecode(cc, val){
-  const def = LOOP.cc[String(cc)]; if(!def) return null;
-  let match = null;
-  for(const part of def.values.split(', ')){
-    const m = part.match(/^(\d+)(?:-(\d+))? = (.+)$/); if(!m) continue;
-    const lo = +m[1], hi = m[2] !== undefined ? +m[2] : null;
-    if(hi !== null ? (val>=lo && val<=hi) : val===lo){ match = m[3]; break; }
-  }
-  return 'Looper '+def.function + (match ? ' — '+match : '');
-}
-function describe(bytes){
-  const st = bytes[0];
-  if(st >= 0xF8) return {0xF8:'Timing Clock',0xFA:'Start',0xFB:'Continue',0xFC:'Stop',0xFE:'Active Sensing',0xFF:'System Reset'}[st] || 'Realtime';
-  if(st === 0xF0) return 'SysEx ('+bytes.length+' bytes)';
-  if((st & 0x80) === 0) return 'data bytes (running status?)';
-  const type = st & 0xF0, ch = (st & 0x0F) + 1; const chs = 'ch'+ch;
-  if(type === 0x90 || type === 0x80){
-    const n = bytes[1], vel = bytes[2]; const on = type === 0x90 && vel > 0; const kind = on ? 'NoteOn' : 'NoteOff';
-    let role = '';
-    if(ch === CHROMA_CH) role = 'Chromatic '+noteName(n);
-    else if(ch === VOC_CH) role = 'Vocoder '+noteName(n);
-    else if(ch >= 1 && ch <= 10){
-      if(n === EXT_NOTE) role = 'EXT SOURCE (bank '+BANK_LETTERS[ch-1]+')';
-      else if(padNumForNote[n] !== undefined) role = 'Bank '+BANK_LETTERS[ch-1]+' Pad '+padNumForNote[n];
-      else role = noteName(n);
-    }else role = noteName(n);
-    return chs+' '+kind+' '+n+' v'+vel+' → '+role;
-  }
-  if(type === 0xB0){
-    const cc = bytes[1], val = bytes[2]; const base = chs+' CC'+cc+'='+val; const bus = busByCh[ch];
-    if(bus){
-      if(cc === CC_SW) return base+' → '+bus.label+' EFX '+(val>=64?'ON':'OFF');
-      if(cc === CC_SEL){ const name = TABLES[bus.table][String(val)]; if(name !== undefined) busEffect[ch] = name; return base+' → '+bus.label+' select '+(name !== undefined ? name : '(out of range — ignored)'); }
-      const ci = ctrlIdx(cc); if(ci >= 0){ const p = paramFor(ch, cc); return base+' → '+bus.label+' Ctrl'+(ci+1)+(p ? ' ('+p.name+')' : ''); }
-    }
-    if(ch === LOOP.channel){ const ld = looperDecode(cc, val); if(ld) return base+' → '+ld; }
-    if(DJ_REC[String(cc)] && DJ_ROWS.some(r=>r.cc===cc && r.ch===ch)) return base+' → DJ '+DJ_REC[String(cc)];
-    if(DJ_TX[String(cc)]) return base+' → DJ '+DJ_TX[String(cc)]+' (transmit-only)';
-    if(cc >= 120) return base+' → '+({120:'All Sound Off',121:'Reset All Controllers',123:'All Notes Off'}[cc]||'Channel Mode');
-    return base;
-  }
-  if(type === 0xC0){ const p = bytes[1]; const bank = (ch>=1 && ch<=10) ? ' (bank '+BANK_LETTERS[ch-1]+')' : ''; return chs+' ProgramChange '+p+' → Pattern '+(p+1)+bank; }
-  if(type === 0xE0){ const v = (bytes[2]<<7 | bytes[1]) - 8192; return chs+' PitchBend '+(v>0?'+':'')+v+(ch===VOC_CH?' → Vocoder':''); }
-  if(type === 0xA0) return chs+' PolyPressure '+bytes[1]+'='+bytes[2];
-  if(type === 0xD0) return chs+' ChannelPressure '+bytes[1];
-  return 'status '+hex([st]);
-}
-function updateSuppressed(){ $('monSuppressed').textContent = (supClock||supSense) ? 'suppressed: '+supClock+' clock, '+supSense+' sensing' : ''; }
-function logMsg(dir, bytes, extra){
-  if($('monHideRt').checked && (bytes[0]===0xF8 || bytes[0]===0xFE)){ if(bytes[0]===0xF8) supClock++; else supSense++; updateSuppressed(); return; }
-  const line = fmtTime()+' '+dir.padEnd(3)+' '+hex(bytes).padEnd(9)+' '+describe(bytes)+(extra||'');
-  monBuf.push({dir, line}); if(monBuf.length > MON_CAP) monBuf.shift();
-  if(monMatch(line)) appendMonLine(dir, line);
-}
-function appendMonLine(dir, line){
-  const nearBottom = monLog.scrollTop + monLog.clientHeight >= monLog.scrollHeight - 30;
-  const d = el('div', dir==='IN' ? 'in' : (/SEND FAILED/.test(line) ? 'err' : 'out'), line);
-  monLog.appendChild(d);
-  while(monLog.childElementCount > MON_CAP) monLog.firstElementChild.remove();
-  if(nearBottom) monLog.scrollTop = monLog.scrollHeight;
-}
-function applyFilter(){
-  const q = $('monFilter').value;
-  if(!q){ monMatch = () => true; }
-  else{ try{ const re = new RegExp(q, 'i'); monMatch = l => re.test(l); } catch(e){ const s = q.toLowerCase(); monMatch = l => l.toLowerCase().includes(s); } }
-  monLog.innerHTML = '';
-  monBuf.forEach(e => { if(monMatch(e.line)) appendMonLine(e.dir, e.line); });
-  monLog.scrollTop = monLog.scrollHeight;
-}
-$('monFilter').addEventListener('input', applyFilter);
-$('monClear').addEventListener('click', ()=>{ monBuf.length = 0; monLog.innerHTML=''; supClock = supSense = 0; updateSuppressed(); });
 
 /* ---------- EFFECTS ---------- */
 hint('fx', MAP.effects_control.description+' EFX switch = CC'+CC_SW+', select = CC'+CC_SEL+', Ctrl 1-6 = CC '+CTRL_CCS.join('/')+'. Drag knobs, scroll to step, double-click to reset.');
@@ -1582,13 +1435,56 @@ for(let p=PC_LO; p<=PC_HI; p++){ const b = sbtn(String(p+1)); b.title = 'Pattern
 /* ---------- LOOPER ---------- */
 hint('looper', LOOP.description+' All CCs on ch'+LOOP.channel+'. '
   + Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).map(([c,d])=>'CC'+c+' '+d.function).join(' · ')+'.');
-Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).forEach(([ccStr, def])=>{
-  const cc = +ccStr; const row = div('looprow'); row.appendChild(span('label', def.function));
-  const rangeM = def.values.match(/^(\d+)-(\d+) = (.+)$/);
-  if(rangeM){ const k = makeKnob({ label:rangeM[3], min:+rangeM[1], max:+rangeM[2], value:64, defaultVal:64, onChange:v=>sendCC(LOOP.channel, cc, v, null) }); row.appendChild(k.el); }
-  else{ def.values.split(', ').forEach(part=>{ const m = part.match(/^(\d+) = (.+)$/); if(!m) return; const b = sbtn(m[2],'sm'); b.addEventListener('click', ()=> sendCC(LOOP.channel, cc, +m[1], null)); row.appendChild(b); }); }
-  $('looperRows').appendChild(row);
-});
+/* One row of buttons grouped by what they do, plus a row for the knob. The old
+   layout printed the hardware key ([EXIT], [DEL]…) as a chip beside a button
+   that already said the same thing; that name is now the button's tooltip. */
+const LOOP_GROUPS = [
+  { title:'Sampling', ccs:[88, 89, 87] },
+  { title:'Playback', ccs:[85, 86] },
+  { title:'Edit',     ccs:[91] },
+];
+{
+  const knobRow = div('looprow');
+  const placed = new Set();
+  const addButtons = (cc, def, into) => {
+    def.values.split(', ').forEach(part=>{
+      const m = part.match(/^(\d+) = (.+)$/); if(!m) return;
+      const label = m[2].replace(/\s*\([^)]*\)\s*$/, '');   // drop "(quad-press equivalent)"
+      const b = sbtn(label, 'sm');
+      b.title = def.function + ' · CC' + cc + '=' + m[1] + ' on ch' + LOOP.channel;
+      b.addEventListener('click', ()=> sendCC(LOOP.channel, cc, +m[1], null));
+      into.appendChild(b);
+    });
+  };
+  LOOP_GROUPS.forEach(g=>{
+    const row = div('looprow');
+    row.appendChild(span('label', g.title));
+    let any = false;
+    g.ccs.forEach(cc=>{
+      const def = LOOP.cc[String(cc)]; if(!def) return;
+      if(/^\d+-\d+ = /.test(def.values)) return;
+      addButtons(cc, def, row); placed.add(String(cc)); any = true;
+    });
+    if(any) $('looperRows').appendChild(row);
+  });
+  /* anything the groups missed, plus every range control, still shows up */
+  Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).forEach(([ccStr, def])=>{
+    const cc = +ccStr;
+    const rangeM = def.values.match(/^(\d+)-(\d+) = (.+)$/);
+    if(rangeM){
+      /* the full name wraps the caption chip and squeezes the value onto two
+         lines, so the chip shows the first term and the tooltip carries it all */
+      const k = makeKnob({ label:rangeM[3].split(/\s*\/\s*/)[0], min:+rangeM[1], max:+rangeM[2],
+        value:64, defaultVal:64, onChange:v=>sendCC(LOOP.channel, cc, v, null) });
+      k.setTitle(rangeM[3] + ' — ' + def.function + ' · CC' + cc + ' on ch' + LOOP.channel);
+      knobRow.appendChild(k.el);
+    } else if(!placed.has(ccStr)){
+      const row = div('looprow'); row.appendChild(span('label','Other'));
+      addButtons(cc, def, row); $('looperRows').appendChild(row);
+    }
+  });
+  if(knobRow.childElementCount) $('looperRows').appendChild(knobRow);
+}
 
 /* ---------- TRANSPORT ---------- */
 [['Start',0xFA,'System Realtime Start (FA)'],
@@ -1611,11 +1507,10 @@ function clockPump(){
   if(clock.next < now) clock.next = now;
   const horizon = now + 150;
   while(clock.next < horizon){
-    if($('monHideRt').checked){ supClock++; } else logMsg('OUT', [0xF8]);
     try{ midiOut.send([0xF8], clock.next); }catch(e){}
     clock.count++; clock.next += tick;
   }
-  updateSuppressed(); clockStatus.textContent = 'running — '+clock.count+' ticks sent';
+  clockStatus.textContent = 'running — '+clock.count+' ticks sent';
 }
 clockBtn.addEventListener('click', ()=>{
   if(clock.running){ clock.running = false; clearInterval(clock.timer); clockBtn.textContent = 'Start clock'; clockBtn.classList.remove('on'); clockStatus.textContent = 'clock stopped — '+clock.count+' ticks sent'; }
@@ -1645,62 +1540,6 @@ hint('transport', MAP.system_realtime.start_stop
   + ' There is no MIDI control for the unit\'s output volume: the front-panel [VOLUME] knob is not in the'
   + ' implementation chart, and CC7 is answered only in DJ mode (chart footnote *8), where it is the per-channel'
   + ' fader — those knobs are in the DJ section.');
-
-/* ---------- raw sender ---------- */
-$('rawSend').addEventListener('click', ()=>{
-  $('rawErr').textContent = ''; const bytes = [];
-  for(const id of ['raw0','raw1','raw2']){
-    const s = $(id).value.trim().replace(/^0x/i,''); if(s === '') break;
-    if(!/^[0-9a-f]{1,2}$/i.test(s)){ $('rawErr').textContent = 'bad hex byte: "'+s+'"'; return; }
-    bytes.push(parseInt(s, 16));
-  }
-  if(!bytes.length){ $('rawErr').textContent = 'enter at least one hex byte'; return; }
-  const ok = sendBytes(bytes, $('rawHex')); if(!ok && midiOut) $('rawErr').textContent = 'rejected by Web MIDI (invalid MIDI message?)';
-});
-
-/* ---------- verification checklist ---------- */
-const CHECKS = [
-  { id:'ctrl456_mapping', title:'(a) Do CC80/81/82 drive the 4th/5th/6th listed parameter? — RESOLVED by manual',
-    desc:'ANSWERED YES by the v5.50 manual. p.33 "Editing the effects": CTRL 1-3 edit the main parameters, and holding [VALUE] + CTRL 1-3 edits the sub-parameters; the MFX List prints params in that order. The chart example 0xB2 50 7F = "BUS 3 Ctrl 4=127" pins CC80=Ctrl4. Optional hardware re-confirm: steps CC80 through 0/32/64/96/127 on a Tape Echo (BUS 1) — the tape-head MODE should change.',
-    run: runTestA },
-  { id:'transmit_ctrl456', title:'(b) Does the SP transmit CCs for Ctrl 4-6 via held-VALUE combos? — RESOLVED by manual',
-    desc:'ANSWERED YES by the implementation chart: "CC#80–83  o  o" marks CC80-82 as Transmitted. Optional hardware re-confirm: filters the monitor to incoming Ctrl4-6 lines; on the SP, hold [VALUE] and turn CTRL 1-3 on a 6-parameter effect.',
-    run: runTestB },
-];
-function loadChecks(){ try{ return JSON.parse(lsGet('sp404_checklist')) || {}; }catch(e){ return {}; } }
-function saveChecks(state){ lsSet('sp404_checklist', JSON.stringify(state)); }
-const checkState = loadChecks();
-CHECKS.forEach(chk=>{
-  const saved = checkState[chk.id] || {status:'untested', notes:''};
-  const box = div('checkitem'); const row = div('row');
-  const btn = sbtn('Test','sm');
-  const notes = el('textarea'); notes.placeholder = 'notes…'; notes.value = saved.notes;
-  const persist = ()=>{ checkState[chk.id] = {status: ddStatus.get(), notes: notes.value}; saveChecks(checkState); };
-  const ddStatus = makeDropdown({ options:['untested','pass','fail'], value:saved.status, onChange:persist });
-  notes.addEventListener('input', persist);
-  btn.addEventListener('click', ()=> chk.run(el('span'), btn));
-  row.append(btn, document.createTextNode(' result: '), ddStatus.el);
-  box.append(el('b',null,chk.title), div('note',chk.desc), row, notes);
-  $('checkItems').appendChild(box);
-});
-const sleep = ms => new Promise(res=>setTimeout(res, ms));
-async function runTestA(prog, btn){
-  if(!midiOut){ btn.textContent = 'no port'; return; }
-  btn.disabled = true;
-  try{
-    const bus = BUSES[0];
-    const entry = Object.entries(TABLES[bus.table]).find(([,name])=>name==='Tape Echo');
-    if(!entry){ return; }
-    bus.setEfx(true); sendCC(bus.ch, CC_SW, 127, null);
-    bus.fx.set(entry[0]); sendCC(bus.ch, CC_SEL, +entry[0], null); bus.applyParams();
-    await sleep(600);
-    const k4 = bus.knobs.find(k=>k.cc===CTRL_CCS[3]);
-    for(const v of [0, 32, 64, 96, 127]){ k4.set(v); await sleep(800); }
-  }finally{ btn.disabled = false; }
-}
-async function runTestB(){
-  $('dev').open = true; $('monHideRt').checked = true; $('monFilter').value = '^\\S+ IN\\b.*Ctrl[4-6]'; applyFilter(); $('pMon').scrollIntoView({behavior:'smooth'});
-}
 
 /* ---------- SHORTCUT FINDER ---------- */
 (async function shortcutFinder(){
@@ -1756,14 +1595,12 @@ async function runTestB(){
 const navBtns = [...document.querySelectorAll('#nav button')];
 navBtns.forEach(b=> b.addEventListener('click', ()=>{
   const t = $(b.dataset.t); if(!t) return;
-  /* Dev is a <details>: it stays collapsed on load, and the nav button toggles it */
-  if(t.tagName === 'DETAILS'){ t.open = !t.open; if(!t.open) return; }
   t.scrollIntoView({behavior:'smooth', block:'start'});
 }));
 if('IntersectionObserver' in window){
   const byId = {}; navBtns.forEach(b=> byId[b.dataset.t] = b);
   const obs = new IntersectionObserver(entries=>{ entries.forEach(en=>{ if(en.isIntersecting){ navBtns.forEach(x=>x.classList.remove('active')); const b = byId[en.target.id]; if(b) b.classList.add('active'); } }); }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
-  ['setup','fx','pads','keys','patterns','looper','transport','dj','shortcuts','dev'].forEach(id=>{ const s=$(id); if(s) obs.observe(s); });
+  ['setup','transport','fx','pads','keys','patterns','looper','dj','shortcuts'].forEach(id=>{ const s=$(id); if(s) obs.observe(s); });
 }
 
 /* ---------- theme switch ----------
@@ -1792,8 +1629,6 @@ $('themeBtn').addEventListener('click', ()=>{
 applyTheme(lsGet('sp404_theme') || 'hardware');
 
 /* ---------- go ---------- */
-$('dev').open = false;     // developer tools always start collapsed
-updateSuppressed();
 initMIDI();
 
 })();
