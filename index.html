@@ -89,7 +89,8 @@
     border-top:3px solid var(--ink);border-radius:0 0 var(--r-panel);
     background:var(--hatch-ink);opacity:.8;pointer-events:none}
   /* section header = white silkscreen on black */
-  .card > h2{position:absolute;top:-14px;left:20px;z-index:3;display:inline-flex;align-items:center;gap:9px;
+  .card > h2{position:absolute;top:-14px;left:50%;transform:translateX(-50%);z-index:3;
+    display:inline-flex;align-items:center;gap:9px;white-space:nowrap;
     margin:0;font-family:var(--marker);font-size:var(--s-label);letter-spacing:1.1px;
     text-transform:uppercase;color:var(--white);background:var(--ink);
     border-radius:var(--r-chip);padding:5px 13px 6px;line-height:1.15}
@@ -284,7 +285,8 @@
   details#dev{background:var(--panel);border:var(--bd-heavy) solid var(--ink);border-radius:var(--r-panel);
     box-shadow:var(--off-lg) var(--off-lg) 0 var(--shadow);padding:16px 22px 18px}
   details#dev::before,details#dev::after{display:none}
-  details#dev > summary{display:inline-block;font-family:var(--marker);font-size:var(--s-label);
+  details#dev > summary{display:block;width:fit-content;max-width:100%;margin:0 auto;
+    font-family:var(--marker);font-size:var(--s-label);
     letter-spacing:1.1px;text-transform:uppercase;color:var(--white);background:var(--ink);
     border-radius:var(--r-chip);padding:5px 13px 6px;cursor:pointer;list-style:none}
   details#dev > summary::-webkit-details-marker{display:none}
@@ -346,7 +348,7 @@
     #nav{margin:8px auto 18px;padding:7px 8px;border-radius:6px 4px 5px 4px/4px 5px 4px 6px}
     #nav button{font-size:12px;padding:4px 9px}
     .card{padding:22px 11px 26px}
-    .card > h2{left:12px;font-size:12px;padding:4px 10px 5px}
+    .card > h2{font-size:12px;padding:4px 10px 5px}
     /* stacked: combo, then name/desc, then badge + manual flush right */
     .sc-item{grid-template-columns:1fr;gap:5px;padding:9px 6px}
     .sc-right{display:flex;justify-content:flex-end;align-items:center;gap:10px;width:100%}
