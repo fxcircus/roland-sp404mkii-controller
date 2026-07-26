@@ -161,10 +161,14 @@
   .knob.disabled{opacity:.28;pointer-events:none}
   .knob-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-top:10px}
 
-  .zn-target{display:inline-block;font-family:var(--mono);font-size:var(--s-value);font-weight:700;
-    letter-spacing:.6px;color:var(--white);background-color:var(--ink);background-image:var(--hatch);
-    border:var(--bd) solid var(--ink);border-radius:var(--r-display);padding:5px 12px 6px;min-width:130px;text-align:center}
-  .chroma-auto{display:inline-flex;align-items:center;gap:6px;font-family:var(--hand);font-size:14px;color:var(--ink2)}
+  /* chromatic needs three steps on the unit first — spell them out */
+  .zn-steps{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--hand);font-size:15px;
+    color:var(--ink);background:var(--paper2);border:var(--bd) dashed var(--ink);
+    border-radius:var(--r-btn);padding:9px 13px;margin:2px 0 10px}
+  .zn-steps b{font-family:var(--marker);font-size:12px;letter-spacing:1px;text-transform:uppercase;
+    color:var(--white);background:var(--ink);border-radius:var(--r-chip);padding:3px 9px 4px}
+  .zn-steps .k{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink);
+    background:var(--white);border:2px solid var(--ink);border-radius:var(--r-keycap);padding:2px 7px 3px}
 
   /* effect bus strips */
   .bus{position:relative;border:var(--bd) solid var(--ink);background:var(--white);
@@ -447,7 +451,7 @@
     <span id="keyVelMount"></span>
   </div>
   <div id="keysSamples">
-    <div class="row"><span class="zn-target" id="chromaTarget">—</span></div>
+    <div class="zn-steps" id="chromaSteps"></div>
     <div class="piano-case"><div class="piano" id="chromaKbd"></div></div>
     <div class="row"><span id="asoMount"></span></div>
   </div>
@@ -1202,25 +1206,32 @@ const KEYS_HINT_A = 'Samples: ch'+CHROMA_CH+' — '+PADS.chromatic.notes;
 /* Selecting a sample means pressing its pad, which also sounds it once — same
    as on the hardware. So auto-select fires only when the target has actually
    changed since we last selected, not on every key press. */
-/* The app CANNOT choose which sample plays chromatically. Selecting one means
-   pressing its pad in SAMPLE mode (manual p.25 step 1) — and a MIDI note-on
-   triggers a pad without moving the SP's "selected sample" cursor, so sending
-   the pad note first does nothing for chromatic. Worse, once the unit is in
-   chromatic mode its pads play the scale (step 3), not select. Both [EXIT] and
-   SHIFT+[PAD 4] are front-panel only. So this just states what CH16 will do. */
+/* These keys are ignored unless the UNIT is already in chromatic mode. The
+   implementation chart lists Recognized note numbers "36-60 (C2-C4, CH 16) *6"
+   and footnote *6 reads "Enabled when playing samples in chromatic mode
+   (MIDI CH 16)". The sample is whichever pad was selected BEFORE entering that
+   mode (manual p.25 step 1), and both the pad press and SHIFT+[PAD 4] are
+   front-panel only — no MIDI equivalent, no SysEx. So the honest thing the app
+   can do is tell you the three steps. */
 function refreshChromaTarget(){
-  const t = $('chromaTarget'); if(!t) return;
-  t.textContent = 'PLAYS THE SAMPLE SELECTED ON THE UNIT';
+  const box = $('chromaSteps'); if(!box) return;
+  box.innerHTML = '';
+  box.append(
+    el('b',null,'On the SP'),
+    span(null,'1. press the pad you want'), span('k','2. SHIFT + PAD 4'),
+    span(null,'3. play here — these keys are ignored until the unit is in chromatic mode'));
 }
 buildPiano($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI);
 refreshChromaTarget();
 { const aso = sbtn('All Sound Off (CC120)','sm'); aso.addEventListener('click', ()=> sendCC(CHROMA_CH, 120, 0, null)); $('asoMount').appendChild(aso); }
 hint('keys', KEYS_HINT_A
-  + ' These keys always play whichever sample the SP itself has selected — the app cannot change that.'
-  + ' Selecting a sample means pressing its pad in SAMPLE mode (manual p.25 step 1); a MIDI note-on triggers a pad'
-  + ' but does not move the unit\'s selected-sample cursor, and once the unit is in chromatic mode its pads play the'
-  + ' scale rather than select. [EXIT] and SHIFT+[PAD 4] are front-panel only. To change the sample, press its pad'
-  + ' on the unit, then play here.'
+  + ' IMPORTANT: CH16 notes are only recognised while the unit is already in chromatic mode — the implementation'
+  + ' chart lists Recognized "36-60 (C2-C4, CH 16)" under footnote *6, "Enabled when playing samples in chromatic'
+  + ' mode". Outside that mode these keys do nothing. The sample played is whichever pad was selected BEFORE you'
+  + ' entered chromatic mode (manual p.25 step 1); once inside, the pads play the scale instead of selecting.'
+  + ' Selecting a pad and SHIFT+[PAD 4] are both front-panel only — there is no MIDI message and no SysEx for'
+  + ' either, so the app cannot switch the sample for you. Press the pad on the unit, enter chromatic mode, then'
+  + ' play here. [EXIT] leaves the mode.'
   + '  |  Vocoder: ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)]+' Pitch bend springs back to centre on release.');
 buildPiano($('vocKbd'), VOC_CH, 36, 72);
 { const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256, springBack:true, format:v=>(v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) }); $('vocBendMount').appendChild(bendKnob.el); }
