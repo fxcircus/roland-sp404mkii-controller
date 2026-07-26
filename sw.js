@@ -33,6 +33,7 @@ const PRECACHE = [
   './index.html',
   './sp404mk2-midi-map.json',
   './sp404mk2-shortcuts.json',
+  './sp404mk2-modulation.json',
   './manifest.webmanifest',
   './icon.svg',
 ];

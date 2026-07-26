@@ -1,0 +1,1123 @@
+{
+  "meta": {
+    "name": "SP-404MK2 modulation suggestions",
+    "note": "Opinions, not MIDI facts. The map JSON stays the source of truth for CCs and ranges; this file only says which parameters are worth moving and how. Every param name here is validated against effects_parameters at build time.",
+    "rate_units": "Hz, free-running. Deliberately not tempo-synced: the app cannot share a clock with the SP, and many of these effects have their own SYNC that locks them to the unit anyway.",
+    "depth_units": "percent of the parameter's full CC range, applied either side of the knob's current value when bipolar"
+  },
+  "shapes": [
+    {
+      "id": "sine",
+      "label": "Sine",
+      "best_for": "continuous ranges — the smooth sweep"
+    },
+    {
+      "id": "tri",
+      "label": "Tri",
+      "best_for": "continuous ranges — linear up and down, no dwell at the extremes"
+    },
+    {
+      "id": "up",
+      "label": "Ramp",
+      "best_for": "builds — rises then resets"
+    },
+    {
+      "id": "down",
+      "label": "Fall",
+      "best_for": "releases — falls then resets"
+    },
+    {
+      "id": "sq",
+      "label": "Sqr",
+      "best_for": "switches and rhythmic gates — the only shape that crosses a threshold cleanly"
+    },
+    {
+      "id": "sh",
+      "label": "S&H",
+      "best_for": "lists and discrete types — holds a random value per step"
+    }
+  ],
+  "defaults": {
+    "shape": "sine",
+    "rate": 0.25,
+    "depth": 50,
+    "phase": 0,
+    "bipolar": true
+  },
+  "by_effect": {
+    "Slicer": {
+      "summary": "The strongest case on the unit: 32 discrete slice patterns that no hand can step through in time.",
+      "suggest": [
+        {
+          "param": "PATTERN",
+          "shape": "sh",
+          "rate": 0.5,
+          "depth": 85,
+          "phase": 0,
+          "bipolar": true,
+          "why": "A new slice pattern every two beats. Hitting one of 32 detents on cue is not a human action."
+        },
+        {
+          "param": "SPEED",
+          "shape": "up",
+          "rate": 0.06,
+          "depth": 70,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Ramps the slice rate up over ~16 seconds — an automated build."
+        },
+        {
+          "param": "MODE",
+          "shape": "sq",
+          "rate": 1.0,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Flips LEGATO/SLASH in rhythm, so the slice envelope changes character bar to bar."
+        }
+      ]
+    },
+    "Scatter": {
+      "summary": "Every parameter is discrete, so this wants stepped and square, never sine.",
+      "suggest": [
+        {
+          "param": "TYPE",
+          "shape": "sh",
+          "rate": 0.5,
+          "depth": 90,
+          "phase": 0,
+          "bipolar": true,
+          "why": "A different scatter pattern each step — the move the effect is built for."
+        },
+        {
+          "param": "SCATTER",
+          "shape": "sq",
+          "rate": 2.0,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Gates the whole effect on the beat instead of holding it on."
+        },
+        {
+          "param": "SPEED",
+          "shape": "sh",
+          "rate": 0.25,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Random single/double-time bursts."
+        }
+      ]
+    },
+    "DJFX Delay": {
+      "summary": "The loop switch is the instrument here; everything else supports it.",
+      "suggest": [
+        {
+          "param": "LOOP SW",
+          "shape": "sq",
+          "rate": 2.0,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Rhythmic loop stutter, engaged and released on the beat."
+        },
+        {
+          "param": "LENGTH",
+          "shape": "sh",
+          "rate": 0.5,
+          "depth": 80,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Varies the stutter length so the repeat never settles."
+        }
+      ]
+    },
+    "DJFX Looper": {
+      "summary": "A loop switch and a bipolar speed — made for stepped modulation.",
+      "suggest": [
+        {
+          "param": "LOOP SW",
+          "shape": "sq",
+          "rate": 2.0,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Beat-locked loop stabs."
+        },
+        {
+          "param": "SPEED",
+          "shape": "sh",
+          "rate": 1.0,
+          "depth": 90,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Jumps between forward and reverse playback — a scratch you cannot perform."
+        }
+      ]
+    },
+    "Back Spin": {
+      "summary": "A one-shot gesture effect, which is exactly what a square wave automates.",
+      "suggest": [
+        {
+          "param": "BACK SW",
+          "shape": "sq",
+          "rate": 0.5,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Fires the spin every two seconds instead of by hand."
+        },
+        {
+          "param": "LENGTH",
+          "shape": "sh",
+          "rate": 0.25,
+          "depth": 90,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Randomises the spin length so repeats do not sound copied."
+        }
+      ]
+    },
+    "Hyper-Reso": {
+      "summary": "Pitched resonance with a scale — stepped modulation turns it into an arpeggiator.",
+      "suggest": [
+        {
+          "param": "NOTE",
+          "shape": "sh",
+          "rate": 2.0,
+          "depth": 70,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Steps through scale degrees on the beat: an arpeggio the SP has no other way to make."
+        },
+        {
+          "param": "SCALE",
+          "shape": "sh",
+          "rate": 0.08,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Very slow modal shifts under a drone."
+        },
+        {
+          "param": "CHARACTER",
+          "shape": "sine",
+          "rate": 0.15,
+          "depth": 45,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Breathes brightness and detune through the resonance."
+        }
+      ]
+    },
+    "Resonator": {
+      "summary": "Same idea as Hyper-Reso but chord-based.",
+      "suggest": [
+        {
+          "param": "ROOT",
+          "shape": "sh",
+          "rate": 1.0,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Jumps the resonant root — melodic scatter over whatever you feed it."
+        },
+        {
+          "param": "CHORD",
+          "shape": "sh",
+          "rate": 0.12,
+          "depth": 70,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Rotates the chord shape every few bars."
+        },
+        {
+          "param": "PANNING",
+          "shape": "sine",
+          "rate": 0.2,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Swings the resonance across the stereo field."
+        }
+      ]
+    },
+    "Ko-Da-Ma": {
+      "summary": "A tempo-locked delay whose time is a list of note values, so stepping it is musical by construction.",
+      "suggest": [
+        {
+          "param": "TIME",
+          "shape": "sh",
+          "rate": 0.35,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Jumps the delay between note values — the classic dub time-shift, on a timer."
+        },
+        {
+          "param": "MODE",
+          "shape": "sq",
+          "rate": 0.25,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Toggles centre and ping-pong so the repeats move around."
+        }
+      ]
+    },
+    "Zan-Zou": {
+      "summary": "Multi-tap delay: the tap mode is the character.",
+      "suggest": [
+        {
+          "param": "TIME",
+          "shape": "sh",
+          "rate": 0.4,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Steps the delay time between note values."
+        },
+        {
+          "param": "MODE",
+          "shape": "sh",
+          "rate": 0.15,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Cycles 2/3/4-tap, changing the rhythm of the repeats."
+        }
+      ]
+    },
+    "SX Delay": {
+      "summary": "Three parameters, one of which is a list of note values.",
+      "suggest": [
+        {
+          "param": "TIME",
+          "shape": "sh",
+          "rate": 0.35,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Note-value jumps you cannot dial by hand mid-bar."
+        },
+        {
+          "param": "FEEDBACK",
+          "shape": "tri",
+          "rate": 0.08,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Slowly swells and drains the repeats."
+        }
+      ]
+    },
+    "Sync Delay": {
+      "summary": "Tempo-locked delay, so stepping the time lands on the grid.",
+      "suggest": [
+        {
+          "param": "TIME",
+          "shape": "sh",
+          "rate": 0.35,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Steps between note divisions."
+        },
+        {
+          "param": "FEEDBACK",
+          "shape": "tri",
+          "rate": 0.07,
+          "depth": 50,
+          "phase": 0,
+          "bipolar": true,
+          "why": "A slow feedback swell that never quite runs away."
+        }
+      ]
+    },
+    "TimeCtrlDly": {
+      "summary": "Delay time is the pitch control here — moving it bends the repeats.",
+      "suggest": [
+        {
+          "param": "TIME",
+          "shape": "sh",
+          "rate": 0.4,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Stepped time changes pitch-shift the tail on every jump."
+        },
+        {
+          "param": "FEEDBACK",
+          "shape": "tri",
+          "rate": 0.08,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Swells the repeats without touching the knob."
+        }
+      ]
+    },
+    "Lo-fi": {
+      "summary": "Nine degradation types is a list worth stepping through.",
+      "suggest": [
+        {
+          "param": "LOFI TYPE",
+          "shape": "sh",
+          "rate": 0.3,
+          "depth": 80,
+          "phase": 0,
+          "bipolar": true,
+          "why": "A different flavour of destruction every few seconds."
+        },
+        {
+          "param": "CUTOFF",
+          "shape": "sine",
+          "rate": 0.12,
+          "depth": 50,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Opens and closes the lo-fi filter underneath it."
+        }
+      ]
+    },
+    "Isolator": {
+      "summary": "Three-band kill: square waves on these are a DJ move, not an experiment.",
+      "suggest": [
+        {
+          "param": "LOW",
+          "shape": "sq",
+          "rate": 2.0,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Drops the bass on the beat — the isolator cut, automated."
+        },
+        {
+          "param": "HIGH",
+          "shape": "sq",
+          "rate": 2.0,
+          "depth": 100,
+          "phase": 0.5,
+          "bipolar": true,
+          "why": "Counter-phased against LOW so the bands trade places."
+        }
+      ]
+    },
+    "Harmony": {
+      "summary": "The harmony interval is a list, which is where the interest is.",
+      "suggest": [
+        {
+          "param": "HARMONY",
+          "shape": "sh",
+          "rate": 0.2,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Rotates the harmony interval so the part rewrites itself."
+        },
+        {
+          "param": "FORMANT",
+          "shape": "sine",
+          "rate": 0.1,
+          "depth": 45,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Slides the vocal character while the pitch holds."
+        }
+      ]
+    },
+    "Vocoder": {
+      "summary": "Note and chord are lists; formant is the texture.",
+      "suggest": [
+        {
+          "param": "NOTE",
+          "shape": "sh",
+          "rate": 2.0,
+          "depth": 65,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Steps the vocoder pitch on the beat — melody from a spoken source."
+        },
+        {
+          "param": "CHORD",
+          "shape": "sh",
+          "rate": 0.12,
+          "depth": 80,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Rotates the chord voicing every few bars."
+        },
+        {
+          "param": "FORMANT",
+          "shape": "sine",
+          "rate": 0.09,
+          "depth": 40,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Slow gender morph under the melody."
+        }
+      ]
+    },
+    "Auto Pitch": {
+      "summary": "Correction becomes an instrument once the settings move.",
+      "suggest": [
+        {
+          "param": "FORMANT",
+          "shape": "sine",
+          "rate": 0.1,
+          "depth": 50,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Slow formant slide — the voice changes character, not pitch."
+        },
+        {
+          "param": "ROBOT",
+          "shape": "sq",
+          "rate": 0.5,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Snaps in and out of full robot on a timer."
+        }
+      ]
+    },
+    "Chromatic PS": {
+      "summary": "Two independent pitch voices with independent pans.",
+      "suggest": [
+        {
+          "param": "PITCH1",
+          "shape": "sh",
+          "rate": 1.0,
+          "depth": 50,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Steps voice 1 through intervals — an arpeggio over any source."
+        },
+        {
+          "param": "PAN1",
+          "shape": "sine",
+          "rate": 0.2,
+          "depth": 80,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Swings voice 1 across the field."
+        },
+        {
+          "param": "PAN2",
+          "shape": "sine",
+          "rate": 0.2,
+          "depth": 80,
+          "phase": 0.5,
+          "bipolar": true,
+          "why": "Counter-phased, so the two voices cross in the middle."
+        }
+      ]
+    },
+    "Cloud Delay": {
+      "summary": "Granular by nature, so scattered modulation suits it.",
+      "suggest": [
+        {
+          "param": "PITCH",
+          "shape": "sh",
+          "rate": 0.8,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Scatters the grain pitch — clouds instead of echoes."
+        },
+        {
+          "param": "CLOUDY",
+          "shape": "sine",
+          "rate": 0.06,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Thickens and thins the cloud over ~16 seconds."
+        }
+      ]
+    },
+    "JUNO Chorus": {
+      "summary": "Only the mode list is worth automating.",
+      "suggest": [
+        {
+          "param": "MODE",
+          "shape": "sh",
+          "rate": 0.1,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Rotates through the JUNO/JX voicings slowly."
+        }
+      ]
+    },
+    "Gt Amp Sim": {
+      "summary": "Wild rather than subtle, but the amp list is genuinely fun to step.",
+      "suggest": [
+        {
+          "param": "AMP TYPE",
+          "shape": "sh",
+          "rate": 0.15,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Swaps the amp every few seconds — a different rig per phrase."
+        },
+        {
+          "param": "DRIVE",
+          "shape": "tri",
+          "rate": 0.06,
+          "depth": 40,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Slow gain swell underneath."
+        }
+      ]
+    },
+    "Super Filter": {
+      "summary": "The obvious one, and its own LFO section sits on CTRL 4-6 where your hands cannot reach.",
+      "suggest": [
+        {
+          "param": "CUTOFF",
+          "shape": "sine",
+          "rate": 0.15,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "The sweep everyone wants, held perfectly steady for as long as you like."
+        },
+        {
+          "param": "RESONANCE",
+          "shape": "sine",
+          "rate": 0.15,
+          "depth": 45,
+          "phase": 0.5,
+          "bipolar": true,
+          "why": "Counter-phased against cutoff, so resonance peaks as the filter closes."
+        },
+        {
+          "param": "FLT TYPE",
+          "shape": "sq",
+          "rate": 1.0,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Jumps LPF/BPF/HPF in rhythm — impossible to do cleanly by hand."
+        }
+      ]
+    },
+    "Filter+Drive": {
+      "summary": "Filter plus saturation: move the cutoff and the drive follows it.",
+      "suggest": [
+        {
+          "param": "CUTOFF",
+          "shape": "sine",
+          "rate": 0.15,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Classic sweep, steady over minutes."
+        },
+        {
+          "param": "RESONANCE",
+          "shape": "sine",
+          "rate": 0.15,
+          "depth": 45,
+          "phase": 0.5,
+          "bipolar": true,
+          "why": "Peaks as the filter closes."
+        },
+        {
+          "param": "FLT TYPE",
+          "shape": "sq",
+          "rate": 0.5,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Flips high-pass and low-pass on a timer."
+        }
+      ]
+    },
+    "Tape Echo": {
+      "summary": "The dub move is the tape speed, and holding it steady by hand is the hard part.",
+      "suggest": [
+        {
+          "param": "TIME",
+          "shape": "tri",
+          "rate": 0.05,
+          "depth": 45,
+          "phase": 0,
+          "bipolar": true,
+          "why": "A 20-second drift that pitch-bends every repeat — tape slowing and recovering."
+        },
+        {
+          "param": "W/F DEPTH",
+          "shape": "sine",
+          "rate": 0.09,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Breathes the wow and flutter in and out."
+        },
+        {
+          "param": "MODE",
+          "shape": "sh",
+          "rate": 0.1,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Rotates the playback-head combination, changing the echo pattern."
+        }
+      ]
+    },
+    "Wah": {
+      "summary": "A pedal you do not have to keep your foot on.",
+      "suggest": [
+        {
+          "param": "MANUAL",
+          "shape": "sine",
+          "rate": 0.4,
+          "depth": 70,
+          "phase": 0,
+          "bipolar": true,
+          "why": "The sweep itself, at a rate no ankle holds steady."
+        },
+        {
+          "param": "RATE",
+          "shape": "up",
+          "rate": 0.05,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Accelerates the auto-wah into a build."
+        }
+      ]
+    },
+    "Phaser": {
+      "summary": "Manual is the sweep position; rate is the sweep speed.",
+      "suggest": [
+        {
+          "param": "MANUAL",
+          "shape": "sine",
+          "rate": 0.12,
+          "depth": 65,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Slow jet sweep through the notches."
+        },
+        {
+          "param": "RATE",
+          "shape": "up",
+          "rate": 0.05,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Speeds the phaser up over ~20 seconds."
+        }
+      ]
+    },
+    "Flanger": {
+      "summary": "Same shape as the phaser, more metallic.",
+      "suggest": [
+        {
+          "param": "MANUAL",
+          "shape": "sine",
+          "rate": 0.12,
+          "depth": 65,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Moves the flange peak through the source."
+        },
+        {
+          "param": "RATE",
+          "shape": "up",
+          "rate": 0.05,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "An accelerating jet."
+        }
+      ]
+    },
+    "Chorus": {
+      "summary": "Its rate is in seconds, so modulating the rate is the interesting part.",
+      "suggest": [
+        {
+          "param": "RATE",
+          "shape": "sine",
+          "rate": 0.05,
+          "depth": 50,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Wobbles the chorus speed — detune that never settles."
+        },
+        {
+          "param": "DEPTH",
+          "shape": "tri",
+          "rate": 0.07,
+          "depth": 45,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Thickens and thins the chorus."
+        }
+      ]
+    },
+    "Ring Mod": {
+      "summary": "Frequency is the whole effect.",
+      "suggest": [
+        {
+          "param": "FREQUENCY",
+          "shape": "sine",
+          "rate": 0.2,
+          "depth": 65,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Sweeps the sidebands — the classic sci-fi glide."
+        },
+        {
+          "param": "POLARITY",
+          "shape": "sq",
+          "rate": 1.0,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Flips the modulation direction on the beat."
+        }
+      ]
+    },
+    "SBF": {
+      "summary": "A moving comb filter.",
+      "suggest": [
+        {
+          "param": "INTERVAL",
+          "shape": "sine",
+          "rate": 0.13,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Slides the band spacing so the comb walks through the source."
+        },
+        {
+          "param": "TYPE",
+          "shape": "sh",
+          "rate": 0.15,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Jumps between the six filter ranges."
+        }
+      ]
+    },
+    "Crusher": {
+      "summary": "Degradation with a rate control, which is what to automate.",
+      "suggest": [
+        {
+          "param": "RATE",
+          "shape": "up",
+          "rate": 0.05,
+          "depth": 70,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Ramps sample-rate destruction into a build."
+        },
+        {
+          "param": "FILTER",
+          "shape": "sine",
+          "rate": 0.12,
+          "depth": 50,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Sweeps the post-crush filter to keep it musical."
+        }
+      ]
+    },
+    "Ha-Dou": {
+      "summary": "Depth and time are both continuous and both change the character.",
+      "suggest": [
+        {
+          "param": "MOD DEPTH",
+          "shape": "sine",
+          "rate": 0.14,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Breathes the effect depth."
+        },
+        {
+          "param": "TIME",
+          "shape": "tri",
+          "rate": 0.05,
+          "depth": 45,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Slowly stretches and shortens the effect."
+        }
+      ]
+    },
+    "Tremolo/Pan": {
+      "summary": "An LFO effect whose own rate is the thing worth automating.",
+      "suggest": [
+        {
+          "param": "RATE",
+          "shape": "up",
+          "rate": 0.05,
+          "depth": 70,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Accelerating tremolo — a build with no hands on it."
+        },
+        {
+          "param": "WAVE",
+          "shape": "sh",
+          "rate": 0.2,
+          "depth": 100,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Rotates the LFO wave, so the tremolo changes shape."
+        },
+        {
+          "param": "DEPTH",
+          "shape": "tri",
+          "rate": 0.08,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Fades the effect in and out."
+        }
+      ]
+    },
+    "Reverb": {
+      "summary": "Space that breathes rather than sits.",
+      "suggest": [
+        {
+          "param": "TIME",
+          "shape": "sine",
+          "rate": 0.04,
+          "depth": 50,
+          "phase": 0,
+          "bipolar": true,
+          "why": "A 25-second swell of the room size."
+        },
+        {
+          "param": "HIGH CUT",
+          "shape": "sine",
+          "rate": 0.07,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Darkens and brightens the tail."
+        }
+      ]
+    },
+    "SX Reverb": {
+      "summary": "Three controls; time is the one worth moving.",
+      "suggest": [
+        {
+          "param": "TIME",
+          "shape": "sine",
+          "rate": 0.04,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Slow expansion and collapse of the space."
+        },
+        {
+          "param": "TONE",
+          "shape": "sine",
+          "rate": 0.06,
+          "depth": 45,
+          "phase": 0.5,
+          "bipolar": true,
+          "why": "Counter-phased, so the tail darkens as it lengthens."
+        }
+      ]
+    },
+    "Downer": {
+      "summary": "A pitch dive with its own rate — square it for rhythm.",
+      "suggest": [
+        {
+          "param": "DEPTH",
+          "shape": "sq",
+          "rate": 1.0,
+          "depth": 90,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Dives on the beat instead of when you turn a knob."
+        },
+        {
+          "param": "FILTER",
+          "shape": "sine",
+          "rate": 0.12,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Sweeps the high-frequency loss under the dive."
+        }
+      ]
+    },
+    "Stopper": {
+      "summary": "Tape-stop, automated.",
+      "suggest": [
+        {
+          "param": "DEPTH",
+          "shape": "sq",
+          "rate": 0.5,
+          "depth": 95,
+          "phase": 0,
+          "bipolar": true,
+          "why": "A stop every two seconds, exactly on time."
+        },
+        {
+          "param": "RATE",
+          "shape": "up",
+          "rate": 0.04,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Shortens the stop over a build."
+        }
+      ]
+    },
+    "To-Gu-Ro": {
+      "summary": "The same family, with filter and amp modulation of its own.",
+      "suggest": [
+        {
+          "param": "DEPTH",
+          "shape": "sq",
+          "rate": 1.0,
+          "depth": 90,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Rhythmic slowdowns."
+        },
+        {
+          "param": "RATE",
+          "shape": "up",
+          "rate": 0.04,
+          "depth": 60,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Tightens the cycle over time."
+        }
+      ]
+    },
+    "Cassette Sim": {
+      "summary": "Texture, but the age control is a genuinely fun slow move.",
+      "suggest": [
+        {
+          "param": "AGE",
+          "shape": "sine",
+          "rate": 0.03,
+          "depth": 70,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Ages and un-ages the tape over half a minute."
+        },
+        {
+          "param": "WOW FLUT",
+          "shape": "sine",
+          "rate": 0.08,
+          "depth": 50,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Varies the instability instead of leaving it fixed."
+        }
+      ]
+    },
+    "404 VinylSim": {
+      "summary": "The vinyl filter is a continuous sweep.",
+      "suggest": [
+        {
+          "param": "FREQUENCY",
+          "shape": "sine",
+          "rate": 0.06,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "The record warping in and out of focus."
+        },
+        {
+          "param": "WOW FLUT",
+          "shape": "sine",
+          "rate": 0.09,
+          "depth": 45,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Uneven platter speed rather than a constant."
+        }
+      ]
+    },
+    "303 VinylSim": {
+      "summary": "Same idea, plus a compressor.",
+      "suggest": [
+        {
+          "param": "WOW FLUT",
+          "shape": "sine",
+          "rate": 0.08,
+          "depth": 50,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Varying instability keeps it from sounding looped."
+        }
+      ]
+    },
+    "Equalizer": {
+      "summary": "Rhythmic EQ cuts are an isolator move; the sweep is the subtler one.",
+      "suggest": [
+        {
+          "param": "MID GAIN",
+          "shape": "sq",
+          "rate": 2.0,
+          "depth": 80,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Scoops the mids on the beat."
+        },
+        {
+          "param": "Mid Freq",
+          "shape": "sine",
+          "rate": 0.1,
+          "depth": 55,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Sweeps the mid band through the source."
+        }
+      ]
+    },
+    "Distortion": {
+      "summary": "Gain staging, so only a slow swell earns automation.",
+      "suggest": [
+        {
+          "param": "DRIVE",
+          "shape": "tri",
+          "rate": 0.05,
+          "depth": 40,
+          "phase": 0,
+          "bipolar": true,
+          "why": "Builds and releases saturation over ~20 seconds."
+        }
+      ]
+    },
+    "Overdrive": {
+      "summary": "As above, gentler.",
+      "suggest": [
+        {
+          "param": "DRIVE",
+          "shape": "tri",
+          "rate": 0.05,
+          "depth": 40,
+          "phase": 0,
+          "bipolar": true,
+          "why": "A slow push into breakup and back."
+        }
+      ]
+    },
+    "Compressor": {
+      "summary": "Set and forget. Sustain, attack, ratio and level are gain staging — modulating them is noise, not music.",
+      "suggest": []
+    },
+    "WrmSaturator": {
+      "summary": "Set and forget. Drive and two EQ bands you dial once and leave.",
+      "suggest": []
+    }
+  }
+}
