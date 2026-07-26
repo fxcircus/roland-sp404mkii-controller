@@ -1583,9 +1583,19 @@ function buildVocKeyboard(){
   }
   container.style.width = (wIdx ? (wIdx-1)*W_ADV + W_WIDTH : 0)+'px';
 }
-{ const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256,
-    springBack:true, format:v=>(v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) });
-  bendKnob.setTitle('Pitch bend on ch'+VOC_CH+' — springs back to centre on release');
+{ /* The wire value is the raw 14-bit MIDI number (-8192..+8191), which means
+     nothing to a player. Show position within the full bend range instead:
+     the manual (p.156) only says pitch bend "continuously changes the pitch"
+     and never states a range in semitones, so labelling this in semitones
+     would be a guess — a percentage of full bend is true whatever depth the
+     unit is set to. */
+  const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:82,
+    springBack:true,
+    format:v=>{ const pct = Math.round(v / (v < 0 ? 8192 : 8191) * 100);
+      return (pct > 0 ? '+' : '') + pct + '%'; },
+    onChange:v=> sendBend(VOC_CH, v, null) });
+  bendKnob.setTitle('Pitch bend on ch'+VOC_CH+' — shown as % of full bend range; how far that '
+    + 'actually bends is set on the unit. Springs back to centre on release.');
   $('vocBendMount').appendChild(bendKnob.el); }
 
 hint('vocoder', 'ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)]
