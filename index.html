@@ -186,7 +186,7 @@
   .k-flute{stroke:#fff;stroke-width:2.2;stroke-linecap:round;opacity:.9;fill:none}
   .k-body{fill:var(--white);stroke:var(--ink);stroke-width:5.5;stroke-linejoin:round}
   .k-notch{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;opacity:.55;fill:none}
-  .k-ptr,.k-ptr-ext{fill:none;stroke:var(--ink);stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round}
+  .k-ptr{fill:none;stroke:var(--ink);stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round}
   /* the wall segment is always light: the skirt is near-black in every theme,
      so this one cannot follow --ink the way the cap portion does */
   .k-ptr-side{fill:none;stroke:#fdfbf7;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round}
@@ -933,8 +933,7 @@
      rotation lives on the parent <g>, which this never touches. */
   /* the ridge clears the cap edge by ~2 units only. Cap top is y=21; scaled
      about the line's inner end (52,34), so only the outer tip travels. */
-  [data-zn-theme='hardware'] .k-ptr,
-  [data-zn-theme='hardware'] .k-ptr-ext{stroke:#fdfbf7;stroke-width:5.5}
+  [data-zn-theme='hardware'] .k-ptr{stroke:#fdfbf7;stroke-width:5.5}
   [data-zn-theme='hardware'] .k-ptr-side{stroke-width:5.5}
   [data-zn-theme='hardware'] .knob-row{gap:18px}
 
@@ -1419,17 +1418,15 @@ function makeKnob(opts){
     + (prof==='profile' ? '<g class="k-flute">'+FLUTES.map(f=>'<line x1="'+f[0]+'" y1="'+f[1]+'" x2="'+f[0]+'" y2="'+f[2]+'"/>').join('')+'</g>' : '')
     + '<ellipse class="k-body" cx="52" cy="46" rx="27" ry="25"/>'
     + '<circle class="k-notch" cx="52" cy="46" r="21" fill="none" stroke-dasharray="2.5 8.5"/>'
-    + '<g class="k-rot"><line class="k-ptr" x1="52" y1="34" x2="52" y2="26"/></g>'
-    + '<path class="k-ptr-ext" d=""/>'
+    + '<path class="k-ptr" d=""/>'
     + '<path class="k-ptr-side" d=""/>'
     + '</svg>'
     + '<span class="knob-label"><span class="knob-name"></span><span class="knob-val"></span></span>';
   const svg = root.querySelector('.knob-svg');
-  const gRot = root.querySelector('.k-rot');
   const fillEl = root.querySelector('.k-fill');
   const spanEl = root.querySelector('.k-span');
   const liveEl = root.querySelector('.k-live');
-  const extEl  = root.querySelector('.k-ptr-ext');
+  const ptrEl  = root.querySelector('.k-ptr');
   const sideEl = root.querySelector('.k-ptr-side');
   const labEl = root.querySelector('.knob-name');
   const valEl = root.querySelector('.knob-val');
@@ -1441,40 +1438,41 @@ function makeKnob(opts){
      the centre rather than whichever instant they were taken at. */
   let modView = null;
   const clamp = v => Math.max(min, Math.min(max, v));
-  /* On the unit the index line does not stop at the top face — it runs over the
-     rim and down the moulded side wall (see the rear photo: these are tall
-     cylinders, not discs). So once the pointer swings far enough forward that
-     the wall faces you, the line carries on over the edge.
+  /* The index line is drawn to the rim EVERY frame rather than being a fixed
+     line inside a rotating <g>. Two reasons, and the second is the important
+     one:
 
-     The pointer's SVG angle is exactly 135 + 270*frac, the same sweep the track
-     uses. sin() of that is how much the wall faces the viewer: positive across
-     the whole lower arc, peaking at 6 o'clock, zero at 3 and 9 where the wall
-     turns edge-on. Scaling the overhang by it means the line grows over the
-     edge and retreats smoothly, with no threshold to pop at.
+     1. The cap is an ellipse (rx 27, ry 25), so the rim is a different distance
+        out at every angle. A rigid line can only be flush at one of them.
+     2. It always terminates ON the rim, so nothing about the line itself
+        changes as the wall comes into view — only the overhang below it grows.
+        While the line stopped short and then jumped out to the rim to meet the
+        overhang, the two appeared together and read as a jolt.
 
-     Worth knowing: travel runs 7:30 to 4:30, so the pointer never reaches 6
-     o'clock — the overhang is longest at both ends of the sweep and gone by
-     the horizontal. */
-  function paintPointerSpill(frac){
+     The overhang is the same line continuing down the moulded side wall, as it
+     does on the unit — these are tall cylinders, not discs. The pointer's SVG
+     angle is exactly 135 + 270*frac, the same sweep the track uses, so sin() of
+     it is how much of that wall faces you: positive across the lower arc,
+     peaking at 6 o'clock, zero at 3 and 9 where the wall turns edge-on. Length
+     scales by it, so the overhang grows from nothing and needs no threshold.
+
+     Travel runs 7:30 to 4:30, so the pointer never reaches 6 o'clock — the
+     overhang is longest at both ends of the sweep and gone by the horizontal. */
+  const f1 = n => n.toFixed(1);
+  function paintPointer(frac){
     const rad = (135 + 270*frac) * Math.PI/180;
     const sn = Math.sin(rad), cs = Math.cos(rad);
-    /* Below this the overhang would be a couple of pixels — the line would just
-       appear to grow longer for no visible reason. Gating both segments on it
-       means the hook arrives as one deliberate gesture, over roughly the last
-       eighth of travel at each end (about 4 o'clock and 8 o'clock). */
-    if(sn <= 0.18){ extEl.setAttribute('d',''); sideEl.setAttribute('d',''); return; }
-    const tipX = 52 + 20*cs, tipY = 46 + 20*sn;      // where .k-ptr stops
+    const inX = 52 + 12*cs, inY = 46 + 12*sn;        // inner end, as before
     const rimX = 52 + 27*cs, rimY = 46 + 25*sn;      // the cap's edge at this angle
-    const f = n => n.toFixed(1);
-    extEl.setAttribute('d',  'M'+f(tipX)+','+f(tipY)+' L'+f(rimX)+','+f(rimY));
-    sideEl.setAttribute('d', 'M'+f(rimX)+','+f(rimY)+' L'+f(rimX)+','+f(rimY + h*sn));
+    ptrEl.setAttribute('d', 'M'+f1(inX)+','+f1(inY)+' L'+f1(rimX)+','+f1(rimY));
+    if(sn <= 0.02){ sideEl.setAttribute('d',''); return; }
+    sideEl.setAttribute('d', 'M'+f1(rimX)+','+f1(rimY)+' L'+f1(rimX)+','+f1(rimY + h*sn));
   }
   function paint(){
     const shown = modView != null ? modView : value;
     const frac = (shown-min)/((max-min)||1);
-    gRot.setAttribute('transform', 'rotate('+(-135+270*frac).toFixed(1)+' 52 46)');
     fillEl.setAttribute('d', knobArc(frac));
-    paintPointerSpill(frac);
+    paintPointer(frac);
     valEl.textContent = fmt(shown);
   }
   const MOD_R = 49;
