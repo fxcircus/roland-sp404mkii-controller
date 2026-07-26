@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SP-404 MKII · MIDI Sketchpad</title>
+<meta name="theme-color" content="#16181b">
+<meta name="description" content="Web MIDI control surface, monitor and shortcut finder for the Roland SP-404MK2.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SP-404MKII">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -2383,6 +2390,8 @@ function applyTheme(id){
   $('themeBtn').textContent = 'Theme';
   $('themeBtn').title = 'Theme: '+t.label+' — click to switch';
   $('themeBtn').setAttribute('aria-label','Theme: '+t.label+', click to switch');
+  const tc = document.querySelector('meta[name="theme-color"]');
+  if(tc) tc.setAttribute('content', t.id === 'hardware' ? '#16181b' : '#d7e3fb');
   lsSet('sp404_theme', t.id);
 }
 $('themeBtn').addEventListener('click', ()=>{
@@ -2672,6 +2681,32 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState 
 initMIDI();
 
 })();
+</script>
+
+<script>
+/* ---------- PWA ----------
+   Registered outside the app IIFE so a failure here can never take the app
+   down with it. There is deliberately NO auto-reload when an update lands:
+   sw.js is network-first, so the document you are looking at already came off
+   the network — a reload would gain nothing and could interrupt a take. The
+   new worker still replaces the old one immediately via skip-waiting, so the
+   offline copy is never more than one load behind main. */
+if('serviceWorker' in navigator && location.protocol !== 'file:'){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      reg.addEventListener('updatefound', function(){
+        var incoming = reg.installing;
+        if(!incoming) return;
+        incoming.addEventListener('statechange', function(){
+          if(incoming.state === 'installed' && navigator.serviceWorker.controller){
+            incoming.postMessage('skip-waiting');
+          }
+        });
+      });
+      reg.update();
+    }).catch(function(){});
+  });
+}
 </script>
 </body>
 </html>

@@ -2,6 +2,8 @@
 
 Single-file Web MIDI diagnostic harness for the Roland SP-404MK2. No build step, Chrome/Edge only.
 
+Installable as a PWA (`manifest.webmanifest` + `sw.js` + `icon.svg`), and it works offline once visited.
+
 Only external dependency: two Google Fonts (`Permanent Marker` for headings/buttons/labels, `Patrick Hand` for body/help text), loaded via `<link>` in `<head>`. Local fallbacks are declared, so the app still works offline — it just loses the hand-drawn lettering. Everything else is self-contained.
 
 ## Run locally
@@ -29,6 +31,15 @@ Pushing *is* how Roy reviews the work — GitHub Pages redeploys from `main` aut
 - Remote: `origin` = `git@github.com:fxcircus/roland-sp404mkii-controller.git` (SSH — this Mac pushes over SSH as `fxcircus`; no gh CLI, no tokens).
 - GitHub Pages serves from branch `main`, folder `/root`. **Live site: https://fxcircus.github.io/roland-sp404mkii-controller/** — a push to `main` redeploys it automatically (no extra step). `.nojekyll` is present so Pages serves the files as-is.
 - Never commit the Roland PDF (see above). It's in `.gitignore`; keep it there.
+
+### PWA / service worker — no per-push step needed
+`sw.js` is **network-first** for everything we ship, so a push to main reaches people on their next load with no action from us. Do NOT convert it to cache-first "for speed": that is exactly the recipe that pins installs to a stale build when someone forgets to bump a constant.
+
+- The cache is written on the way past and only ever **read when the network is unavailable**.
+- Same-origin fetches use `cache: 'no-cache'`, forcing revalidation against GitHub Pages instead of accepting its 10-minute `max-age`. A deploy is visible on the next load, not up to ten minutes later.
+- `VERSION` in `sw.js` exists **only** so `activate()` can bin older cache stores. Content updates do not need it bumped. Bump it if you change the caching logic itself or want to force every install to re-fetch its offline copy.
+- The page is deliberately **not** auto-reloaded when a new worker activates — network-first means the document already came off the network, so a reload would gain nothing and could interrupt a take.
+- Adding a new runtime file (another JSON, another asset)? Add it to `PRECACHE` in `sw.js`, or it will not be there offline.
 
 ### Verifying before you push
 Browser automation is **not** a gate — it's often unavailable, and Roy doesn't expect it. Verify what can be checked statically, then push:

@@ -1,0 +1,21 @@
+{
+  "name": "SP-404 MKII MIDI Sketchpad",
+  "short_name": "SP-404MKII",
+  "description": "Web MIDI control surface, monitor and shortcut finder for the Roland SP-404MK2.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "/roland-sp404mkii-controller/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#16181b",
+  "theme_color": "#16181b",
+  "categories": ["music", "utilities"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
