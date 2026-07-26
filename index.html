@@ -165,6 +165,9 @@
   .seg .seg-btn:last-child{border-right-width:var(--bd);border-radius:0 7px 0 0/0 6px 0 0}
   .seg .seg-btn.on{background:var(--ink);color:var(--white)}
   .keys-top{display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap;margin-bottom:2px}
+  /* each port label stays glued to its own picker — as one flat row they got
+     separated when the row wrapped, leaving "Input" above the output menu */
+  .portpair{display:flex;align-items:center;gap:9px}
 
   /* knobs — value arc, hatched cylinder skirt, squashed cap, grip ring, pointer */
   .knob{width:116px;text-align:center;user-select:none}
@@ -457,6 +460,9 @@
     .knob{width:88px}
     .knob-svg{width:88px;height:83px}
     .knob-row{gap:10px}
+    .midi-ports{flex-direction:column;align-items:stretch;gap:12px}
+    .portpair{flex-direction:column;align-items:flex-start;gap:6px;width:100%}
+    .midi-ports #rescanBtn{width:100%}
     /* A dropdown mid-row puts its absolutely-positioned panel at left+width,
        which runs off a phone screen — and it counts even while hidden. Full
        width on its own line keeps the panel inside the card. */
@@ -825,13 +831,16 @@
 
 <section id="setup" class="card">
   <h2><span class="n">1</span>MIDI<span class="lamp" id="lamp"></span></h2>
-  <div class="row"><b class="mini">Output</b><span id="outMount"></span>
-    <b class="mini">Input</b><span id="inMount"></span>
-    <button id="rescanBtn" class="sbtn sm" type="button">Rescan</button></div>
+  <div class="row midi-ports">
+    <span class="portpair"><b class="mini">Output</b><span id="outMount"></span></span>
+    <span class="portpair"><b class="mini">Input</b><span id="inMount"></span></span>
+    <button id="rescanBtn" class="sbtn sm" type="button">Rescan</button>
+  </div>
 </section>
 
 <section id="transport" class="card">
   <h2><span class="n">2</span>Transport</h2>
+  <div class="zn-steps" id="rtSteps"></div>
   <div class="row" id="rtMount"></div>
   <div class="row" id="clockMount"></div>
 </section>
@@ -1761,6 +1770,17 @@ function makeXFade({ cc, ch, min=0, max=127, value=64 }){
 }
 $('djDecks').append(volKnob(1), makeXFade({ cc:8, ch:1 }), volKnob(2));
 $('djSeq').appendChild(volKnob(3));
+{
+  /* Chart p.168: Recognized Clock and Commands both carry footnote *4,
+     "Enabled when this unit is in remote mode (when a tempo signal is received
+     from an external device)" — so the SP ignores Start/Stop until clock is
+     already flowing, and it only follows clock when MIDI Sync is not Internal. */
+  const box = $('rtSteps');
+  box.append(el('b',null,'On the SP'),
+    span(null,'set'), span('k','MIDI SYNC'), span(null,'to'), span('k','AUTO'),
+    span(null,'(or USB / MIDI) — then Start clock here and the SP follows this BPM.'),
+    span(null,'Start / Stop only drive its transport once the clock is running.'));
+}
 hint('transport', MAP.system_realtime.start_stop
   + ' There is no MIDI control for the unit\'s output volume: the front-panel [VOLUME] knob is not in the'
   + ' implementation chart, and CC7 is answered only in DJ mode (chart footnote *8), where it is the per-channel'
