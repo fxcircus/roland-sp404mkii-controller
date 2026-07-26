@@ -334,6 +334,7 @@
     padding:12px 15px;margin:0 0 12px;border-radius:var(--r-btn);box-shadow:var(--off) var(--off) 0 var(--shadow)}
   .bus.inactive{opacity:.6;background:repeating-linear-gradient(45deg,#f2f4f8,#f2f4f8 7px,#e7ebf2 7px,#e7ebf2 14px);border-style:dashed}
   .bus-head{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .efxbtn{min-width:58px;text-align:center}
   .bus-name{font-family:var(--marker);font-size:18px;text-transform:uppercase;letter-spacing:.8px}
   .bus-ch{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--white);background:var(--ink);
     padding:3px 9px;border-radius:var(--r-keycap)}
@@ -1854,9 +1855,20 @@ hint('fx', MAP.effects_control.description+' EFX switch = CC'+CC_SW+', select = 
 BUSES.forEach(bus=>{
   const strip = div('bus'); strip.dataset.ch = bus.ch;
   const head = div('bus-head');
-  const efx = sbtn('EFX','sm');
+  const efx = sbtn('OFF','sm'); efx.classList.add('efxbtn');
   let efxOn = false;
-  efx.addEventListener('click', ()=>{ efxOn = !efxOn; efx.classList.toggle('on', efxOn); sendCC(bus.ch, CC_SW, efxOn?127:0, null); });
+  /* The label is the state, matching every other toggle here (mode, bipolar,
+     running). Dropping the word EFX costs the only hint of what the button
+     does, so the tooltip carries it. */
+  function paintEfx(){
+    efx.textContent = efxOn ? 'ON' : 'OFF';
+    efx.classList.toggle('on', efxOn);
+    efx.setAttribute('aria-pressed', efxOn ? 'true' : 'false');
+    efx.title = 'EFX switch for ' + bus.label + ' — CC' + CC_SW + ' on ch' + bus.ch + '. '
+      + (efxOn ? 'Effect is on; press to bypass it.' : 'Effect is bypassed; press to switch it on.');
+  }
+  efx.addEventListener('click', ()=>{ efxOn = !efxOn; paintEfx(); sendCC(bus.ch, CC_SW, efxOn?127:0, null); });
+  paintEfx();
   /* label is the effect name only; value stays the CC83 code that gets sent */
   const fxOptions = Object.entries(TABLES[bus.table]).sort((a,b)=>+a[0]-+b[0]).map(([code,name])=>({value:code, label:name, name}));
   const fx = makeDropdown({ className:'lcd', options:fxOptions, value:'0', onChange:v=>{ sendCC(bus.ch, CC_SEL, +v, null); applyParams(); } });
@@ -1902,7 +1914,7 @@ BUSES.forEach(bus=>{
     });
   }
   applyParams();
-  bus.fx = fx; bus.setEfx = on=>{ efxOn=on; efx.classList.toggle('on',on); }; bus.efxOn = ()=>efxOn;
+  bus.fx = fx; bus.setEfx = on=>{ efxOn=!!on; paintEfx(); }; bus.efxOn = ()=>efxOn;
   bus.applyParams = applyParams; bus.stripEl = strip; bus.annEl = ann;
   $('fxCols').appendChild(strip);
 });
