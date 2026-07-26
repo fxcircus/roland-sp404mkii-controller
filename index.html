@@ -452,7 +452,7 @@
   [data-zn-theme='hardware'] .sc-key,
   [data-zn-theme='hardware'] .zn-steps .k{background:#2b2f35;color:var(--ink2);border-color:#05070a}
   [data-zn-theme='hardware'] .lamp{background:#2b2f35;border-color:#05070a}
-  [data-zn-theme='hardware'] .lamp.on{background:#ff3b30;box-shadow:0 0 9px rgba(255,59,48,.85)}
+  [data-zn-theme='hardware'] .lamp.on{background:#34d17c;box-shadow:0 0 9px rgba(52,209,124,.85)}
   /* pads: uniform graphite with amber numerals, as on the unit */
   [data-zn-theme='hardware'] .pad{color:var(--accent);border-color:#05070a;border-radius:5px}
   [data-zn-theme='hardware'] .pad::after{inset:2px;border-color:rgba(255,255,255,.08);opacity:1}
@@ -617,7 +617,7 @@
     box-shadow:inset 0 2px 4px rgba(0,0,0,.8)}
   [data-zn-theme='hardware'] .lamp.on{
     background-image:radial-gradient(circle at 34% 30%,rgba(255,255,255,.65),transparent 62%);
-    box-shadow:0 0 12px 3px rgba(255,59,48,.8), inset 0 1px 0 rgba(255,255,255,.5)}
+    box-shadow:0 0 12px 3px rgba(52,209,124,.8), inset 0 1px 0 rgba(255,255,255,.5)}
 
   /* backlit LCD: recessed, faint scanlines, phosphor glow on the glyphs */
   [data-zn-theme='hardware'] .knob-val,
@@ -699,7 +699,7 @@
 
 <nav id="nav">
   <div class="navrow">
-    <button data-t="setup">Setup</button>
+    <button data-t="setup">MIDI</button>
     <button data-t="transport">Transport</button>
     <button data-t="fx">Effects</button>
     <button data-t="pads">Pads</button>
@@ -718,7 +718,7 @@
 <div id="wrap">
 
 <section id="setup" class="card">
-  <h2><span class="n">1</span>Setup</h2>
+  <h2><span class="n">1</span>MIDI</h2>
   <div class="row"><b class="mini">Output</b><span id="outMount"></span>
     <b class="mini">Input</b><span id="inMount"></span>
     <button id="rescanBtn" class="sbtn sm" type="button">Rescan</button></div>
@@ -1169,7 +1169,9 @@ function makeKnob(opts){
 function setStatus(){
   const ok = !!midiOut;
   $('lamp').classList.toggle('on', ok);
-  $('connStatus').textContent = ok ? 'OUT: '+midiOut.name+' · IN: '+(midiIn?midiIn.name:'none') : 'no MIDI output';
+  /* the pickers already name the ports — this line is state, not a readout */
+  $('connStatus').textContent = ok ? 'Connected' : 'No MIDI output';
+  $('connStatus').title = ok ? 'OUT: '+midiOut.name+' · IN: '+(midiIn?midiIn.name:'none') : '';
 }
 function setInput(inp){
   if(midiIn) midiIn.onmidimessage = null;
@@ -1589,11 +1591,16 @@ Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).forEach(([ccStr, def])=>{
 });
 
 /* ---------- TRANSPORT ---------- */
-[['Start (FA)',0xFA],['Stop (FC)',0xFC],['Continue (FB) — untested',0xFB]].forEach(([label,byte])=>{ const b = sbtn(label); b.addEventListener('click', ()=> sendBytes([byte], null)); $('rtMount').appendChild(b); });
+[['Start',0xFA,'System Realtime Start (FA)'],
+ ['Stop',0xFC,'System Realtime Stop (FC)'],
+ ['Continue',0xFB,'System Realtime Continue (FB) — untested on hardware']
+].forEach(([label,byte,tip])=>{ const b = sbtn(label); b.title = tip;
+  b.addEventListener('click', ()=> sendBytes([byte], null)); $('rtMount').appendChild(b); });
 const clock = {running:false, next:0, timer:null, count:0, bpm:120};
 const bpmKnob = makeKnob({ label:'BPM', min:40, max:300, value:120, defaultVal:120, step:1, onChange:v=>{ clock.bpm=v; } });
 $('clockMount').appendChild(bpmKnob.el);
-const clockBtn = sbtn('Start clock (F8 · 24 ppqn)');
+const clockBtn = sbtn('Start clock');
+clockBtn.title = 'Timing Clock (F8) at 24 ppqn';
 const clockStatus = span('note','clock stopped'); clockStatus.style.marginLeft='6px';
 $('clockMount').append(clockBtn, clockStatus);
 function clockPump(){
@@ -1611,7 +1618,7 @@ function clockPump(){
   updateSuppressed(); clockStatus.textContent = 'running — '+clock.count+' ticks sent';
 }
 clockBtn.addEventListener('click', ()=>{
-  if(clock.running){ clock.running = false; clearInterval(clock.timer); clockBtn.textContent = 'Start clock (F8 · 24 ppqn)'; clockBtn.classList.remove('on'); clockStatus.textContent = 'clock stopped — '+clock.count+' ticks sent'; }
+  if(clock.running){ clock.running = false; clearInterval(clock.timer); clockBtn.textContent = 'Start clock'; clockBtn.classList.remove('on'); clockStatus.textContent = 'clock stopped — '+clock.count+' ticks sent'; }
   else{ if(!midiOut){ clockStatus.textContent = 'no output port'; return; } clock.running = true; clock.count = 0; clock.next = performance.now() + 20; clock.timer = setInterval(clockPump, 50); clockBtn.textContent = 'Stop clock'; clockBtn.classList.add('on'); clockPump(); }
 });
 
