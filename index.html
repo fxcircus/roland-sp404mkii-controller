@@ -197,6 +197,76 @@
   .knob.disabled{opacity:.28;pointer-events:none}
   .knob-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-top:10px}
 
+  /* ---- MODULATION ----
+     Motion gets its own hue. The accent already means "the value you set";
+     teal means "this is moving without you", and the two have to be separable
+     at a glance or a moving knob just looks like a knob. */
+  :root{--mod:#0b7d72; --mod-soft:rgba(11,125,114,.34)}
+  [data-zn-theme='hardware']{--mod:#2dd4bf; --mod-soft:rgba(45,212,191,.22)}
+  /* the collar sits outside the value track, so it survives the hardware theme
+     hiding .k-fill — there it reads as an LED ring, which real gear has */
+  .k-span{fill:none;stroke:var(--mod-soft);stroke-width:6;stroke-linecap:round;display:none}
+  .k-live{fill:none;stroke:var(--mod);stroke-width:6.5;stroke-linecap:round;display:none}
+  .knob.modulated .k-span,.knob.modulated .k-live{display:block}
+  .modbtn{display:block;margin:5px auto 0;font-family:var(--mono);font-size:10px;letter-spacing:1.3px;
+    text-transform:uppercase;padding:3px 9px;background:transparent;color:var(--ink2);
+    border:2px solid var(--ink2);border-radius:var(--r-chip);opacity:.6;cursor:pointer}
+  .modbtn:hover{opacity:1;color:var(--mod);border-color:var(--mod)}
+  .knob.modulated .modbtn{opacity:1;color:var(--mod);border-color:var(--mod);background:var(--mod-soft)}
+  .knob.mod-editing .modbtn{background:var(--mod);color:var(--paper);border-color:var(--mod)}
+  .knob.disabled .modbtn{opacity:.25;pointer-events:none}
+
+  /* the drawer drops out from under the knobs it belongs to. grid-template-rows
+     0fr->1fr is the one way to transition to an automatic height. */
+  .moddrawer{display:grid;grid-template-rows:0fr;transition:grid-template-rows .26s ease;margin-top:2px}
+  .moddrawer.open{grid-template-rows:1fr}
+  .moddrawer > .modinner{overflow:hidden;min-height:0}
+  .modbody{margin-top:11px;border:var(--bd) solid var(--mod);border-radius:var(--r-btn);
+    background:var(--panel);padding:12px 12px 14px}
+  .modhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:9px;margin-bottom:10px}
+  .modhead .t{font-family:var(--marker);font-size:14px;letter-spacing:.6px;text-transform:uppercase}
+  .modhead .r{font-family:var(--mono);font-size:11px;color:var(--ink2)}
+  .modhead .close{margin-left:auto}
+  .modgrid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:15px;align-items:start}
+  .modfield{display:flex;flex-direction:column;gap:6px}
+  .modlab{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink2)}
+  .shapes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+  .shape{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 5px;
+    background:var(--white);border:var(--bd) solid var(--ink);border-radius:var(--r-btn-sm);
+    color:var(--ink);cursor:pointer}
+  [data-zn-theme='hardware'] .shape{background:#1d2024;border-color:#05070a}
+  .shape svg{width:24px;height:14px}
+  .shape path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .shape span{font-family:var(--mono);font-size:8.5px;letter-spacing:.5px;text-transform:uppercase;opacity:.75}
+  /* state must outrank theme: a themed background rule is more specific than a
+     bare attribute selector and would silently swallow the pressed look */
+  [data-zn-theme='hardware'] .shape[aria-pressed='true'],
+  .shape[aria-pressed='true']{background:var(--mod);color:var(--paper);border-color:var(--mod)}
+  /* wide enough for its own label: "RATE 0.51Hz" needs ~110px, and a narrower
+     box lets the nowrap chip spill until the two labels read as one bar */
+  .modknobs{display:flex;gap:14px}
+  .modknobs .knob{width:112px}
+  .modknobs .knob-svg{width:78px;height:74px}
+  .modfoot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:11px}
+  .modfoot .rm{margin-left:auto}
+  .modwhy{font-family:var(--hand);font-size:14px;color:var(--ink2);margin:10px 0 0;line-height:1.45}
+  .modsug{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:9px}
+
+  /* what is moving, before the detail — forgotten motion is the failure mode */
+  .movebar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;
+    padding:8px 11px;border:var(--bd) dashed var(--mod);border-radius:var(--r-btn);
+    background:var(--mod-soft)}
+  .movebar[hidden]{display:none}
+  .movebar .lede{font-family:var(--mono);font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mod)}
+  [data-zn-theme='hardware'] .movebar .lede{color:var(--mod)}
+  .mvchip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;
+    background:var(--panel);border:2px solid var(--mod);border-radius:var(--r-chip);
+    padding:3px 4px 3px 8px;color:var(--ink);cursor:pointer}
+  .mvchip b{font-weight:700}
+  .mvchip .x{border:0;background:transparent;color:var(--ink2);font-size:15px;line-height:1;padding:0 4px;cursor:pointer}
+  .mvchip .x:hover{color:var(--accent)}
+  .movebar .stopmo{margin-left:auto}
+
   /* DJ: the two decks sit either side of the crossfader; the sequencer fader
      is a separate group, so they read as the two halves of the unit */
   /* DJ: decks (with the crossfader between them) centred on one row, the
@@ -537,6 +607,11 @@
     .knob{width:88px}
     .knob-svg{width:88px;height:83px}
     .knob-row{gap:10px}
+    .modgrid{grid-template-columns:minmax(0,1fr);gap:12px}
+    .modknobs{justify-content:center}
+    .shapes{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+    .shape{padding:9px 2px 7px}
+    .movebar .stopmo{margin-left:0}
     /* three rows: both labels, both pickers, then Rescan across the bottom.
        display:contents on the pairs lets each label and picker become a grid
        item in its own right, so they can be placed independently while the
@@ -962,6 +1037,11 @@
 <section id="fx" class="card">
   <h2><span class="n">2</span>Effects</h2>
   <div id="fxRouting"></div>
+  <div class="movebar" id="moveBar" hidden>
+    <span class="lede">Moving now</span>
+    <span id="moveChips"></span>
+    <button id="stopMotion" class="sbtn sm stopmo" type="button">Stop all motion</button>
+  </div>
   <div id="fxCols"></div>
 </section>
 
@@ -1060,6 +1140,14 @@ try{
     'Could not load sp404mk2-midi-map.json ('+e.message+'). Serve this folder with "python3 -m http.server" — file:// blocks fetch.';
   return;
 }
+/* Suggestions are a nicety, not a dependency — a missing or broken file costs
+   the Suggest button and nothing else. */
+let MODMAP = null;
+try{
+  const rm = await fetch('sp404mk2-modulation.json');
+  if(rm.ok) MODMAP = await rm.json();
+}catch(e){ MODMAP = null; }
+
 document.getElementById('app').hidden = false;
 
 /* ---------- DOM helpers ---------- */
@@ -1319,6 +1407,8 @@ function makeKnob(opts){
     '<svg viewBox="0 0 104 98" width="104" height="98" class="knob-svg">'
     + '<path class="k-track" d="M22.3,75.7 A42,42 0 1 1 81.7,75.7"/>'
     + '<path class="k-fill" d=""/>'
+    + '<path class="k-span" d=""/>'
+    + '<path class="k-live" d=""/>'
     + '<path class="k-skirt" d="'+skirt+'"/>'
     + '<path class="k-skirt-tex" d="'+skirt+'" fill="url(#znSkirtHatch)" stroke="none"/>'
     + (prof==='profile' ? '<g class="k-flute">'+FLUTES.map(f=>'<line x1="'+f[0]+'" y1="'+f[1]+'" x2="'+f[0]+'" y2="'+f[2]+'"/>').join('')+'</g>' : '')
@@ -1330,16 +1420,42 @@ function makeKnob(opts){
   const svg = root.querySelector('.knob-svg');
   const gRot = root.querySelector('.k-rot');
   const fillEl = root.querySelector('.k-fill');
+  const spanEl = root.querySelector('.k-span');
+  const liveEl = root.querySelector('.k-live');
   const labEl = root.querySelector('.knob-name');
   const valEl = root.querySelector('.knob-val');
   labEl.textContent = opts.label||'';
   let enabled = true;
+  /* When a motion is running the pointer shows where the LFO currently is,
+     while `value` stays the centre you dialled. Keeping those separate is what
+     lets you drag the knob to move the whole sweep, and lets snapshots store
+     the centre rather than whichever instant they were taken at. */
+  let modView = null;
   const clamp = v => Math.max(min, Math.min(max, v));
   function paint(){
-    const frac = (value-min)/((max-min)||1);
+    const shown = modView != null ? modView : value;
+    const frac = (shown-min)/((max-min)||1);
     gRot.setAttribute('transform', 'rotate('+(-135+270*frac).toFixed(1)+' 52 46)');
     fillEl.setAttribute('d', knobArc(frac));
-    valEl.textContent = fmt(value);
+    valEl.textContent = fmt(shown);
+  }
+  const MOD_R = 49;
+  function modArc(t0, t1){
+    t0 = Math.max(0, Math.min(1, t0)); t1 = Math.max(0, Math.min(1, t1));
+    if(t1 < t0){ const sw = t0; t0 = t1; t1 = sw; }
+    const a0 = 135 + 270*t0, a1 = 135 + 270*t1;
+    const pt = a => { const r = a*Math.PI/180; return [52 + MOD_R*Math.cos(r), 46 + MOD_R*Math.sin(r)]; };
+    const [x0,y0] = pt(a0), [x1,y1] = pt(a1);
+    return 'M'+x0.toFixed(1)+','+y0.toFixed(1)+' A'+MOD_R+','+MOD_R+' 0 '+((a1-a0)>180?1:0)+' 1 '+x1.toFixed(1)+','+y1.toFixed(1);
+  }
+  function showMod(out, lo, hi){
+    if(out == null){ modView = null; root.classList.remove('modulated'); paint(); return; }
+    modView = clamp(out); root.classList.add('modulated');
+    const f = v => (v-min)/((max-min)||1);
+    spanEl.setAttribute('d', modArc(f(lo), f(hi)));
+    const c = f(modView);
+    liveEl.setAttribute('d', modArc(c-0.013, c+0.013));
+    paint();
   }
   function setV(v, silent){
     v = clamp(Math.round(v));
@@ -1379,6 +1495,7 @@ function makeKnob(opts){
     if(e.key==='ArrowUp'||e.key==='ArrowRight'){ e.preventDefault(); setV(value+step); }
     else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){ e.preventDefault(); setV(value-step); } });
   return { el:root, cc:opts.cc, set:(v,s)=>setV(v,s), get:()=>value,
+    min, max, showMod,
     setLabel:t=>{ labEl.textContent=t; }, setTitle:t=>{ root.title=t||''; },
     setEnabled:on=>{ enabled=!!on; root.classList.toggle('disabled', !on); } };
 }
@@ -1451,6 +1568,7 @@ async function initMIDI(){
    monitor to see. Clock is still counted, and the counter says so. */
 const MON_MAX = 250;
 let monOn = false, monSeq = 0, monClockSeen = false, monFlushQueued = false;
+let modEmitting = false, monMotionSeen = false;
 const monPending = [];
 const RT_NAMES = {0xF8:'Clock', 0xFA:'Start', 0xFB:'Continue', 0xFC:'Stop',
                   0xFE:'Active sensing', 0xFF:'System reset', 0xF2:'Song position'};
@@ -1490,16 +1608,24 @@ function describeMidi(d){
   if(st === 0xD0) return { ch, text:'Channel pressure ' + d[1] };
   return { ch, text:'raw' };
 }
+function queueMonFlush(){
+  if(monFlushQueued) return;
+  monFlushQueued = true;
+  requestAnimationFrame(flushMonitor);
+}
 function logMidi(dir, bytes){
   if(!monOn) return;
   const s0 = bytes[0];
   if(s0 === 0xFE) return;
-  if(s0 === 0xF8){ monClockSeen = true; return; }
+  /* Suppressed traffic still has to reach the counter, or the monitor sits
+     blank and silent while the SP is being driven hard. */
+  if(s0 === 0xF8){ monClockSeen = true; queueMonFlush(); return; }
+  /* an LFO emits continuously; listing it would bury everything else, exactly
+     as clock would */
+  if(modEmitting){ monMotionSeen = true; queueMonFlush(); return; }
   monPending.push({ dir, bytes: Array.from(bytes) });
   if(monPending.length > MON_MAX) monPending.splice(0, monPending.length - MON_MAX);
-  if(monFlushQueued) return;
-  monFlushQueued = true;
-  requestAnimationFrame(flushMonitor);
+  queueMonFlush();
 }
 function flushMonitor(){
   monFlushQueued = false;
@@ -1519,12 +1645,13 @@ function flushMonitor(){
   }
   monPending.length = 0;
   while(log.children.length > MON_MAX) log.removeChild(log.lastChild);
-  $('monCount').textContent = monSeq + ' message' + (monSeq === 1 ? '' : 's')
-    + (monClockSeen ? ' · clock running (not listed)' : '');
+  $('monCount').textContent = (monSeq ? monSeq + ' message' + (monSeq === 1 ? '' : 's') : 'nothing listed yet')
+    + (monClockSeen ? ' · clock running (not listed)' : '')
+    + (monMotionSeen ? ' · motion running (not listed)' : '');
 }
 function monitorClear(){
   const log = $('monLog');
-  log.innerHTML = ''; monSeq = 0; monClockSeen = false; monPending.length = 0;
+  log.innerHTML = ''; monSeq = 0; monClockSeen = false; monMotionSeen = false; monPending.length = 0;
   log.appendChild(div('mempty','Waiting for MIDI — play something here, or on the SP.'));
   $('monCount').textContent = '';
 }
@@ -1654,6 +1781,8 @@ function panicAll(){
       try{ midiOut.send(m); logMidi('out', m); }catch(e){} }, 60);
   }
   document.querySelectorAll('.active-key').forEach(el=>el.classList.remove('active-key'));
+  /* a panic that leaves the LFOs running is worse than no panic at all */
+  if(typeof clearAllMotion === 'function') clearAllMotion(true);
 }
 
 /* ---------- EFFECTS ---------- */
@@ -1669,12 +1798,37 @@ BUSES.forEach(bus=>{
   const fx = makeDropdown({ className:'lcd', options:fxOptions, value:'0', onChange:v=>{ sendCC(bus.ch, CC_SEL, +v, null); applyParams(); } });
   const ann = span('bus-ann','');
   head.append(span('bus-name', bus.label), span('bus-ch','ch'+bus.ch), efx, fx.el, ann);
+  const sugBtn = sbtn('Suggest motion','sm'); sugBtn.hidden = true;
+  sugBtn.addEventListener('click', ()=> applySuggestions(bus));
+  head.appendChild(sugBtn);
   const krow = div('knob-row');
-  bus.knobs = CTRL_CCS.map((cc,i)=>{ const k = makeKnob({ label:'CTRL '+(i+1), cc, value:0, onChange:v=>sendCC(bus.ch, cc, v, null) }); krow.appendChild(k.el); return k; });
-  strip.append(head, krow);
+  bus.knobs = CTRL_CCS.map((cc,i)=>{
+    const k = makeKnob({ label:'CTRL '+(i+1), cc, value:0, onChange:v=>sendCC(bus.ch, cc, v, null) });
+    const mb = el('button','modbtn','Mod'); mb.type = 'button';
+    mb.title = 'Modulate this parameter — an LFO moves it for you';
+    mb.addEventListener('click', ()=> toggleModDrawer(bus, i));
+    k.el.appendChild(mb);
+    krow.appendChild(k.el); return k;
+  });
+  const drawer = div('moddrawer'); drawer.appendChild(div('modinner'));
+  bus.drawer = drawer; bus.sugBtn = sugBtn;
+  strip.append(head, krow, drawer);
   function applyParams(){
     const sel = fx.selected(); const name = sel ? sel.name : null;
+    /* CTRL 3 on Slicer and CTRL 3 on Reverb are different parameters, so motion
+       assigned to the old effect is meaningless under the new one. Guarded on a
+       real change so the first call and a state restore do not wipe anything. */
+    if(bus.lastFx !== undefined && bus.lastFx !== name && typeof clearLane === 'function'){
+      bus.knobs.forEach((k,i)=> clearLane(bus.ch, i, true));
+      if(modEditing && modEditing.ch === bus.ch) closeModDrawer();
+    }
+    bus.lastFx = name;
     busEffect[bus.ch] = name;
+    if(bus.sugBtn){
+      const blk = suggestionsFor(bus);
+      bus.sugBtn.hidden = !(blk && blk.suggest && blk.suggest.length);
+      if(blk) bus.sugBtn.title = blk.summary;
+    }
     const ps = name ? PARAMS[name] : null;
     /* effect 0 is OFF — nothing to drive, so the knobs go dead at zero rather
        than sitting live and sending CC that does nothing */
@@ -1696,6 +1850,294 @@ BUSES.forEach(bus=>{
   bus.applyParams = applyParams; bus.stripEl = strip; bus.annEl = ann;
   $('fxCols').appendChild(strip);
 });
+
+/* ---------- MODULATION ----------
+   An LFO per CTRL parameter, sending real CC.
+
+   setInterval is the right tool here even though it is the wrong tool for a
+   sequencer. A note arriving 30ms late is a flam you hear immediately; a filter
+   sweep arriving 30ms late is a filter sweep. Timer jitter simply does not
+   matter at these rates, so the lookahead machinery a note scheduler needs
+   would be cost without benefit.
+
+   The knob's own value stays the CENTRE you dialled — the LFO rides on top and
+   only the pointer moves. That separation is what lets you drag a knob to move
+   a whole sweep, and lets snapshots store the centre rather than whatever
+   instant they happened to catch.                                            */
+const MOD_TICK = 30;
+const MOD_SHAPES = [
+  { id:'sine', label:'Sine', path:'M1,8 C4,1 7,1 9,8 C11,15 14,15 17,8',
+    fn:p=>Math.sin(2*Math.PI*p) },
+  { id:'tri',  label:'Tri',  path:'M1,13 L5.5,3 L10,13 L14.5,3 L17,8',
+    fn:p=>{ const f=p-Math.floor(p); return f<.5 ? -1+4*f : 3-4*f; } },
+  { id:'up',   label:'Ramp', path:'M1,13 L8,3 L8,13 L15,3 L15,13',
+    fn:p=>2*(p-Math.floor(p))-1 },
+  { id:'down', label:'Fall', path:'M1,3 L8,13 L8,3 L15,13 L15,3',
+    fn:p=>1-2*(p-Math.floor(p)) },
+  { id:'sq',   label:'Sqr',  path:'M1,13 L1,3 L7,3 L7,13 L13,13 L13,3 L17,3',
+    fn:p=>(p-Math.floor(p))<.5 ? 1 : -1 },
+  { id:'sh',   label:'S&H',  path:'M1,10 L5,10 L5,4 L9,4 L9,13 L13,13 L13,7 L17,7',
+    fn:null },
+];
+const modShape = id => MOD_SHAPES.find(x=>x.id===id) || MOD_SHAPES[0];
+const MOD_DEFAULT = { shape:'sine', rate:0.25, depth:50, phase:0, bipolar:true, running:true };
+const RATE_LO = Math.log(0.02), RATE_HI = Math.log(20);
+const posToRate = p => Math.exp(RATE_LO + (p/100)*(RATE_HI-RATE_LO));
+const rateToPos = r => Math.round(((Math.log(Math.max(0.02, Math.min(20, r))) - RATE_LO)/(RATE_HI-RATE_LO))*100);
+const rateText  = r => (r < 1 ? r.toFixed(2) : r.toFixed(1)) + 'Hz';
+
+const modLanes = {};
+const modKey = (ch, cc) => ch + ':' + cc;
+let modTimer = null, modT0 = 0, modEditing = null;
+
+function modTick(){
+  const t = (performance.now() - modT0) / 1000;
+  for(const key in modLanes){
+    const L = modLanes[key];
+    const bus = busByCh[L.ch]; if(!bus || !bus.knobs) continue;
+    const k = bus.knobs[L.i]; if(!k) continue;
+    if(!L.running){ k.showMod(null); continue; }
+    const centre = k.get();
+    const span = (L.depth/100) * 63.5;
+    const p = t*L.rate + (L.phase||0);
+    let u;
+    if(L.shape === 'sh'){
+      /* hash the step, don't re-roll: sampling Math.random every frame would be
+         noise, not sample-and-hold */
+      const x = Math.sin(Math.floor(p)*12.9898 + 78.233 + L.cc)*43758.5453;
+      u = (x - Math.floor(x))*2 - 1;
+    }else{
+      u = modShape(L.shape).fn(p);
+    }
+    if(!L.bipolar) u = (u + 1)/2;
+    const out = Math.max(0, Math.min(127, Math.round(centre + u*span)));
+    k.showMod(out, Math.max(0, centre - (L.bipolar ? span : 0)), Math.min(127, centre + span));
+    /* only on change: a slow sine spends most of its life on a value the SP
+       already holds, and dropping the repeats roughly halves the traffic */
+    if(out !== L.last){
+      L.last = out;
+      modEmitting = true;
+      try{ sendCC(L.ch, L.cc, out, null); }finally{ modEmitting = false; }
+    }
+  }
+}
+function ensureModTimer(){
+  if(modTimer) return;
+  modT0 = performance.now();
+  modTimer = setInterval(modTick, MOD_TICK);
+}
+function stopModTimer(){ if(modTimer){ clearInterval(modTimer); modTimer = null; } }
+
+function setLane(ch, i, patch){
+  const cc = CTRL_CCS[i]; if(cc == null) return null;
+  const key = modKey(ch, cc);
+  const isNew = !modLanes[key];
+  const lane = modLanes[key] || Object.assign({ ch, i, cc, last:null }, MOD_DEFAULT);
+  modLanes[key] = Object.assign(lane, patch || {});
+  lane.last = null;                 // force the next tick to emit
+  if(isNew || (patch && patch.recentre)) fitCentre(ch, i, lane);
+  ensureModTimer(); renderMoveBar(); paintModButtons();
+  return lane;
+}
+/* A CTRL knob sits at 0 until you move it, and a bipolar LFO centred on 0
+   spends half its cycle clamped against the floor — you assign modulation and
+   nothing appears to happen. So when a lane is first created, slide the centre
+   just far enough that the whole swing fits. Only on creation: doing it on
+   every depth tweak would fight you while you dial. */
+function fitCentre(ch, i, lane){
+  const bus = busByCh[ch], k = bus && bus.knobs ? bus.knobs[i] : null;
+  if(!k) return;
+  const span = (lane.depth/100) * 63.5;
+  let lo = lane.bipolar ? span : 0, hi = 127 - span;
+  if(lo > hi) lo = hi = 63;
+  const want = Math.round(Math.max(lo, Math.min(hi, k.get())));
+  if(want !== k.get()) k.set(want);      // not silent: the centre really moved
+}
+function clearLane(ch, i, silent){
+  const cc = CTRL_CCS[i]; if(cc == null) return;
+  const key = modKey(ch, cc);
+  if(!modLanes[key]) return;
+  delete modLanes[key];
+  const bus = busByCh[ch], k = bus && bus.knobs ? bus.knobs[i] : null;
+  if(k){
+    k.showMod(null);
+    /* put the parameter back where you set it — otherwise it stays frozen
+       wherever the LFO happened to stop */
+    if(!silent) sendCC(ch, cc, k.get(), null);
+  }
+  if(!Object.keys(modLanes).length) stopModTimer();
+  renderMoveBar(); paintModButtons();
+}
+function clearAllMotion(silent){
+  Object.keys(modLanes).forEach(key=>{
+    const L = modLanes[key];
+    delete modLanes[key];
+    const bus = busByCh[L.ch], k = bus && bus.knobs ? bus.knobs[L.i] : null;
+    if(k){ k.showMod(null); if(!silent) sendCC(L.ch, L.cc, k.get(), null); }
+  });
+  stopModTimer(); closeModDrawer(); renderMoveBar(); paintModButtons();
+}
+
+function paramNameFor(bus, i){
+  const fxName = busEffect[bus.ch];
+  const ps = fxName ? PARAMS[fxName] : null;
+  const p = ps ? ps.find(x=>x.cc === CTRL_CCS[i]) : null;
+  return p ? p.name : 'CTRL ' + (i+1);
+}
+function paramRangeFor(bus, i){
+  const fxName = busEffect[bus.ch];
+  const ps = fxName ? PARAMS[fxName] : null;
+  const p = ps ? ps.find(x=>x.cc === CTRL_CCS[i]) : null;
+  return (p ? p.value_range + ' · ' : '') + 'CC' + CTRL_CCS[i];
+}
+function suggestionsFor(bus){
+  if(!MODMAP || !MODMAP.by_effect) return null;
+  const fxName = busEffect[bus.ch];
+  return (fxName && MODMAP.by_effect[fxName]) ? MODMAP.by_effect[fxName] : null;
+}
+function applySuggestions(bus){
+  const blk = suggestionsFor(bus); if(!blk) return;
+  const fxName = busEffect[bus.ch], ps = PARAMS[fxName] || [];
+  blk.suggest.forEach(sg=>{
+    const p = ps.find(x=>x.name === sg.param); if(!p) return;
+    const i = CTRL_CCS.indexOf(p.cc); if(i < 0) return;
+    setLane(bus.ch, i, { shape:sg.shape, rate:sg.rate, depth:sg.depth,
+      phase:sg.phase || 0, bipolar:sg.bipolar !== false, running:true });
+  });
+}
+
+function paintModButtons(){
+  BUSES.forEach(bus=>{
+    if(!bus.knobs) return;
+    bus.knobs.forEach((k,i)=>{
+      const live = !!modLanes[modKey(bus.ch, CTRL_CCS[i])];
+      k.el.classList.toggle('modulated', live);
+      k.el.classList.toggle('mod-editing', !!(modEditing && modEditing.ch === bus.ch && modEditing.i === i));
+      if(!live) k.showMod(null);
+    });
+  });
+}
+function renderMoveBar(){
+  const bar = $('moveBar'), wrap = $('moveChips');
+  const keys = Object.keys(modLanes);
+  bar.hidden = !keys.length;
+  wrap.innerHTML = '';
+  keys.forEach(key=>{
+    const L = modLanes[key];
+    const bus = busByCh[L.ch]; if(!bus) return;
+    const sh = modShape(L.shape);
+    const chip = span('mvchip');
+    chip.innerHTML = '<svg viewBox="0 0 18 16" width="18" height="14" aria-hidden="true"><path d="'+sh.path
+      + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    chip.append(el('b',null, bus.label + ' ' + paramNameFor(bus, L.i)),
+                document.createTextNode(' ' + rateText(L.rate) + ' · ' + L.depth + '%'));
+    const x = el('button','x','×'); x.type='button';
+    x.setAttribute('aria-label','Stop ' + paramNameFor(bus, L.i));
+    x.addEventListener('click', e=>{ e.stopPropagation(); clearLane(L.ch, L.i); });
+    chip.appendChild(x);
+    chip.addEventListener('click', ()=> openModDrawer(bus, L.i));
+    wrap.appendChild(chip);
+  });
+}
+$('stopMotion').addEventListener('click', ()=> clearAllMotion());
+$('stopMotion').title = 'Return every modulated parameter to the value you set and stop the LFOs.';
+
+/* ---------- the drawer ---------- */
+function closeModDrawer(){
+  if(!modEditing) return;
+  const bus = busByCh[modEditing.ch];
+  if(bus && bus.drawer) bus.drawer.classList.remove('open');
+  modEditing = null;
+  paintModButtons();
+}
+function toggleModDrawer(bus, i){
+  if(modEditing && modEditing.ch === bus.ch && modEditing.i === i) closeModDrawer();
+  else openModDrawer(bus, i);
+}
+function openModDrawer(bus, i){
+  if(modEditing && modEditing.ch !== bus.ch){
+    const other = busByCh[modEditing.ch];
+    if(other && other.drawer) other.drawer.classList.remove('open');
+  }
+  modEditing = { ch:bus.ch, i };
+  const lane = modLanes[modKey(bus.ch, CTRL_CCS[i])] || setLane(bus.ch, i, {});
+  const inner = bus.drawer.firstElementChild;
+  inner.innerHTML = '';
+
+  const body = div('modbody');
+  const head = div('modhead');
+  head.append(span('t', bus.label + ' · ' + paramNameFor(bus, i)), span('r', paramRangeFor(bus, i)));
+  const done = sbtn('Done','sm'); done.classList.add('close');
+  done.addEventListener('click', closeModDrawer);
+  head.appendChild(done);
+
+  const grid = div('modgrid');
+  const fShape = div('modfield');
+  fShape.appendChild(span('modlab','Shape'));
+  const shapes = div('shapes');
+  MOD_SHAPES.forEach(sh=>{
+    const b = el('button','shape'); b.type='button';
+    b.setAttribute('aria-pressed', String(sh.id === lane.shape));
+    b.innerHTML = '<svg viewBox="0 0 18 16" aria-hidden="true"><path d="'+sh.path+'"/></svg>';
+    b.appendChild(el('span',null,sh.label));
+    b.addEventListener('click', ()=>{
+      setLane(bus.ch, i, { shape:sh.id });
+      [...shapes.children].forEach((c,j)=> c.setAttribute('aria-pressed', String(MOD_SHAPES[j].id === sh.id)));
+    });
+    shapes.appendChild(b);
+  });
+  fShape.appendChild(shapes);
+
+  const fKnobs = div('modfield');
+  fKnobs.appendChild(span('modlab','Rate & depth'));
+  const kwrap = div('modknobs');
+  const rk = makeKnob({ label:'RATE', min:0, max:100, value:rateToPos(lane.rate),
+    format:v=>rateText(posToRate(v)), onChange:v=> setLane(bus.ch, i, { rate:posToRate(v) }) });
+  rk.setTitle('How fast the parameter moves. 0.02Hz is a 50-second sweep; 20Hz is a wobble.');
+  const dk = makeKnob({ label:'DEPTH', min:0, max:100, value:lane.depth,
+    format:v=>v+'%', onChange:v=> setLane(bus.ch, i, { depth:v }) });
+  dk.setTitle('How far it swings either side of the value you set.');
+  kwrap.append(rk.el, dk.el);
+  fKnobs.appendChild(kwrap);
+  grid.append(fShape, fKnobs);
+
+  const foot = div('modfoot');
+  const bip = sbtn(lane.bipolar ? 'Bipolar' : 'Unipolar','sm');
+  bip.classList.toggle('on', lane.bipolar);
+  bip.addEventListener('click', ()=>{
+    const L = setLane(bus.ch, i, { bipolar: !modLanes[modKey(bus.ch, CTRL_CCS[i])].bipolar });
+    bip.textContent = L.bipolar ? 'Bipolar' : 'Unipolar'; bip.classList.toggle('on', L.bipolar);
+  });
+  const run = sbtn(lane.running ? 'Running' : 'Paused','sm');
+  run.classList.toggle('on', lane.running);
+  run.addEventListener('click', ()=>{
+    const L = setLane(bus.ch, i, { running: !modLanes[modKey(bus.ch, CTRL_CCS[i])].running });
+    run.textContent = L.running ? 'Running' : 'Paused'; run.classList.toggle('on', L.running);
+    if(!L.running){ const k = bus.knobs[i]; k.showMod(null); sendCC(bus.ch, CTRL_CCS[i], k.get(), null); }
+  });
+  const rm = sbtn('Remove','sm'); rm.classList.add('rm');
+  rm.addEventListener('click', ()=>{ clearLane(bus.ch, i); closeModDrawer(); });
+  foot.append(bip, run, rm);
+
+  body.append(head, grid, foot);
+
+  const blk = suggestionsFor(bus);
+  const sg = blk ? blk.suggest.find(x=> x.param === paramNameFor(bus, i)) : null;
+  if(sg){
+    const row = div('modsug');
+    const apply = sbtn('Use suggested','sm');
+    apply.addEventListener('click', ()=>{
+      setLane(bus.ch, i, { shape:sg.shape, rate:sg.rate, depth:sg.depth,
+        phase:sg.phase || 0, bipolar:sg.bipolar !== false, running:true });
+      openModDrawer(bus, i);
+    });
+    row.append(apply, span('modwhy', sg.why));
+    body.appendChild(row);
+  }
+  inner.appendChild(body);
+  bus.drawer.classList.add('open');
+  paintModButtons(); renderMoveBar();
+}
 
 /* ---------- declared audio routing ---------- */
 const ROUTING = MAP.audio_routing;
@@ -2584,6 +3026,12 @@ function collectState(){
     dj: { a:djVol[1].get(), b:djVol[2].get(), c:djVol[3].get(), x:djXfade.get() },
     loop: loopTempoKnob ? { tempo:loopTempoKnob.get() } : null,
     routing: routeApi ? routeApi.get() : null,
+    /* motion definitions, not the instant they were caught: the centre lives in
+       the knob value above, so a snapshot restores the sweep, not a frozen
+       point on it */
+    mod: Object.keys(modLanes).map(k=>{ const L = modLanes[k];
+      return { ch:L.ch, i:L.i, shape:L.shape, rate:L.rate, depth:L.depth,
+               phase:L.phase || 0, bipolar:!!L.bipolar, running:!!L.running }; }),
     ui: { monitor:monOn, follow:followOn, padNames:padNamesOn },
   };
 }
@@ -2635,6 +3083,14 @@ function applyState(st, send){
     if(send && loopTempoKnob.cc != null) sendCC(LOOP.channel, loopTempoKnob.cc, st.loop.tempo, null);
   }
   if(st.routing && routeApi) routeApi.set(st.routing);   // hardware-only; never sent
+  /* after the effects, because changing an effect deliberately clears motion on
+     that bus — restoring first would have it wiped a line later */
+  clearAllMotion(true);
+  if(Array.isArray(st.mod)) st.mod.forEach(L=>{
+    if(!busByCh[L.ch] || CTRL_CCS[L.i] == null) return;
+    setLane(L.ch, L.i, { shape:L.shape, rate:L.rate, depth:L.depth,
+      phase:L.phase || 0, bipolar:L.bipolar !== false, running:L.running !== false });
+  });
   if(st.ui){
     if(st.ui.monitor != null) setMonitor(!!st.ui.monitor);
     if(st.ui.follow  != null){ followOn = !!st.ui.follow; paintFollow(); }
