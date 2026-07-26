@@ -843,23 +843,20 @@
      real unit has no light collar — so the knob scales up to fill that space.
      Scale the <svg>, NOT its children: the pointer lives in a
      <g transform="rotate(...)"> and a CSS transform there freezes the rotation. */
-  [data-zn-theme='hardware'] .k-track,
   [data-zn-theme='hardware'] .k-fill{display:none}
-  [data-zn-theme='hardware'] .knob-svg{transform:scale(1.6);transform-origin:50% 47%;
-    filter:drop-shadow(0 5px 6px rgba(0,0,0,.65));margin-bottom:7px}
-  [data-zn-theme='hardware'] .k-skirt,
+  [data-zn-theme='hardware'] .knob-svg{margin-bottom:2px}
   [data-zn-theme='hardware'] .k-notch{display:none}
-  [data-zn-theme='hardware'] .k-body{fill:url(#znCapGrad);stroke:#05070a;stroke-width:3}
+  /* flat fill, not a gradient: at natural size the gradient banded across the
+     cap and fought the pointer for attention */
+  [data-zn-theme='hardware'] .k-body{fill:#191d21;stroke:#05070a;stroke-width:3}
   [data-zn-theme='hardware'] .k-flute{stroke:rgba(255,255,255,.3);stroke-width:1.6;opacity:1}
   /* the index line is a raised plastic ridge running past the cap edge. Scaled
      about its inner endpoint so only the outer end travels; safe because the
      rotation lives on the parent <g>, which this never touches. */
   /* the ridge clears the cap edge by ~2 units only. Cap top is y=21; scaled
      about the line's inner end (52,34), so only the outer tip travels. */
-  [data-zn-theme='hardware'] .k-ptr{stroke:#fdfbf7;stroke-width:5.5;
-    transform:scaleY(1.5);transform-origin:52px 34px}
-  [data-zn-theme='hardware'] .knob{width:132px}
-  [data-zn-theme='hardware'] .knob-row{gap:22px}
+  [data-zn-theme='hardware'] .k-ptr{stroke:#fdfbf7;stroke-width:5.5}
+  [data-zn-theme='hardware'] .knob-row{gap:18px}
 
   /* hardware dropdown: a plain drawer, not origami. clip-path needs !important
      because the shared rule kills it outright to stop the base reveal fighting
@@ -892,11 +889,6 @@
     <rect x="0" width="1.5" height="5" fill="#31363d"></rect>
     <rect x="2.6" width="1" height="5" fill="#000000" opacity=".65"></rect>
   </pattern>
-  <linearGradient id="znCapGrad" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="#2d323a"></stop>
-    <stop offset="52%" stop-color="#212529"></stop>
-    <stop offset="100%" stop-color="#181c20"></stop>
-  </linearGradient>
 </defs></svg>
 
 <div id="loadError"></div>
