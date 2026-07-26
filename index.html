@@ -126,7 +126,18 @@
   .sbtn.on{background:var(--ink);color:var(--white);box-shadow:var(--off) var(--off) 0 var(--accent)}
   .sbtn.accent2.on,.sbtn.accent2.held{background:var(--ink);color:var(--white)}
   .sbtn.sm{font-size:13px;padding:6px 13px 7px;border-radius:var(--r-btn-sm)}
-  .sbtn.danger{box-shadow:var(--off) var(--off) 0 var(--accent)}
+  /* Stop All is the one destructive control — it gets a filled cap, not an
+     outline, so it never reads as just another button in the row */
+  .sbtn.danger{background:#c8352c;color:#fff5f3;border-color:var(--ink);
+    box-shadow:var(--off) var(--off) 0 var(--shadow)}
+  .sbtn.danger:hover{background:#dc4136}
+  /* Stop All lives in the navbar, where "#nav button" (1,0,1) outranks
+     ".sbtn.danger" (0,2,0) — so it gets an id-on-id selector that beats both
+     that and the themed "[theme] #nav button" (1,1,1). */
+  #nav #panicBtn{background:#c8352c;color:#fff5f3;border-color:var(--ink);
+    letter-spacing:1.4px;padding:5px 20px;
+    box-shadow:var(--off) var(--off) 0 var(--shadow)}
+  #nav #panicBtn:hover{background:#dc4136}
   .sbtn[disabled]{opacity:.35;pointer-events:none}
   .sbtn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 
@@ -160,6 +171,30 @@
   .knob-val{font-family:var(--mono);font-size:12px;font-weight:700;opacity:.85}
   .knob.disabled{opacity:.28;pointer-events:none}
   .knob-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-top:10px}
+
+  /* DJ: the two decks sit either side of the crossfader; the sequencer fader
+     is a separate group, so they read as the two halves of the unit */
+  .dj-layout{display:flex;gap:34px;flex-wrap:wrap;align-items:flex-start;margin-top:10px}
+  .dj-deck{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .dj-seq{display:flex;gap:18px;align-items:center;margin-left:auto}
+  .dj-layout{justify-content:space-between}
+  .xfade{width:220px;text-align:center;user-select:none}
+  .xfade__track{position:relative;height:34px;border:var(--bd) solid var(--ink);
+    border-radius:var(--r-btn-sm);background:var(--paper2);cursor:ew-resize;touch-action:none;
+    box-shadow:inset 0 2px 5px rgba(0,0,0,.35)}
+  /* centre detent — where the two decks are level */
+  .xfade__track::after{content:'';position:absolute;left:50%;top:4px;bottom:4px;width:2px;
+    margin-left:-1px;background:var(--ink);opacity:.35;pointer-events:none}
+  .xfade__cap{position:absolute;top:-4px;bottom:-4px;width:26px;margin-left:-13px;
+    border:var(--bd) solid var(--ink);border-radius:3px;background:var(--white);
+    box-shadow:0 2px 0 var(--shadow);pointer-events:none}
+  .xfade__ends{display:flex;justify-content:space-between;font-family:var(--mono);
+    font-size:11px;font-weight:700;color:var(--ink2);margin-top:4px}
+  [data-zn-theme='hardware'] .xfade__track{background:#15181b;border-color:#05070a;
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.85)}
+  [data-zn-theme='hardware'] .xfade__cap{border-color:#05070a;
+    background-image:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 50%),linear-gradient(#3a4048,#22262b);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 2px 0 #0a0d10}
 
   /* chromatic needs three steps on the unit first — spell them out */
   .zn-steps{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--hand);font-size:15px;
@@ -245,6 +280,10 @@
 
   /* pads */
   .padgrid{display:grid;grid-template-columns:repeat(4,minmax(74px,1fr));gap:12px;margin:10px 0;max-width:640px}
+  /* 25 semitones (-12..+12) in a 5x5 puts the root dead centre */
+  .padgrid--chroma{grid-template-columns:repeat(5,minmax(0,1fr));max-width:470px}
+  .padgrid--chroma .num{font-size:22px}
+  .pad[data-root='true']{outline:3px solid var(--accent);outline-offset:-6px}
   .pad{position:relative;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
     font-family:var(--marker);color:var(--ink);background:var(--pad-force,var(--pad,var(--white)));
     border:var(--bd-heavy) solid var(--ink);
@@ -406,8 +445,9 @@
   [data-zn-theme='hardware'] .card > h2 .n{background:#14171a;color:#cfcbc2}
   [data-zn-theme='hardware'] .sc-cat .cnt{color:rgba(20,23,26,.6)}
   /* nameplate: dark with an amber edge, like the printed logo area */
-  [data-zn-theme='hardware'] #hero h1{background:#0f1216;color:var(--ink);border-radius:5px;
-    transform:none;box-shadow:var(--off) var(--off) 0 var(--accent);text-shadow:none}
+  /* printed straight onto the chassis, no plate behind it */
+  [data-zn-theme='hardware'] #hero h1{background:none;color:var(--ink);border-radius:0;
+    transform:none;box-shadow:none;padding:0;text-shadow:none}
   [data-zn-theme='hardware'] #hero h1 span{color:var(--accent)}
   /* buttons: graphite caps, amber legend; lit state is amber-filled */
   [data-zn-theme='hardware'] .sbtn,
@@ -497,9 +537,8 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.11), 0 7px 16px rgba(0,0,0,.55)}
   /* engraved nameplate */
   [data-zn-theme='hardware'] #hero h1{
-    background-image:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 40%),linear-gradient(#1a1e22,#0d1013);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.13), 0 4px 10px rgba(0,0,0,.6);
-    text-shadow:0 -1px 0 rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.09)}
+    background-image:none;box-shadow:none;
+    text-shadow:0 1px 0 rgba(0,0,0,.85), 0 0 18px rgba(0,0,0,.5)}
 
   /* moulded rubber pads: matte crosshatch, domed top light, seated in the panel */
   [data-zn-theme='hardware'] .pad{
@@ -564,9 +603,16 @@
   /* Danger must be restated HERE, after the generic .sbtn rule above: both are
      (0,2,0), so the later one wins outright and a colour set earlier never lands. */
   [data-zn-theme='hardware'] .sbtn.danger{
-    color:#ffe4de;text-shadow:0 0 5px rgba(255,90,70,.55), 0 0 14px rgba(255,60,45,.3);
+    color:#fff1ee;text-shadow:0 0 6px rgba(255,110,90,.7), 0 0 18px rgba(255,60,45,.42);
     background-image:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,0) 48%),linear-gradient(#cc2a22,#8e1712);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 3px 0 #0a0d10, 0 0 18px rgba(220,50,40,.45)}
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 3px 0 #0a0d10, 0 0 24px rgba(220,50,40,.6)}
+  [data-zn-theme='hardware'] #nav #panicBtn{
+    background-color:#b3211d;border-color:#ff6a5c;color:#fff1ee;
+    background-image:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,0) 48%),linear-gradient(#d6342a,#8e1712);
+    text-shadow:0 0 6px rgba(255,110,90,.7), 0 0 18px rgba(255,60,45,.42);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 3px 0 #0a0d10, 0 0 24px rgba(220,50,40,.55)}
+  [data-zn-theme='hardware'] #nav #panicBtn:hover{background-color:#cc2a22;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.34), 0 3px 0 #0a0d10, 0 0 30px rgba(230,60,48,.7)}
   [data-zn-theme='hardware'] .sbtn.danger:hover{color:#fff4f1;
     text-shadow:0 0 7px rgba(255,110,90,.7), 0 0 20px rgba(255,60,45,.42)}
   [data-zn-theme='hardware'] .sbtn.danger:active{color:#fffaf9;
@@ -671,7 +717,8 @@
     <button data-t="transport">Transport</button>
     <button data-t="fx">Effects</button>
     <button data-t="pads">Pads</button>
-    <button data-t="keys">Keys</button>
+    <button data-t="chromatic">Chromatic</button>
+    <button data-t="vocoder">Vocoder</button>
     <button data-t="patterns">Patterns</button>
     <button data-t="looper">Looper</button>
     <button data-t="dj">DJ</button>
@@ -713,44 +760,41 @@
   <div class="padgrid" id="padGrid"></div>
 </section>
 
-<section id="keys" class="card">
-  <h2><span class="n">5</span>Keys</h2>
-  <div class="keys-top">
-    <div class="seg" id="keysSeg">
-      <button type="button" class="seg-btn on" data-m="samples">Samples</button>
-      <button type="button" class="seg-btn" data-m="vocoder">Vocoder</button>
-    </div>
-    <span id="keyVelMount"></span>
-  </div>
-  <div id="keysSamples">
-    <div class="zn-steps" id="chromaSteps"></div>
-    <div class="piano-case"><div class="piano" id="chromaKbd"></div></div>
-    <div class="row"><span id="asoMount"></span></div>
-  </div>
-  <div id="keysVocoder" hidden>
-    <div class="piano-case"><div class="piano" id="vocKbd"></div></div>
-    <div class="row"><span id="vocBendMount"></span></div>
-  </div>
+<section id="chromatic" class="card">
+  <h2><span class="n">5</span>Chromatic</h2>
+  <div class="zn-steps" id="chromaSteps"></div>
+  <div class="row"><span id="chromaVelMount"></span></div>
+  <div class="padgrid padgrid--chroma" id="chromaPads"></div>
+</section>
+
+<section id="vocoder" class="card">
+  <h2><span class="n">6</span>Vocoder</h2>
+  <div class="zn-steps" id="vocSteps"></div>
+  <div class="row"><span id="vocVelMount"></span><span id="vocBendMount"></span></div>
+  <div class="piano-case"><div class="piano" id="vocKbd"></div></div>
 </section>
 
 <section id="patterns" class="card">
-  <h2><span class="n">6</span>Patterns</h2>
+  <h2><span class="n">7</span>Patterns</h2>
   <div class="row"><b class="mini">Bank</b><div class="bankrow" id="patBanks"></div></div>
   <div class="patgrid" id="patGrid"></div>
 </section>
 
 <section id="looper" class="card">
-  <h2><span class="n">7</span>Looper</h2>
+  <h2><span class="n">8</span>Looper</h2>
   <div id="looperRows"></div>
 </section>
 
 <section id="dj" class="card">
-  <h2><span class="n">8</span>DJ mode</h2>
-  <div class="knob-row" id="djRows"></div>
+  <h2><span class="n">9</span>DJ mode</h2>
+  <div class="dj-layout">
+    <div class="dj-deck" id="djDecks"></div>
+    <div class="dj-seq" id="djSeq"></div>
+  </div>
 </section>
 
 <section id="shortcuts" class="card">
-  <h2><span class="n">9</span>Shortcut Finder</h2>
+  <h2><span class="n">10</span>Shortcut Finder</h2>
   <div id="scCtrls" class="row">
     <input type="text" id="scSearch" placeholder="Search combos, names, descriptions…">
     <b class="mini">Category</b><span id="scCatMount"></span>
@@ -1340,85 +1384,114 @@ for(let pad=1; pad<=16; pad++){
   extBtn.addEventListener('pointercancel', up);
 }
 
-/* ---------- KEYS — real piano layout, one mode at a time ---------- */
-const keyVelKnob = makeKnob({ label:'VELOCITY', min:1, max:127, value:100, defaultVal:100 });
-keyVelKnob.setTitle('Note-on velocity for both keyboards');
-$('keyVelMount').appendChild(keyVelKnob.el);
-const keyVel = ()=> keyVelKnob.get();
+/* ---------- CHROMATIC ----------
+   The hardware plays chromatic mode from its PADS, not a keyboard, so this is a
+   pad bank. CH16 accepts notes 36-60 and that range is centred on note 48, so
+   it is exactly -12..+12 semitones from the root — 25 pads, root dead centre of
+   a 5x5.
 
-/* white keys advance 35px (38px wide, 3px of shared ink overlap); blacks straddle the seam */
+   These pads are ignored unless the UNIT is already in chromatic mode: the
+   implementation chart lists Recognized "36-60 (C2-C4, CH 16)" under footnote
+   *6, "Enabled when playing samples in chromatic mode". The sample is whichever
+   pad was selected BEFORE entering that mode (manual p.25 step 1), and both the
+   pad press and SHIFT+[PAD 4] are front-panel only — no MIDI, no SysEx. So the
+   honest thing the app can do is print the three steps.                      */
+const CHROMA_ROOT = 48;
 const BLACK_PC = [1,3,6,8,10];
-/* V2 piano metrics: 42px whites with a 3px gap -> 45px advance, seam at -1.5 */
-const W_ADV = 45, W_WIDTH = 42, B_WIDTH = 28, SEAM = -1.5;
-function buildPiano(container, ch, lo, hi, beforeNote){
-  container.innerHTML = '';
-  const whites = div('piano-whites');
-  container.appendChild(whites);
-  let wIdx = 0;
-  for(let n=lo; n<=hi; n++){
-    const isBlack = BLACK_PC.includes(((n%12)+12)%12);
-    const k = div(isBlack ? 'bkey' : 'wkey', noteName(n));
-    k.title = noteName(n)+' · note '+n+' · ch'+ch;
-    pressable(k, ()=>ch, n, keyVel, beforeNote);
-    if(isBlack){ k.style.left = (wIdx*W_ADV + SEAM - B_WIDTH/2)+'px'; container.appendChild(k); }
-    else{ if(n%12===0) k.classList.add('c-key'); whites.appendChild(k); wIdx++; }
-  }
-  container.style.width = (wIdx ? (wIdx-1)*W_ADV + W_WIDTH : 0)+'px';
-}
-const KEYS_HINT_A = 'Samples: ch'+CHROMA_CH+' — '+PADS.chromatic.notes;
-/* Selecting a sample means pressing its pad, which also sounds it once — same
-   as on the hardware. So auto-select fires only when the target has actually
-   changed since we last selected, not on every key press. */
-/* These keys are ignored unless the UNIT is already in chromatic mode. The
-   implementation chart lists Recognized note numbers "36-60 (C2-C4, CH 16) *6"
-   and footnote *6 reads "Enabled when playing samples in chromatic mode
-   (MIDI CH 16)". The sample is whichever pad was selected BEFORE entering that
-   mode (manual p.25 step 1), and both the pad press and SHIFT+[PAD 4] are
-   front-panel only — no MIDI equivalent, no SysEx. So the honest thing the app
-   can do is tell you the three steps. */
-function refreshChromaTarget(){
-  const box = $('chromaSteps'); if(!box) return;
-  box.innerHTML = '';
+const isAccidental = n => BLACK_PC.includes(((n%12)+12)%12);
+
+const chromaVel = makeKnob({ label:'VELOCITY', min:1, max:127, value:100, defaultVal:100 });
+chromaVel.setTitle('Note-on velocity');
+$('chromaVelMount').appendChild(chromaVel.el);
+
+{
+  const box = $('chromaSteps');
   box.append(
     el('b',null,'On the SP'),
     span(null,'1. press the pad you want'),
     span(null,'2.'), span('k','SHIFT'), span('plus','+'), span('k','PAD 4'),
-    span(null,'3. play here — these keys are ignored until the unit is in chromatic mode'));
-}
-buildPiano($('chromaKbd'), CHROMA_CH, CHROMA_LO, CHROMA_HI);
-refreshChromaTarget();
-{ const aso = sbtn('All Sound Off (CC120)','sm'); aso.addEventListener('click', ()=> sendCC(CHROMA_CH, 120, 0, null)); $('asoMount').appendChild(aso); }
-hint('keys', KEYS_HINT_A
-  + ' IMPORTANT: CH16 notes are only recognised while the unit is already in chromatic mode — the implementation'
-  + ' chart lists Recognized "36-60 (C2-C4, CH 16)" under footnote *6, "Enabled when playing samples in chromatic'
-  + ' mode". Outside that mode these keys do nothing. The sample played is whichever pad was selected BEFORE you'
-  + ' entered chromatic mode (manual p.25 step 1); once inside, the pads play the scale instead of selecting.'
-  + ' Selecting a pad and SHIFT+[PAD 4] are both front-panel only — there is no MIDI message and no SysEx for'
-  + ' either, so the app cannot switch the sample for you. Press the pad on the unit, enter chromatic mode, then'
-  + ' play here. [EXIT] leaves the mode.'
-  + '  |  Vocoder: ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)]+' Pitch bend springs back to centre on release.');
-buildPiano($('vocKbd'), VOC_CH, 36, 72);
-{ const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256, springBack:true, format:v=>(v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) }); $('vocBendMount').appendChild(bendKnob.el); }
+    span(null,'3. play here — these pads are ignored until the unit is in chromatic mode'));
 
-/* Samples / Vocoder switch — samples is the default, only one keyboard is mounted at a time */
-{
-  const seg = $('keysSeg');
-  const panes = { samples:{el:$('keysSamples'), ch:CHROMA_CH}, vocoder:{el:$('keysVocoder'), ch:VOC_CH} };
-  let mode = 'samples';
-  [...seg.querySelectorAll('.seg-btn')].forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const next = b.dataset.m;
-      if(next === mode) return;
-      /* release anything held on the keyboard we're leaving */
-      const leaving = panes[mode];
-      leaving.el.querySelectorAll('.active-key').forEach(k=>k.classList.remove('active-key'));
-      sendCC(leaving.ch, 123, 0, null);
-      mode = next;
-      [...seg.querySelectorAll('.seg-btn')].forEach(x=>x.classList.toggle('on', x===b));
-      Object.entries(panes).forEach(([k,p])=> p.el.hidden = (k !== mode));
-    });
-  });
+  for(let semi = CHROMA_LO - CHROMA_ROOT; semi <= CHROMA_HI - CHROMA_ROOT; semi++){
+    const note = CHROMA_ROOT + semi;
+    const p = div('pad');
+    if(semi === 0) p.dataset.root = 'true';
+    /* piano-like colouring so the shape of the scale is readable at a glance */
+    p.style.setProperty('--pad', semi === 0 ? 'var(--accent)' : (isAccidental(note) ? '#93a1bb' : '#e2eaf7'));
+    p.title = (semi > 0 ? '+' : '') + semi + ' semitone' + (Math.abs(semi) === 1 ? '' : 's')
+      + ' · ' + noteName(note) + ' · note ' + note + ' · ch' + CHROMA_CH;
+    p.append(span('num', (semi > 0 ? '+' : '') + semi));
+    pressable(p, ()=>CHROMA_CH, note, ()=>chromaVel.get());
+    $('chromaPads').appendChild(p);
+  }
 }
+
+hint('chromatic', PADS.chromatic.notes
+  + ' The pads span -12..+12 semitones around the root, which is the whole range CH16 accepts.'
+  + ' IMPORTANT: they are only recognised while the unit is ALREADY in chromatic mode — the implementation'
+  + ' chart lists Recognized "36-60 (C2-C4, CH 16)" under footnote *6, "Enabled when playing samples in'
+  + ' chromatic mode". Outside that mode they do nothing. The sample played is whichever pad was selected'
+  + ' BEFORE you entered chromatic mode (manual p.25 step 1). Selecting a pad and SHIFT+[PAD 4] are both'
+  + ' front-panel only, so the app cannot switch the sample or enter the mode for you. [EXIT] leaves it.');
+
+/* ---------- VOCODER ----------
+   Unlike chromatic, this one the app CAN enable: Vocoder is INPUT FX #2, and
+   the INPUT bus answers the same EFX select/switch CCs as the other buses. */
+const VOC_FX_CODE = Object.entries(TABLES.input_fx).find(([,n])=>/vocoder/i.test(n));
+const INPUT_BUS_CH = 5;
+
+const vocVel = makeKnob({ label:'VELOCITY', min:1, max:127, value:100, defaultVal:100 });
+vocVel.setTitle('Note-on velocity');
+$('vocVelMount').appendChild(vocVel.el);
+
+{
+  const box = $('vocSteps');
+  box.append(el('b',null,'To enable'), span(null,'Vocoder is an INPUT FX — set INPUT FX to Vocoder on the unit,'));
+  if(VOC_FX_CODE){
+    const enable = sbtn('Enable vocoder','sm');
+    enable.title = 'Sends EFX select CC'+CC_SEL+'='+VOC_FX_CODE[0]+' and EFX switch CC'+CC_SW
+      +'=127 on ch'+INPUT_BUS_CH+' (INPUT bus)';
+    enable.addEventListener('click', ()=>{
+      sendCC(INPUT_BUS_CH, CC_SEL, +VOC_FX_CODE[0], null);
+      sendCC(INPUT_BUS_CH, CC_SW, 127, null);
+      const bus = BUSES.find(x=>x.ch===INPUT_BUS_CH);
+      if(bus){ bus.fx.set(VOC_FX_CODE[0]); bus.setEfx(true); bus.applyParams(); }
+    });
+    box.append(span(null,'or'), enable);
+  }
+  box.append(span(null,'then sing into the input and play here.'));
+}
+
+buildVocKeyboard();
+function buildVocKeyboard(){
+  const container = $('vocKbd');
+  /* V2 piano metrics: 42px whites with a 3px gap -> 45px advance, seam at -1.5 */
+  const W_ADV = 45, W_WIDTH = 42, B_WIDTH = 28, SEAM = -1.5;
+  container.innerHTML = '';
+  const whites = div('piano-whites');
+  container.appendChild(whites);
+  let wIdx = 0;
+  for(let n = 36; n <= 72; n++){
+    const black = isAccidental(n);
+    const k = div(black ? 'bkey' : 'wkey', noteName(n));
+    k.title = noteName(n)+' · note '+n+' · ch'+VOC_CH;
+    pressable(k, ()=>VOC_CH, n, ()=>vocVel.get());
+    if(black){ k.style.left = (wIdx*W_ADV + SEAM - B_WIDTH/2)+'px'; container.appendChild(k); }
+    else{ if(n%12===0) k.classList.add('c-key'); whites.appendChild(k); wIdx++; }
+  }
+  container.style.width = (wIdx ? (wIdx-1)*W_ADV + W_WIDTH : 0)+'px';
+}
+{ const bendKnob = makeKnob({ label:'PITCH BEND', min:-8192, max:8191, value:0, defaultVal:0, step:256,
+    springBack:true, format:v=>(v>0?'+':'')+v, onChange:v=> sendBend(VOC_CH, v, null) });
+  bendKnob.setTitle('Pitch bend on ch'+VOC_CH+' — springs back to centre on release');
+  $('vocBendMount').appendChild(bendKnob.el); }
+
+hint('vocoder', 'ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)]
+  + ' The implementation chart marks these notes "Enabled when INPUT FX is Vocoder (MIDI CH 11)" (footnote *2),'
+  + ' so the INPUT bus has to be running the Vocoder effect first. Vocoder is INPUT FX '
+  + (VOC_FX_CODE ? VOC_FX_CODE[0] : '2') + ', which the app can select for you — that is what Enable vocoder does'
+  + ' (EFX select + EFX switch on ch'+INPUT_BUS_CH+'). It is an input effect, so it processes whatever is coming'
+  + ' into the unit; play these keys to set the pitch. Pitch bend springs back to centre on release.');
 
 /* ---------- PATTERNS ---------- */
 hint('patterns', PADS.pattern_launch.message+'. '+PADS.pattern_launch.mapping);
@@ -1528,14 +1601,56 @@ hint('dj', MAP.dj_mode.warning
    front-panel [VOLUME] knob that sets overall output level (p.19) appears
    nowhere in the chart. These therefore live in DJ mode, where they work. */
 const VOL_LABELS = { 1:'VOL CH1', 2:'VOL CH2', 3:'VOL SEQ' };
-DJ_ROWS.forEach(({cc, ch})=>{
-  const k = makeKnob({
-    label: cc === 7 ? VOL_LABELS[ch] : 'X-FADE',
-    min:0, max:127, value: cc===8?64:100, defaultVal: cc===8?64:100,
-    onChange:v=>sendCC(ch, cc, v, null) });
-  k.setTitle(DJ_REC[String(cc)] + ' (CC'+cc+' ch'+ch+') — DJ mode only');
-  $('djRows').appendChild(k.el);
-});
+function volKnob(ch){
+  const k = makeKnob({ label:VOL_LABELS[ch], min:0, max:127, value:100, defaultVal:100,
+    onChange:v=>sendCC(ch, 7, v, null) });
+  k.setTitle(DJ_REC['7'] + ' (CC7 ch'+ch+') — DJ mode only');
+  return k.el;
+}
+/* A crossfader is a horizontal throw, not a rotation — a knob for it reads
+   wrong and loses the centre detent that matters most. */
+function makeXFade({ cc, ch, min=0, max=127, value=64 }){
+  const root = div('xfade'); root.tabIndex = 0;
+  root.innerHTML = '<div class="xfade__track"><div class="xfade__cap"></div></div>'
+    + '<div class="xfade__ends"><span>CH1</span><span>X-FADE</span><span>CH2</span></div>';
+  const track = root.querySelector('.xfade__track');
+  const cap = root.querySelector('.xfade__cap');
+  let v = value;
+  root.setAttribute('role','slider');
+  root.setAttribute('aria-valuemin', min); root.setAttribute('aria-valuemax', max);
+  root.title = DJ_REC[String(cc)] + ' (CC'+cc+' ch'+ch+') — DJ mode only';
+  function paint(){
+    cap.style.left = (((v - min) / (max - min)) * 100) + '%';
+    root.setAttribute('aria-valuenow', v);
+  }
+  function setV(n, silent){
+    n = Math.max(min, Math.min(max, Math.round(n)));
+    if(n === v){ paint(); return; }
+    v = n; paint(); if(!silent) sendCC(ch, cc, v, null);
+  }
+  function fromEvent(e){
+    const r = track.getBoundingClientRect();
+    setV(min + ((e.clientX - r.left) / r.width) * (max - min));
+  }
+  let dragging = false;
+  track.addEventListener('pointerdown', e=>{ e.preventDefault(); dragging = true;
+    try{ track.setPointerCapture(e.pointerId); }catch(_){}
+    fromEvent(e); });
+  track.addEventListener('pointermove', e=>{ if(dragging) fromEvent(e); });
+  const end = e=>{ if(!dragging) return; dragging = false;
+    try{ track.releasePointerCapture(e.pointerId); }catch(_){} };
+  track.addEventListener('pointerup', end);
+  track.addEventListener('pointercancel', end);
+  root.addEventListener('dblclick', ()=> setV((min + max) / 2));
+  root.addEventListener('keydown', e=>{
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); setV(v - (e.shiftKey ? 1 : 4)); }
+    else if(e.key === 'ArrowRight'){ e.preventDefault(); setV(v + (e.shiftKey ? 1 : 4)); }
+  });
+  paint();
+  return root;
+}
+$('djDecks').append(volKnob(1), makeXFade({ cc:8, ch:1 }), volKnob(2));
+$('djSeq').appendChild(volKnob(3));
 hint('transport', MAP.system_realtime.start_stop
   + ' There is no MIDI control for the unit\'s output volume: the front-panel [VOLUME] knob is not in the'
   + ' implementation chart, and CC7 is answered only in DJ mode (chart footnote *8), where it is the per-channel'
@@ -1600,7 +1715,7 @@ navBtns.forEach(b=> b.addEventListener('click', ()=>{
 if('IntersectionObserver' in window){
   const byId = {}; navBtns.forEach(b=> byId[b.dataset.t] = b);
   const obs = new IntersectionObserver(entries=>{ entries.forEach(en=>{ if(en.isIntersecting){ navBtns.forEach(x=>x.classList.remove('active')); const b = byId[en.target.id]; if(b) b.classList.add('active'); } }); }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
-  ['setup','transport','fx','pads','keys','patterns','looper','dj','shortcuts'].forEach(id=>{ const s=$(id); if(s) obs.observe(s); });
+  ['setup','transport','fx','pads','chromatic','vocoder','patterns','looper','dj','shortcuts'].forEach(id=>{ const s=$(id); if(s) obs.observe(s); });
 }
 
 /* ---------- theme switch ----------
