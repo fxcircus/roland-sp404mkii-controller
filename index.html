@@ -458,6 +458,7 @@
      and --ink swap and the log reads correctly in both. Only the recessed
      screen look is hardware-specific. */
   .mon-ctl{gap:9px;margin-top:4px}
+  .sbtn:disabled{opacity:.42;cursor:not-allowed}
   .monlog{width:100%;max-height:260px;overflow-y:auto;margin-top:2px;
     font-family:var(--mono);font-size:12px;line-height:1.5;
     background:var(--paper2);color:var(--ink);
@@ -896,6 +897,7 @@
     <button id="rescanBtn" class="sbtn sm" type="button">Rescan</button>
   </div>
   <div class="row mon-ctl">
+    <button id="followToggle" class="sbtn sm" type="button" aria-pressed="false">Follow SP</button>
     <button id="monToggle" class="sbtn sm" type="button" aria-pressed="false">Monitor</button>
     <button id="monClear" class="sbtn sm" type="button" hidden>Clear</button>
     <span class="note" id="monCount" hidden></span>
@@ -1326,6 +1328,7 @@ function setStatus(){
                  : 'No MIDI output — pick a port, or press Rescan';
   $('lamp').title = why;
   $('lamp').setAttribute('aria-label', why);
+  paintFollow();
 }
 function setInput(inp){
   if(midiIn) midiIn.onmidimessage = null;
@@ -1336,6 +1339,7 @@ function onMidiIn(e){
   const d = e.data;
   if(!d || !d.length) return;
   logMidi('in', d);
+  mirrorIn(d);
 }
 const ddOut = makeDropdown({ options:[{value:'',label:'—'}], placeholder:'—', onChange:id=>{
   const outs=[...midiAccess.outputs.values()]; midiOut = outs.find(o=>o.id===id)||null;
@@ -1474,6 +1478,83 @@ $('monToggle').addEventListener('click', ()=> setMonitor(!monOn));
 $('monToggle').title = 'Log every MIDI message in and out. Clock and active sensing are counted but not listed — at 24 ticks a beat they bury everything else.';
 $('monClear').addEventListener('click', monitorClear);
 setMonitor(false);
+
+/* ---------- MIRROR — follow the SP ----------
+   The SP transmits when you operate it (pad notes, effect knob CCs, DJ faders),
+   so the UI can follow the hardware. Two rules hold this together:
+
+   1. Every setter here is the SILENT form. A mirror that re-sent what it
+      received would loop the message straight back at the unit.
+   2. It is PASSIVE and cannot be otherwise. The SP has no SysEx and no state
+      readback, so this reflects changes made while it is listening and can
+      never pull the current state — before you touch a control, the app is
+      guessing. That is the device, not a gap we can engineer away.
+
+   It also does nothing at all without a MIDI input selected, which is what the
+   toggle's disabled state says. Needs PAD Note Out / SEQ Note Out enabled in
+   the SP's own menu for the note traffic to exist in the first place.       */
+let followOn = true;
+
+function mirrorNote(el, on){
+  if(!el) return;
+  clearTimeout(el._noteT);
+  el.classList.toggle('active-key', on);
+  /* a dropped note-off would otherwise leave a key lit forever */
+  if(on) el._noteT = setTimeout(()=> el.classList.remove('active-key'), 4000);
+}
+function mirrorIn(d){
+  if(!followOn || !midiIn) return;
+  const st = d[0] & 0xF0, ch = (d[0] & 0x0F) + 1;
+
+  if(st === 0xB0){
+    const cc = d[1], v = d[2];
+    const bus = busByCh[ch];
+    if(bus){
+      if(cc === CC_SEL){
+        const code = String(v);
+        if(TABLES[bus.table] && TABLES[bus.table][code] != null){ bus.fx.set(code); bus.applyParams(); }
+      }else if(cc === CC_SW){
+        bus.setEfx(v >= 64);
+      }else{
+        const i = CTRL_CCS.indexOf(cc);
+        if(i >= 0 && bus.knobs[i]) bus.knobs[i].set(v, true);
+      }
+    }
+    if(cc === 7 && djVol[ch]) djVol[ch].set(v, true);
+    else if(cc === 8 && ch === 1) djXfade.set(v, true);
+    return;
+  }
+
+  if(st === 0x90 || st === 0x80){
+    const on = st === 0x90 && d[2] > 0, note = d[1];
+    if(ch === CHROMA_CH){ mirrorNote(chromaEls[note], on); return; }
+    if(ch === VOC_CH){ mirrorNote(vocEls[note], on); return; }
+    if(ch >= 1 && ch <= 10 && padNumForNote[note]){
+      /* the SP names its bank by the channel it plays on, so following the note
+         means following the bank too — otherwise pad 5 of bank C would light up
+         pad 5 of whichever bank happens to be showing */
+      if(on && ch !== padBank) setPadBank(ch);
+      if(ch === padBank) mirrorNote(padEls[padNumForNote[note]], on);
+    }
+    return;
+  }
+
+  if(st === 0xE0 && ch === VOC_CH && vocBendKnob){
+    vocBendKnob.set(((d[2] << 7) | d[1]) - 8192, true);
+  }
+}
+function paintFollow(){
+  const b = $('followToggle'); if(!b) return;
+  const have = !!midiIn, live = followOn && have;
+  b.disabled = !have;
+  b.classList.toggle('on', live);
+  b.setAttribute('aria-pressed', live ? 'true' : 'false');
+  b.title = have
+    ? 'Follow the SP: turn a knob or change an effect on the unit and the matching control here moves with it. Passive — it never sends anything back, and it can only reflect changes made while it is listening, because the SP cannot be asked its current state.'
+    : 'Needs a MIDI input — pick the SP under Input. There is nothing to follow without one.';
+}
+$('followToggle').addEventListener('click', ()=>{ followOn = !followOn; paintFollow(); });
+paintFollow();
 
 /* ---------- sending ---------- */
 function sendBytes(bytes, hexEl, timestamp){
@@ -1676,6 +1757,7 @@ const CHROMA_ROOT = 48;
 const BLACK_PC = [1,3,6,8,10];
 const isAccidental = n => BLACK_PC.includes(((n%12)+12)%12);
 
+const chromaEls = {};
 const chromaVel = makeKnob({ label:'VELOCITY', min:1, max:127, value:100, defaultVal:100 });
 chromaVel.setTitle('Note-on velocity');
 $('chromaVelMount').appendChild(chromaVel.el);
@@ -1695,6 +1777,7 @@ $('chromaVelMount').appendChild(chromaVel.el);
     b.title = (semi > 0 ? '+' : '') + semi + ' semitone' + (Math.abs(semi) === 1 ? '' : 's')
       + ' · ' + noteName(note) + ' · note ' + note + ' · ch' + CHROMA_CH;
     pressable(b, ()=>CHROMA_CH, note, ()=>chromaVel.get());
+    chromaEls[note] = b;
     $('chromaPads').appendChild(b);
   }
 }
@@ -1735,12 +1818,15 @@ $('vocVelMount').appendChild(vocVel.el);
   box.append(span(null,'then sing into the input and play here.'));
 }
 
+const vocEls = {};
+let vocBendKnob = null;
 buildVocKeyboard();
 function buildVocKeyboard(){
   const container = $('vocKbd');
   /* V2 piano metrics: 42px whites with a 3px gap -> 45px advance, seam at -1.5 */
   const W_ADV = 45, W_WIDTH = 42, B_WIDTH = 28, SEAM = -1.5;
   container.innerHTML = '';
+  for(const k in vocEls) delete vocEls[k];
   const whites = div('piano-whites');
   container.appendChild(whites);
   let wIdx = 0;
@@ -1749,6 +1835,7 @@ function buildVocKeyboard(){
     const k = div(black ? 'bkey' : 'wkey', noteName(n));
     k.title = noteName(n)+' · note '+n+' · ch'+VOC_CH;
     pressable(k, ()=>VOC_CH, n, ()=>vocVel.get());
+    vocEls[n] = k;
     if(black){ k.style.left = (wIdx*W_ADV + SEAM - B_WIDTH/2)+'px'; container.appendChild(k); }
     else{ if(n%12===0) k.classList.add('c-key'); whites.appendChild(k); wIdx++; }
   }
@@ -1767,6 +1854,7 @@ function buildVocKeyboard(){
     onChange:v=> sendBend(VOC_CH, v, null) });
   bendKnob.setTitle('Pitch bend on ch'+VOC_CH+' — shown as % of full bend range; how far that '
     + 'actually bends is set on the unit. Springs back to centre on release.');
+  vocBendKnob = bendKnob;
   $('vocBendMount').appendChild(bendKnob.el); }
 
 hint('vocoder', 'ch'+VOC_CH+' — '+MAP.channel_map[String(VOC_CH)]
@@ -1894,7 +1982,7 @@ function volKnob(ch){
   const k = makeKnob({ label:VOL_LABELS[ch], min:0, max:127, value:100, defaultVal:100,
     onChange:v=>sendCC(ch, 7, v, null) });
   k.setTitle(DJ_REC['7'] + ' (CC7 ch'+ch+') — DJ mode only');
-  return k.el;
+  return k;
 }
 /* A crossfader is a horizontal throw, not a rotation — a knob for it reads
    wrong and loses the centre detent that matters most. */
@@ -1943,7 +2031,7 @@ function makeXFade({ cc, ch, min=0, max=127, value=64 }){
     else if(e.key === 'ArrowRight'){ e.preventDefault(); setV(v + (e.shiftKey ? 1 : 4)); }
   });
   paint();
-  return root;
+  return { el:root, set:(n,silent)=>setV(n,silent), get:()=>v };
 }
 {
   /* manual p.93: "Press the bank [D/I] button and the [E/J] button
@@ -1953,8 +2041,10 @@ function makeXFade({ cc, ch, min=0, max=127, value=64 }){
     span('k','BANK D/I'), span('plus','+'), span('k','BANK E/J'),
     span(null,'together to enter DJ MIXER mode — these controls do nothing until you do'));
 }
-$('djDecks').append(volKnob(1), makeXFade({ cc:8, ch:1 }), volKnob(2));
-$('djSeq').appendChild(volKnob(3));
+const djVol = { 1:volKnob(1), 2:volKnob(2), 3:volKnob(3) };
+const djXfade = makeXFade({ cc:8, ch:1 });
+$('djDecks').append(djVol[1].el, djXfade.el, djVol[2].el);
+$('djSeq').appendChild(djVol[3].el);
 /* ---------- TRANSPORT steps + hint (parked) ---------- */
 // {
 //   /* Chart p.168: Recognized Clock and Commands both carry footnote *4,
