@@ -71,7 +71,13 @@
     border-radius:var(--r-btn-sm);padding:5px 13px;cursor:pointer;box-shadow:3px 3px 0 var(--shadow)}
   #nav button:hover{background:var(--paper2)}
   #nav button.active{background:var(--ink);color:var(--white);box-shadow:3px 3px 0 var(--accent)}
-  #nav .status{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink2);max-width:100%}
+  /* Theme left, Stop All centred, coffee right. A 3-column grid rather than
+     space-between: the side buttons are different widths, so space-between
+     would leave Stop All off-centre. */
+  #nav .status{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;
+    width:100%;font-size:14px;color:var(--ink2)}
+  #nav .status > :first-child{justify-self:start}
+  #nav .status > :last-child{justify-self:end}
   .lamp{display:inline-block;width:15px;height:15px;border-radius:50%;background:var(--white);
     border:var(--bd) solid var(--ink);flex:0 0 auto}
   .lamp.on{background:var(--accent);box-shadow:0 0 0 3px var(--ink)}
@@ -139,9 +145,11 @@
     box-shadow:var(--off) var(--off) 0 var(--shadow)}
   #nav #panicBtn:hover{background:#dc4136}
   /* buy-me-a-coffee: BMC yellow in both themes, icon only */
-  #nav #coffeeBtn{display:inline-flex;align-items:center;justify-content:center;
+  #nav #coffeeBtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;
     background:#fbb034;color:#3a2905;border-color:var(--ink);text-decoration:none;
-    padding:5px 12px;box-shadow:var(--off) var(--off) 0 var(--shadow)}
+    padding:5px 13px;box-shadow:var(--off) var(--off) 0 var(--shadow)}
+  .coffee-txt{font-family:var(--marker);font-size:12px;letter-spacing:.8px;text-transform:uppercase}
+  @media (max-width:700px){ .coffee-txt{display:none} }
   #nav #coffeeBtn:hover{background:#ffc355}
   .sbtn[disabled]{opacity:.35;pointer-events:none}
   .sbtn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
@@ -354,9 +362,14 @@
 
   .patgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:9px;margin:10px 0;max-width:760px}
   .patgrid .sbtn{text-align:center;padding:11px 2px;font-size:16px}
-  .looprow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0;padding:9px 0;
-    border-bottom:2px solid rgba(14,17,22,.12)}
-  #looperRows .looprow:last-child{border-bottom:0}
+  /* grouped columns: each block is one thing you might want to do, so the card
+     reads as short lists rather than a stack of ragged rows with a mostly
+     empty knob row at the bottom */
+  .loopgrid{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;margin-top:12px}
+  .loopgroup{display:flex;flex-direction:column;gap:8px;flex:0 1 210px;min-width:170px}
+  .loopgroup > .label{align-self:flex-start;margin-bottom:2px}
+  .loopgroup .sbtn{width:100%;text-align:center}
+  .loopgroup--knob{flex:0 0 auto;min-width:0;align-items:flex-start}
 
   /* dev tools */
   .note{font-family:var(--hand);color:var(--ink2);font-size:14px;margin:2px 0 6px;line-height:1.4}
@@ -560,7 +573,6 @@
   [data-zn-theme='hardware'] .sc-cap.partial,
   [data-zn-theme='hardware'] .sc-cap.hw{background:#2b2f35;color:var(--ink);border-color:#05070a}
   [data-zn-theme='hardware'] .sc-item{border-bottom-color:rgba(255,255,255,.09)}
-  [data-zn-theme='hardware'] .looprow{border-bottom-color:rgba(255,255,255,.09)}
   [data-zn-theme='hardware'] a{color:#ffb974}
 
   /* ---- material pass ---------------------------------------------------
@@ -803,6 +815,7 @@
         <path d="M4 8h13v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/>
         <path d="M7 2v2M11 2v2M15 2v2"/>
       </svg>
+      <span class="coffee-txt">Support this project</span>
     </a></div>
 </nav>
 
@@ -1592,7 +1605,7 @@ const LOOP_GROUPS = [
   { title:'Edit',     ccs:[91] },
 ];
 {
-  const knobRow = div('looprow');
+  const grid = div('loopgrid');
   const placed = new Set();
   const addButtons = (cc, def, into) => {
     def.values.split(', ').forEach(part=>{
@@ -1604,18 +1617,23 @@ const LOOP_GROUPS = [
       into.appendChild(b);
     });
   };
-  LOOP_GROUPS.forEach(g=>{
-    const row = div('looprow');
-    row.appendChild(span('label', g.title));
+  const group = (title, extra) => {
+    const g = div('loopgroup' + (extra ? ' ' + extra : ''));
+    g.appendChild(span('label', title));
+    return g;
+  };
+  LOOP_GROUPS.forEach(spec=>{
+    const g = group(spec.title);
     let any = false;
-    g.ccs.forEach(cc=>{
+    spec.ccs.forEach(cc=>{
       const def = LOOP.cc[String(cc)]; if(!def) return;
       if(/^\d+-\d+ = /.test(def.values)) return;
-      addButtons(cc, def, row); placed.add(String(cc)); any = true;
+      addButtons(cc, def, g); placed.add(String(cc)); any = true;
     });
-    if(any) $('looperRows').appendChild(row);
+    if(any) grid.appendChild(g);
   });
-  /* anything the groups missed, plus every range control, still shows up */
+  const knobGroup = group('Tempo', 'loopgroup--knob');
+  let hasKnob = false;
   Object.entries(LOOP.cc).sort((a,b)=>+a[0]-+b[0]).forEach(([ccStr, def])=>{
     const cc = +ccStr;
     const rangeM = def.values.match(/^(\d+)-(\d+) = (.+)$/);
@@ -1625,13 +1643,13 @@ const LOOP_GROUPS = [
       const k = makeKnob({ label:rangeM[3].split(/\s*\/\s*/)[0], min:+rangeM[1], max:+rangeM[2],
         value:64, defaultVal:64, onChange:v=>sendCC(LOOP.channel, cc, v, null) });
       k.setTitle(rangeM[3] + ' — ' + def.function + ' · CC' + cc + ' on ch' + LOOP.channel);
-      knobRow.appendChild(k.el);
+      knobGroup.appendChild(k.el); hasKnob = true;
     } else if(!placed.has(ccStr)){
-      const row = div('looprow'); row.appendChild(span('label','Other'));
-      addButtons(cc, def, row); $('looperRows').appendChild(row);
+      const g = group('Other'); addButtons(cc, def, g); grid.appendChild(g);
     }
   });
-  if(knobRow.childElementCount) $('looperRows').appendChild(knobRow);
+  if(hasKnob) grid.appendChild(knobGroup);
+  $('looperRows').appendChild(grid);
 }
 
 /* ---------- TRANSPORT ---------- */
@@ -1797,28 +1815,70 @@ hint('transport', MAP.system_realtime.start_stop
 })();
 
 /* ---------- jump menu ----------
-   The hash tracks whichever section you are in, via replaceState so it never
-   piles up history entries, and is restored on load — refresh keeps you put. */
+   Highlighting is computed from scroll position, not an IntersectionObserver
+   band. The old version used rootMargin -45%/-50%, a sliver across the middle
+   of the viewport: a short card like MIDI never occupies it, so clicking MIDI
+   scrolled correctly but lit Transport. This instead takes the LAST section
+   whose top has passed just under the sticky bar, which is unambiguous and
+   always marks exactly one.
+
+   The hash follows the same value via replaceState (no history entries) and is
+   restored on load, so a refresh keeps you put.                              */
 const navBtns = [...document.querySelectorAll('#nav button[data-t]')];
+const SECTION_IDS = navBtns.map(b=>b.dataset.t).filter(id=>$(id));
+let navLock = 0;                    // set while a click-scroll is in flight
+
 function markSection(id){
   if(!id) return;
   try{ history.replaceState(null, '', '#' + id); }catch(e){}
 }
+function currentSection(){
+  const probe = 150;                // just below the sticky bar
+  let cur = SECTION_IDS[0];
+  for(const id of SECTION_IDS){
+    const el = $(id); if(!el) continue;
+    if(el.getBoundingClientRect().top - probe <= 0) cur = id; else break;
+  }
+  /* the last card is usually too short to reach the probe line, so it would
+     never light up without this */
+  if(window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4){
+    cur = SECTION_IDS[SECTION_IDS.length - 1];
+  }
+  return cur;
+}
+function paintNav(id){
+  navBtns.forEach(x=> x.classList.toggle('active', x.dataset.t === id));
+}
+let queued = false;
+function syncNav(){
+  if(queued) return;
+  queued = true;
+  requestAnimationFrame(()=>{
+    queued = false;
+    if(Date.now() < navLock) return;   // don't fight a smooth scroll in progress
+    const id = currentSection();
+    paintNav(id); markSection(id);
+  });
+}
 navBtns.forEach(b=> b.addEventListener('click', ()=>{
   const t = $(b.dataset.t); if(!t) return;
-  markSection(b.dataset.t);
+  /* paint immediately and hold it until the smooth scroll settles, so the
+     intermediate sections it flies past never steal the highlight */
+  paintNav(b.dataset.t); markSection(b.dataset.t);
+  navLock = Date.now() + 700;
   t.scrollIntoView({behavior:'smooth', block:'start'});
 }));
+window.addEventListener('scroll', syncNav, {passive:true});
+window.addEventListener('resize', syncNav);
 {
-  /* restore before the observer starts firing, or it immediately rewrites the
-     hash to whatever is at the top of the page */
   const want = decodeURIComponent(location.hash.replace('#',''));
-  if(want && $(want)) requestAnimationFrame(()=> $(want).scrollIntoView({block:'start'}));
-}
-if('IntersectionObserver' in window){
-  const byId = {}; navBtns.forEach(b=> byId[b.dataset.t] = b);
-  const obs = new IntersectionObserver(entries=>{ entries.forEach(en=>{ if(en.isIntersecting){ navBtns.forEach(x=>x.classList.remove('active')); const b = byId[en.target.id]; if(b){ b.classList.add('active'); markSection(en.target.id); } } }); }, { rootMargin:'-45% 0px -50% 0px', threshold:0 });
-  ['setup','transport','fx','pads','chromatic','vocoder','patterns','looper','dj','shortcuts'].forEach(id=>{ const s=$(id); if(s) obs.observe(s); });
+  if(want && $(want)){
+    paintNav(want);
+    navLock = Date.now() + 700;
+    requestAnimationFrame(()=> $(want).scrollIntoView({block:'start'}));
+  } else {
+    syncNav();
+  }
 }
 
 /* ---------- theme switch ----------
