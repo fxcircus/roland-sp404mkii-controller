@@ -138,6 +138,11 @@
     letter-spacing:1.4px;padding:5px 20px;
     box-shadow:var(--off) var(--off) 0 var(--shadow)}
   #nav #panicBtn:hover{background:#dc4136}
+  /* buy-me-a-coffee: BMC yellow in both themes, icon only */
+  #nav #coffeeBtn{display:inline-flex;align-items:center;justify-content:center;
+    background:#fbb034;color:#3a2905;border-color:var(--ink);text-decoration:none;
+    padding:5px 12px;box-shadow:var(--off) var(--off) 0 var(--shadow)}
+  #nav #coffeeBtn:hover{background:#ffc355}
   .sbtn[disabled]{opacity:.35;pointer-events:none}
   .sbtn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 
@@ -174,27 +179,40 @@
 
   /* DJ: the two decks sit either side of the crossfader; the sequencer fader
      is a separate group, so they read as the two halves of the unit */
-  .dj-layout{display:flex;gap:34px;flex-wrap:wrap;align-items:flex-start;margin-top:10px}
-  .dj-deck{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-  .dj-seq{display:flex;gap:18px;align-items:center;margin-left:auto}
-  .dj-layout{justify-content:space-between}
-  .xfade{width:220px;text-align:center;user-select:none}
-  .xfade__track{position:relative;height:34px;border:var(--bd) solid var(--ink);
-    border-radius:var(--r-btn-sm);background:var(--paper2);cursor:ew-resize;touch-action:none;
-    box-shadow:inset 0 2px 5px rgba(0,0,0,.35)}
-  /* centre detent — where the two decks are level */
-  .xfade__track::after{content:'';position:absolute;left:50%;top:4px;bottom:4px;width:2px;
-    margin-left:-1px;background:var(--ink);opacity:.35;pointer-events:none}
-  .xfade__cap{position:absolute;top:-4px;bottom:-4px;width:26px;margin-left:-13px;
-    border:var(--bd) solid var(--ink);border-radius:3px;background:var(--white);
-    box-shadow:0 2px 0 var(--shadow);pointer-events:none}
+  /* DJ: decks (with the crossfader between them) centred on one row, the
+     sequencer fader centred on a second */
+  .dj-layout{display:flex;flex-direction:column;align-items:center;gap:20px;margin-top:12px}
+  .dj-deck{display:flex;gap:22px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .dj-seq{display:flex;gap:18px;align-items:center;justify-content:center}
+
+  /* crossfader, drawn after the real thing: a black slot with a travel post at
+     each end, and a tall ribbed cap carrying a white index line */
+  .xfade{width:250px;text-align:center;user-select:none}
+  .xfade__track{position:relative;height:66px;cursor:ew-resize;touch-action:none}
+  .xfade__slot{position:absolute;left:14px;right:14px;top:50%;height:13px;margin-top:-6.5px;
+    background:#0a0d10;border:2px solid #05070a;border-radius:2px;
+    box-shadow:inset 0 2px 5px rgba(0,0,0,.9)}
+  .xfade__post{position:absolute;top:5px;bottom:5px;width:5px;border-radius:1px;
+    background:linear-gradient(90deg,#8d8a83,#e7e3da 45%,#8d8a83);
+    box-shadow:0 1px 2px rgba(0,0,0,.6)}
+  .xfade__post--l{left:4px}
+  .xfade__post--r{right:4px}
+  /* the cap travels along this inset rail so it never rides over the posts */
+  .xfade__rail{position:absolute;left:26px;right:26px;top:0;bottom:0}
+  .xfade__cap{position:absolute;top:0;bottom:0;width:32px;margin-left:-16px;
+    border:2px solid #05070a;border-radius:4px;
+    background-image:linear-gradient(90deg,#0d1014,#464c55 18%,#2c3138 50%,#464c55 82%,#0d1014);
+    box-shadow:0 4px 9px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.18);
+    pointer-events:none}
+  /* the index line belongs to the cap, so it moves with it */
+  .xfade__cap::after{content:'';position:absolute;left:50%;top:8px;bottom:8px;width:6px;
+    margin-left:-3px;border-radius:1px;
+    background:linear-gradient(90deg,#cfcbc2,#fdfbf7 45%,#cfcbc2);
+    box-shadow:0 0 5px rgba(0,0,0,.6)}
   .xfade__ends{display:flex;justify-content:space-between;font-family:var(--mono);
-    font-size:11px;font-weight:700;color:var(--ink2);margin-top:4px}
-  [data-zn-theme='hardware'] .xfade__track{background:#15181b;border-color:#05070a;
-    box-shadow:inset 0 2px 6px rgba(0,0,0,.85)}
-  [data-zn-theme='hardware'] .xfade__cap{border-color:#05070a;
-    background-image:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 50%),linear-gradient(#3a4048,#22262b);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 2px 0 #0a0d10}
+    font-size:11px;font-weight:700;color:var(--ink2);margin-top:2px}
+  .xfade:focus-visible{outline:none}
+  .xfade:focus-visible .xfade__cap{border-color:var(--accent)}
 
   /* chromatic needs three steps on the unit first — spell them out */
   .zn-steps{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--hand);font-size:15px;
@@ -280,10 +298,13 @@
 
   /* pads */
   .padgrid{display:grid;grid-template-columns:repeat(4,minmax(74px,1fr));gap:12px;margin:10px 0;max-width:640px}
-  /* 25 semitones (-12..+12) in a 5x5 puts the root dead centre */
-  .padgrid--chroma{grid-template-columns:repeat(5,minmax(0,1fr));max-width:470px}
-  .padgrid--chroma .num{font-size:22px}
-  .pad[data-root='true']{outline:3px solid var(--accent);outline-offset:-6px}
+  /* 25 semitones as pattern-style buttons: 13 per row puts -12..0 on the first
+     row and +1..+12 on the second, so it is two short rows instead of five */
+  .chromagrid{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:8px;
+    margin:10px 0;max-width:900px}
+  .chromagrid .sbtn{padding:11px 2px;text-align:center;font-size:14px;min-width:0}
+  .chromagrid .sbtn.active-key{background:var(--ink);color:var(--white)}
+  .chromagrid .sbtn[data-root='true']{outline:2px solid var(--accent);outline-offset:-4px}
   .pad{position:relative;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
     font-family:var(--marker);color:var(--ink);background:var(--pad-force,var(--pad,var(--white)));
     border:var(--bd-heavy) solid var(--ink);
@@ -595,6 +616,7 @@
     transform:translateY(3px);box-shadow:inset 0 2px 6px rgba(0,0,0,.75), 0 0 0 #0a0d10;
     color:#ffd7a5;text-shadow:0 0 7px rgba(255,175,85,.8), 0 0 20px rgba(255,150,45,.5), 0 0 38px rgba(255,140,35,.3)}
   [data-zn-theme='hardware'] .sbtn.on,
+  [data-zn-theme='hardware'] .sbtn.active-key,
   [data-zn-theme='hardware'] .seg-btn.on,
   [data-zn-theme='hardware'] #nav button.active{
     background-image:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0) 50%),linear-gradient(#ff9a2e,#e07000);
@@ -613,6 +635,12 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 3px 0 #0a0d10, 0 0 24px rgba(220,50,40,.55)}
   [data-zn-theme='hardware'] #nav #panicBtn:hover{background-color:#cc2a22;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.34), 0 3px 0 #0a0d10, 0 0 30px rgba(230,60,48,.7)}
+  [data-zn-theme='hardware'] #nav #coffeeBtn{
+    background-color:#fbb034;border-color:#ffd27a;color:#3a2905;text-shadow:none;
+    background-image:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 48%),linear-gradient(#ffc04a,#e09410);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 3px 0 #0a0d10, 0 0 20px rgba(251,176,52,.45)}
+  [data-zn-theme='hardware'] #nav #coffeeBtn:hover{background-color:#ffc355;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 3px 0 #0a0d10, 0 0 26px rgba(251,176,52,.6)}
   [data-zn-theme='hardware'] .sbtn.danger:hover{color:#fff4f1;
     text-shadow:0 0 7px rgba(255,110,90,.7), 0 0 20px rgba(255,60,45,.42)}
   [data-zn-theme='hardware'] .sbtn.danger:active{color:#fffaf9;
@@ -726,7 +754,16 @@
   </div>
   <div class="status">
     <button id="themeBtn" class="sbtn sm" type="button">Theme</button>
-    <button id="panicBtn" class="sbtn sm danger" type="button">Stop All</button></div>
+    <button id="panicBtn" class="sbtn sm danger" type="button">Stop All</button>
+    <a id="coffeeBtn" class="sbtn sm" href="https://buymeacoffee.com/fxcircus"
+       target="_blank" rel="noopener noreferrer" aria-label="Buy me a coffee" title="Buy me a coffee">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M17 8h1a3 3 0 0 1 0 6h-1"/>
+        <path d="M4 8h13v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/>
+        <path d="M7 2v2M11 2v2M15 2v2"/>
+      </svg>
+    </a></div>
 </nav>
 
 <div id="wrap">
@@ -764,7 +801,7 @@
   <h2><span class="n">5</span>Chromatic</h2>
   <div class="zn-steps" id="chromaSteps"></div>
   <div class="row"><span id="chromaVelMount"></span></div>
-  <div class="padgrid padgrid--chroma" id="chromaPads"></div>
+  <div class="chromagrid" id="chromaPads"></div>
 </section>
 
 <section id="vocoder" class="card">
@@ -787,6 +824,7 @@
 
 <section id="dj" class="card">
   <h2><span class="n">9</span>DJ mode</h2>
+  <div class="zn-steps" id="djSteps"></div>
   <div class="dj-layout">
     <div class="dj-deck" id="djDecks"></div>
     <div class="dj-seq" id="djSeq"></div>
@@ -1414,15 +1452,12 @@ $('chromaVelMount').appendChild(chromaVel.el);
 
   for(let semi = CHROMA_LO - CHROMA_ROOT; semi <= CHROMA_HI - CHROMA_ROOT; semi++){
     const note = CHROMA_ROOT + semi;
-    const p = div('pad');
-    if(semi === 0) p.dataset.root = 'true';
-    /* piano-like colouring so the shape of the scale is readable at a glance */
-    p.style.setProperty('--pad', semi === 0 ? 'var(--accent)' : (isAccidental(note) ? '#93a1bb' : '#e2eaf7'));
-    p.title = (semi > 0 ? '+' : '') + semi + ' semitone' + (Math.abs(semi) === 1 ? '' : 's')
+    const b = sbtn((semi > 0 ? '+' : '') + semi);
+    if(semi === 0) b.dataset.root = 'true';
+    b.title = (semi > 0 ? '+' : '') + semi + ' semitone' + (Math.abs(semi) === 1 ? '' : 's')
       + ' · ' + noteName(note) + ' · note ' + note + ' · ch' + CHROMA_CH;
-    p.append(span('num', (semi > 0 ? '+' : '') + semi));
-    pressable(p, ()=>CHROMA_CH, note, ()=>chromaVel.get());
-    $('chromaPads').appendChild(p);
+    pressable(b, ()=>CHROMA_CH, note, ()=>chromaVel.get());
+    $('chromaPads').appendChild(b);
   }
 }
 
@@ -1611,10 +1646,16 @@ function volKnob(ch){
    wrong and loses the centre detent that matters most. */
 function makeXFade({ cc, ch, min=0, max=127, value=64 }){
   const root = div('xfade'); root.tabIndex = 0;
-  root.innerHTML = '<div class="xfade__track"><div class="xfade__cap"></div></div>'
+  root.innerHTML = '<div class="xfade__track">'
+    + '<span class="xfade__slot"></span>'
+    + '<span class="xfade__post xfade__post--l"></span>'
+    + '<span class="xfade__post xfade__post--r"></span>'
+    + '<span class="xfade__rail"><span class="xfade__cap"></span></span>'
+    + '</div>'
     + '<div class="xfade__ends"><span>CH1</span><span>X-FADE</span><span>CH2</span></div>';
   const track = root.querySelector('.xfade__track');
-  const cap = root.querySelector('.xfade__cap');
+  const rail  = root.querySelector('.xfade__rail');
+  const cap   = root.querySelector('.xfade__cap');
   let v = value;
   root.setAttribute('role','slider');
   root.setAttribute('aria-valuemin', min); root.setAttribute('aria-valuemax', max);
@@ -1629,7 +1670,8 @@ function makeXFade({ cc, ch, min=0, max=127, value=64 }){
     v = n; paint(); if(!silent) sendCC(ch, cc, v, null);
   }
   function fromEvent(e){
-    const r = track.getBoundingClientRect();
+    /* measure the rail, not the track — the cap's travel is inset by the posts */
+    const r = rail.getBoundingClientRect();
     setV(min + ((e.clientX - r.left) / r.width) * (max - min));
   }
   let dragging = false;
@@ -1648,6 +1690,14 @@ function makeXFade({ cc, ch, min=0, max=127, value=64 }){
   });
   paint();
   return root;
+}
+{
+  /* manual p.93: "Press the bank [D/I] button and the [E/J] button
+     simultaneously. The unit enters DJ MIXER mode." Front-panel only. */
+  const box = $('djSteps');
+  box.append(el('b',null,'On the SP'), span(null,'press'),
+    span('k','BANK D/I'), span('plus','+'), span('k','BANK E/J'),
+    span(null,'together to enter DJ MIXER mode — these controls do nothing until you do'));
 }
 $('djDecks').append(volKnob(1), makeXFade({ cc:8, ch:1 }), volKnob(2));
 $('djSeq').appendChild(volKnob(3));
