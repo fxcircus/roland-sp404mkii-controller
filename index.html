@@ -613,8 +613,10 @@
   /* the index line is a raised plastic ridge running past the cap edge. Scaled
      about its inner endpoint so only the outer end travels; safe because the
      rotation lives on the parent <g>, which this never touches. */
+  /* the ridge clears the cap edge by ~2 units only. Cap top is y=21; scaled
+     about the line's inner end (52,34), so only the outer tip travels. */
   [data-zn-theme='hardware'] .k-ptr{stroke:#fdfbf7;stroke-width:5.5;
-    transform:scaleY(2.15);transform-origin:52px 34px}
+    transform:scaleY(1.5);transform-origin:52px 34px}
   [data-zn-theme='hardware'] .knob{width:132px}
   [data-zn-theme='hardware'] .knob-row{gap:22px}
 
