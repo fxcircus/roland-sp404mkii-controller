@@ -1031,7 +1031,8 @@ BUSES.forEach(bus=>{
   const efx = sbtn('EFX','sm');
   let efxOn = false;
   efx.addEventListener('click', ()=>{ efxOn = !efxOn; efx.classList.toggle('on', efxOn); sendCC(bus.ch, CC_SW, efxOn?127:0, null); });
-  const fxOptions = Object.entries(TABLES[bus.table]).sort((a,b)=>+a[0]-+b[0]).map(([code,name])=>({value:code, label:code+': '+name, name}));
+  /* label is the effect name only; value stays the CC83 code that gets sent */
+  const fxOptions = Object.entries(TABLES[bus.table]).sort((a,b)=>+a[0]-+b[0]).map(([code,name])=>({value:code, label:name, name}));
   const fx = makeDropdown({ className:'lcd', options:fxOptions, value:'0', onChange:v=>{ sendCC(bus.ch, CC_SEL, +v, null); applyParams(); } });
   const ann = span('bus-ann','');
   head.append(span('bus-name', bus.label), span('bus-ch','ch'+bus.ch), efx, fx.el, ann);
