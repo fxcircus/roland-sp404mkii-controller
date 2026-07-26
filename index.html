@@ -350,8 +350,7 @@
      on a pad, since the SP has no SysEx to ask. `.pad *` is pointer-events:none
      so the whole pad is one target; the label and its editor have to opt back
      in, and then stop the event bubbling or renaming would fire the note. */
-  .pad-opts{gap:10px;margin-top:2px}
-  #padNameHint{font-size:13px}
+  .pad-opts{gap:10px;margin:2px 0 0}
   .pad-name{display:none;position:absolute;left:5px;right:5px;bottom:4px;
     font-family:var(--hand);font-size:12px;line-height:1.2;text-align:center;color:var(--ink);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -981,11 +980,10 @@
     <span id="extMount"></span>
     <button class="sbtn" id="extModeToggle" type="button">mode: toggle</button>
   </div>
+  <div class="padgrid" id="padGrid"></div>
   <div class="row pad-opts">
     <button id="padNameToggle" class="sbtn sm" type="button" aria-pressed="false">Name pads</button>
-    <span class="note" id="padNameHint" hidden>Tap a pad's label to rename it. Names are per bank and live on this device.</span>
   </div>
-  <div class="padgrid" id="padGrid"></div>
 </section>
 
 <section id="chromatic" class="card">
@@ -1832,7 +1830,6 @@ function setPadNaming(on){
   const b = $('padNameToggle');
   b.classList.toggle('on', padNamesOn);
   b.setAttribute('aria-pressed', padNamesOn ? 'true' : 'false');
-  $('padNameHint').hidden = !padNamesOn;
   if(padNamesOn) renderPadNames();
 }
 function editPadName(pad, lab){
@@ -1861,7 +1858,9 @@ function editPadName(pad, lab){
     input.addEventListener(t, e=> e.stopPropagation()));
 }
 $('padNameToggle').addEventListener('click', ()=> setPadNaming(!padNamesOn));
-$('padNameToggle').title = 'Show an editable label on each pad. The SP cannot tell the app what sample is loaded — no SysEx, no readback — so this is you telling it. Saved per bank, on this device.';
+$('padNameToggle').title = 'Show an editable label on each pad, and tap a label to rename it. '
+  + 'The SP cannot tell the app what sample is loaded — no SysEx, no readback — so this is you telling it. '
+  + 'Names are saved per bank, on this device.';
 
 const padEls = {};
 for(let pad=1; pad<=16; pad++){
