@@ -2,8 +2,20 @@
   "meta": {
     "name": "SP-404MK2 modulation suggestions",
     "note": "Opinions, not MIDI facts. The map JSON stays the source of truth for CCs and ranges; this file only says which parameters are worth moving and how. Every param name here is validated against effects_parameters at build time.",
-    "rate_units": "Hz, free-running. Deliberately not tempo-synced: the app cannot share a clock with the SP, and many of these effects have their own SYNC that locks them to the unit anyway.",
-    "depth_units": "percent of the parameter's full CC range, applied either side of the knob's current value when bipolar"
+    "rate_units": "Hz for free-running moves. Suggestions that are rhythmic also carry a 'sync' note division: the app uses it when the SP is sending clock (MIDI Sync Out = ON), locking phase to the unit's own downbeat, and falls back to the typed tempo otherwise.",
+    "depth_units": "percent of the parameter's full CC range, applied either side of the knob's current value when bipolar",
+    "sync_divisions": [
+      "4bar",
+      "2bar",
+      "1bar",
+      "1/2",
+      "1/4",
+      "1/4T",
+      "1/8",
+      "1/8T",
+      "1/16",
+      "1/32"
+    ]
   },
   "shapes": [
     {
@@ -55,7 +67,8 @@
           "depth": 85,
           "phase": 0,
           "bipolar": true,
-          "why": "A new slice pattern every two beats. Hitting one of 32 detents on cue is not a human action."
+          "why": "A new slice pattern every two beats. Hitting one of 32 detents on cue is not a human action.",
+          "sync": "1bar"
         },
         {
           "param": "SPEED",
@@ -73,7 +86,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Flips LEGATO/SLASH in rhythm, so the slice envelope changes character bar to bar."
+          "why": "Flips LEGATO/SLASH in rhythm, so the slice envelope changes character bar to bar.",
+          "sync": "1/2"
         }
       ]
     },
@@ -87,7 +101,8 @@
           "depth": 90,
           "phase": 0,
           "bipolar": true,
-          "why": "A different scatter pattern each step — the move the effect is built for."
+          "why": "A different scatter pattern each step — the move the effect is built for.",
+          "sync": "1bar"
         },
         {
           "param": "SCATTER",
@@ -96,7 +111,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Gates the whole effect on the beat instead of holding it on."
+          "why": "Gates the whole effect on the beat instead of holding it on.",
+          "sync": "1/4"
         },
         {
           "param": "SPEED",
@@ -105,7 +121,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Random single/double-time bursts."
+          "why": "Random single/double-time bursts.",
+          "sync": "2bar"
         }
       ]
     },
@@ -119,7 +136,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Rhythmic loop stutter, engaged and released on the beat."
+          "why": "Rhythmic loop stutter, engaged and released on the beat.",
+          "sync": "1/4"
         },
         {
           "param": "LENGTH",
@@ -128,7 +146,8 @@
           "depth": 80,
           "phase": 0,
           "bipolar": true,
-          "why": "Varies the stutter length so the repeat never settles."
+          "why": "Varies the stutter length so the repeat never settles.",
+          "sync": "1bar"
         }
       ]
     },
@@ -142,7 +161,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Beat-locked loop stabs."
+          "why": "Beat-locked loop stabs.",
+          "sync": "1/4"
         },
         {
           "param": "SPEED",
@@ -151,7 +171,8 @@
           "depth": 90,
           "phase": 0,
           "bipolar": true,
-          "why": "Jumps between forward and reverse playback — a scratch you cannot perform."
+          "why": "Jumps between forward and reverse playback — a scratch you cannot perform.",
+          "sync": "1/2"
         }
       ]
     },
@@ -165,7 +186,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Fires the spin every two seconds instead of by hand."
+          "why": "Fires the spin every two seconds instead of by hand.",
+          "sync": "1bar"
         },
         {
           "param": "LENGTH",
@@ -174,7 +196,8 @@
           "depth": 90,
           "phase": 0,
           "bipolar": true,
-          "why": "Randomises the spin length so repeats do not sound copied."
+          "why": "Randomises the spin length so repeats do not sound copied.",
+          "sync": "2bar"
         }
       ]
     },
@@ -188,7 +211,8 @@
           "depth": 70,
           "phase": 0,
           "bipolar": true,
-          "why": "Steps through scale degrees on the beat: an arpeggio the SP has no other way to make."
+          "why": "Steps through scale degrees on the beat: an arpeggio the SP has no other way to make.",
+          "sync": "1/4"
         },
         {
           "param": "SCALE",
@@ -220,7 +244,8 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "Jumps the resonant root — melodic scatter over whatever you feed it."
+          "why": "Jumps the resonant root — melodic scatter over whatever you feed it.",
+          "sync": "1/2"
         },
         {
           "param": "CHORD",
@@ -252,7 +277,8 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Jumps the delay between note values — the classic dub time-shift, on a timer."
+          "why": "Jumps the delay between note values — the classic dub time-shift, on a timer.",
+          "sync": "1bar"
         },
         {
           "param": "MODE",
@@ -261,7 +287,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Toggles centre and ping-pong so the repeats move around."
+          "why": "Toggles centre and ping-pong so the repeats move around.",
+          "sync": "2bar"
         }
       ]
     },
@@ -275,7 +302,8 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Steps the delay time between note values."
+          "why": "Steps the delay time between note values.",
+          "sync": "1bar"
         },
         {
           "param": "MODE",
@@ -298,7 +326,8 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Note-value jumps you cannot dial by hand mid-bar."
+          "why": "Note-value jumps you cannot dial by hand mid-bar.",
+          "sync": "1bar"
         },
         {
           "param": "FEEDBACK",
@@ -321,7 +350,8 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Steps between note divisions."
+          "why": "Steps between note divisions.",
+          "sync": "1bar"
         },
         {
           "param": "FEEDBACK",
@@ -344,7 +374,8 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "Stepped time changes pitch-shift the tail on every jump."
+          "why": "Stepped time changes pitch-shift the tail on every jump.",
+          "sync": "1bar"
         },
         {
           "param": "FEEDBACK",
@@ -367,7 +398,8 @@
           "depth": 80,
           "phase": 0,
           "bipolar": true,
-          "why": "A different flavour of destruction every few seconds."
+          "why": "A different flavour of destruction every few seconds.",
+          "sync": "2bar"
         },
         {
           "param": "CUTOFF",
@@ -390,7 +422,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Drops the bass on the beat — the isolator cut, automated."
+          "why": "Drops the bass on the beat — the isolator cut, automated.",
+          "sync": "1/4"
         },
         {
           "param": "HIGH",
@@ -399,7 +432,8 @@
           "depth": 100,
           "phase": 0.5,
           "bipolar": true,
-          "why": "Counter-phased against LOW so the bands trade places."
+          "why": "Counter-phased against LOW so the bands trade places.",
+          "sync": "1/4"
         }
       ]
     },
@@ -436,7 +470,8 @@
           "depth": 65,
           "phase": 0,
           "bipolar": true,
-          "why": "Steps the vocoder pitch on the beat — melody from a spoken source."
+          "why": "Steps the vocoder pitch on the beat — melody from a spoken source.",
+          "sync": "1/4"
         },
         {
           "param": "CHORD",
@@ -477,7 +512,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Snaps in and out of full robot on a timer."
+          "why": "Snaps in and out of full robot on a timer.",
+          "sync": "1bar"
         }
       ]
     },
@@ -491,7 +527,8 @@
           "depth": 50,
           "phase": 0,
           "bipolar": true,
-          "why": "Steps voice 1 through intervals — an arpeggio over any source."
+          "why": "Steps voice 1 through intervals — an arpeggio over any source.",
+          "sync": "1/2"
         },
         {
           "param": "PAN1",
@@ -523,7 +560,8 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "Scatters the grain pitch — clouds instead of echoes."
+          "why": "Scatters the grain pitch — clouds instead of echoes.",
+          "sync": "1/2"
         },
         {
           "param": "CLOUDY",
@@ -601,7 +639,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Jumps LPF/BPF/HPF in rhythm — impossible to do cleanly by hand."
+          "why": "Jumps LPF/BPF/HPF in rhythm — impossible to do cleanly by hand.",
+          "sync": "1/2"
         }
       ]
     },
@@ -633,7 +672,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Flips high-pass and low-pass on a timer."
+          "why": "Flips high-pass and low-pass on a timer.",
+          "sync": "1bar"
         }
       ]
     },
@@ -679,7 +719,8 @@
           "depth": 70,
           "phase": 0,
           "bipolar": true,
-          "why": "The sweep itself, at a rate no ankle holds steady."
+          "why": "The sweep itself, at a rate no ankle holds steady.",
+          "sync": "1bar"
         },
         {
           "param": "RATE",
@@ -780,7 +821,8 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Flips the modulation direction on the beat."
+          "why": "Flips the modulation direction on the beat.",
+          "sync": "1/2"
         }
       ]
     },
@@ -941,7 +983,8 @@
           "depth": 90,
           "phase": 0,
           "bipolar": true,
-          "why": "Dives on the beat instead of when you turn a knob."
+          "why": "Dives on the beat instead of when you turn a knob.",
+          "sync": "1/2"
         },
         {
           "param": "FILTER",
@@ -964,7 +1007,8 @@
           "depth": 95,
           "phase": 0,
           "bipolar": true,
-          "why": "A stop every two seconds, exactly on time."
+          "why": "A stop every two seconds, exactly on time.",
+          "sync": "1bar"
         },
         {
           "param": "RATE",
@@ -987,7 +1031,8 @@
           "depth": 90,
           "phase": 0,
           "bipolar": true,
-          "why": "Rhythmic slowdowns."
+          "why": "Rhythmic slowdowns.",
+          "sync": "1/2"
         },
         {
           "param": "RATE",
@@ -1070,7 +1115,8 @@
           "depth": 80,
           "phase": 0,
           "bipolar": true,
-          "why": "Scoops the mids on the beat."
+          "why": "Scoops the mids on the beat.",
+          "sync": "1/4"
         },
         {
           "param": "Mid Freq",

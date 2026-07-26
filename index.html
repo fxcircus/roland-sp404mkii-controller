@@ -233,6 +233,7 @@
   .modgrid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:15px;align-items:start}
   .modfield{display:flex;flex-direction:column;gap:6px}
   .modlab{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink2)}
+  .modlab-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
   .shapes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
   .shape{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 5px;
     background:var(--white);border:var(--bd) solid var(--ink);border-radius:var(--r-btn-sm);
@@ -571,6 +572,21 @@
      and --ink swap and the log reads correctly in both. Only the recessed
      screen look is hardware-specific. */
   .mon-ctl{gap:9px;margin-top:4px}
+  .clock-row{gap:9px;margin-top:4px}
+  #bpmInput{width:96px;font-family:var(--mono);font-size:14px;padding:6px 9px;
+    border:var(--bd) solid var(--ink);border-radius:var(--r-btn-sm);
+    background:var(--white);color:var(--ink)}
+  #bpmInput:disabled{opacity:.75;cursor:not-allowed}
+  [data-zn-theme='hardware'] #bpmInput{background:#1b1e22;border-color:#05070a}
+  #clockState{font-size:14px}
+  #clockState.live{color:var(--mod)}
+  .modmode{display:inline-flex;border:var(--bd) solid var(--ink);border-radius:var(--r-btn-sm);overflow:hidden}
+  .modmode button{font-family:var(--marker);font-size:11px;letter-spacing:.7px;text-transform:uppercase;
+    padding:5px 12px;border:0;background:var(--btn-face,var(--white));color:var(--ink);cursor:pointer}
+  [data-zn-theme='hardware'] .modmode button{background:#1d2024}
+  .modmode button + button{border-left:var(--bd) solid var(--ink)}
+  [data-zn-theme='hardware'] .modmode button[aria-pressed='true'],
+  .modmode button[aria-pressed='true']{background:var(--mod);color:var(--paper)}
   .sbtn:disabled{opacity:.42;cursor:not-allowed}
   .monlog{width:100%;max-height:260px;overflow-y:auto;margin-top:2px;
     font-family:var(--mono);font-size:12px;line-height:1.5;
@@ -1024,6 +1040,11 @@
     <button id="monToggle" class="sbtn sm" type="button" aria-pressed="false">Monitor</button>
     <button id="monClear" class="sbtn sm" type="button" hidden>Clear</button>
     <span class="note" id="monCount" hidden></span>
+  </div>
+  <div class="row clock-row">
+    <b class="mini">Tempo</b>
+    <input type="number" id="bpmInput" min="20" max="300" step="0.1" value="120" aria-label="Tempo in BPM">
+    <span class="note" id="clockState"></span>
   </div>
   <div id="monLog" class="monlog" hidden></div>
 </section>
@@ -1556,6 +1577,7 @@ function setInput(inp){
 function onMidiIn(e){
   const d = e.data;
   if(!d || !d.length) return;
+  clockIn(d);
   logMidi('in', d);
   mirrorIn(d);
 }
@@ -1834,9 +1856,6 @@ BUSES.forEach(bus=>{
   const fx = makeDropdown({ className:'lcd', options:fxOptions, value:'0', onChange:v=>{ sendCC(bus.ch, CC_SEL, +v, null); applyParams(); } });
   const ann = span('bus-ann','');
   head.append(span('bus-name', bus.label), span('bus-ch','ch'+bus.ch), efx, fx.el, ann);
-  const sugBtn = sbtn('Suggest motion','sm'); sugBtn.hidden = true;
-  sugBtn.addEventListener('click', ()=> applySuggestions(bus));
-  head.appendChild(sugBtn);
   const krow = div('knob-row');
   bus.knobs = CTRL_CCS.map((cc,i)=>{
     const k = makeKnob({ label:'CTRL '+(i+1), cc, value:0, onChange:v=>sendCC(bus.ch, cc, v, null) });
@@ -1847,7 +1866,7 @@ BUSES.forEach(bus=>{
     krow.appendChild(k.el); return k;
   });
   const drawer = div('moddrawer'); drawer.appendChild(div('modinner'));
-  bus.drawer = drawer; bus.sugBtn = sugBtn;
+  bus.drawer = drawer;
   strip.append(head, krow, drawer);
   function applyParams(){
     const sel = fx.selected(); const name = sel ? sel.name : null;
@@ -1860,11 +1879,6 @@ BUSES.forEach(bus=>{
     }
     bus.lastFx = name;
     busEffect[bus.ch] = name;
-    if(bus.sugBtn){
-      const blk = suggestionsFor(bus);
-      bus.sugBtn.hidden = !(blk && blk.suggest && blk.suggest.length);
-      if(blk) bus.sugBtn.title = blk.summary;
-    }
     const ps = name ? PARAMS[name] : null;
     /* effect 0 is OFF — nothing to drive, so the knobs go dead at zero rather
        than sitting live and sending CC that does nothing */
@@ -1886,6 +1900,79 @@ BUSES.forEach(bus=>{
   bus.applyParams = applyParams; bus.stripEl = strip; bus.annEl = ann;
   $('fxCols').appendChild(strip);
 });
+
+/* ---------- CLOCK ----------
+   We do not send clock; we FOLLOW it. The SP transmits 0xF8 when MIDI Sync Out
+   is ON (implementation chart footnote *3), so with the SP as master the app
+   can lock to the unit's own tempo and downbeat — which sidesteps the whole
+   two-free-running-oscillators problem, because there is only one oscillator
+   and it is the SP's.
+
+   Synced LFOs take their phase from the TICK COUNT, not from elapsed time, so
+   they cannot drift: 0xFA resets the count to the downbeat and every cycle is
+   measured in ticks from there. Elapsed time is used only to interpolate
+   between ticks so slow shapes stay smooth.
+
+   Without clock the same lanes free-run against the typed BPM, which is honest
+   — it will not line up with the SP, and the readout says so.              */
+const CLK_PPQ = 24;
+let clkTicks = 0, clkLastAt = 0, clkInterval = 0, clkSeenAt = 0, clkRunning = false;
+let manualBPM = +(lsGet('sp404_bpm') || 120) || 120;
+
+function clockIn(d){
+  const s0 = d[0];
+  if(s0 === 0xF8){
+    const now = performance.now();
+    if(clkLastAt){
+      const dt = now - clkLastAt;
+      /* ignore absurd gaps — a paused sender or a reconnect would otherwise
+         drag the average into nonsense */
+      if(dt > 2 && dt < 200) clkInterval = clkInterval ? clkInterval*0.85 + dt*0.15 : dt;
+    }
+    clkLastAt = now; clkSeenAt = now; clkTicks++;
+    return;
+  }
+  if(s0 === 0xFA){ clkTicks = 0; clkRunning = true; clkSeenAt = performance.now(); return; }
+  if(s0 === 0xFB){ clkRunning = true; return; }
+  if(s0 === 0xFC){ clkRunning = false; return; }
+}
+const clockLive = ()  => !!clkSeenAt && (performance.now() - clkSeenAt) < 1000;
+const clockBPM  = ()  => clkInterval ? 60000 / (clkInterval * CLK_PPQ) : 0;
+const tempoBPM  = ()  => (clockLive() && clockBPM()) ? clockBPM() : manualBPM;
+function clockTickPos(){
+  if(!clockLive() || !clkInterval) return null;
+  const frac = Math.min(1, (performance.now() - clkLastAt) / clkInterval);
+  return clkTicks + frac;
+}
+let clkWasLive = null;
+function updateClockUI(){
+  const live = clockLive(), bpm = clockBPM();
+  /* The chips say whether a lane is locked or free-running, so they go stale the
+     moment clock appears or drops. The null check is load-bearing: this function
+     also runs once at parse time, before the MODULATION block's consts exist,
+     and renderMoveBar touches modLanes — calling it then is a TDZ error that
+     takes the whole app down before MIDI is even wired up. */
+  if(clkWasLive === null) clkWasLive = live;
+  else if(clkWasLive !== live){ clkWasLive = live; renderMoveBar(); }
+  const inp = $('bpmInput'), st = $('clockState');
+  if(live && bpm){
+    inp.disabled = true;
+    inp.value = bpm.toFixed(1);
+    st.textContent = 'following the SP’s clock' + (clkRunning ? '' : ' (stopped)');
+    st.classList.add('live');
+  }else{
+    inp.disabled = false;
+    if(document.activeElement !== inp) inp.value = manualBPM.toFixed(1);
+    st.textContent = 'no clock on the input — set MIDI Sync Out to ON on the SP to follow it';
+    st.classList.remove('live');
+  }
+}
+$('bpmInput').addEventListener('input', ()=>{
+  const v = parseFloat($('bpmInput').value);
+  if(isFinite(v) && v >= 20 && v <= 300){ manualBPM = v; lsSet('sp404_bpm', String(v)); }
+});
+setInterval(updateClockUI, 400);
+updateClockUI();
 
 /* ---------- MODULATION ----------
    An LFO per CTRL parameter, sending real CC.
@@ -1916,11 +2003,30 @@ const MOD_SHAPES = [
     fn:null },
 ];
 const modShape = id => MOD_SHAPES.find(x=>x.id===id) || MOD_SHAPES[0];
-const MOD_DEFAULT = { shape:'sine', rate:0.25, depth:50, phase:0, bipolar:true, running:true };
+/* Slow to fast, so the rate knob reads left-to-right the way the Hz one does. */
+const SYNC_DIVS = [
+  { id:'4bar', label:'4 bar', beats:16 },
+  { id:'2bar', label:'2 bar', beats:8 },
+  { id:'1bar', label:'1 bar', beats:4 },
+  { id:'1/2',  label:'1/2',   beats:2 },
+  { id:'1/4',  label:'1/4',   beats:1 },
+  { id:'1/4T', label:'1/4T',  beats:2/3 },
+  { id:'1/8',  label:'1/8',   beats:0.5 },
+  { id:'1/8T', label:'1/8T',  beats:1/3 },
+  { id:'1/16', label:'1/16',  beats:0.25 },
+  { id:'1/32', label:'1/32',  beats:0.125 },
+];
+const divIndex = id => Math.max(0, SYNC_DIVS.findIndex(d=>d.id===id));
+const MOD_DEFAULT = { shape:'sine', mode:'hz', rate:0.25, div:'1bar', depth:50, phase:0, bipolar:true, running:true };
 const RATE_LO = Math.log(0.02), RATE_HI = Math.log(20);
 const posToRate = p => Math.exp(RATE_LO + (p/100)*(RATE_HI-RATE_LO));
 const rateToPos = r => Math.round(((Math.log(Math.max(0.02, Math.min(20, r))) - RATE_LO)/(RATE_HI-RATE_LO))*100);
 const rateText  = r => (r < 1 ? r.toFixed(2) : r.toFixed(1)) + 'Hz';
+function laneRateText(L){
+  if(L.mode !== 'sync') return rateText(L.rate);
+  const d = SYNC_DIVS[divIndex(L.div)] || SYNC_DIVS[2];
+  return d.label + (clockLive() ? ' ⟲' : ' @' + Math.round(tempoBPM()));
+}
 
 const modLanes = {};
 const modKey = (ch, cc) => ch + ':' + cc;
@@ -1935,7 +2041,16 @@ function modTick(){
     if(!L.running){ k.showMod(null); continue; }
     const centre = k.get();
     const span = (L.depth/100) * 63.5;
-    const p = t*L.rate + (L.phase||0);
+    let p;
+    if(L.mode === 'sync'){
+      const beats = (SYNC_DIVS[divIndex(L.div)] || SYNC_DIVS[2]).beats;
+      const tp = clockTickPos();
+      /* phase from the tick COUNT when clock is present, so it cannot drift and
+         0xFA puts every lane back on the downbeat together */
+      p = (tp != null ? tp/(CLK_PPQ*beats) : t*(tempoBPM()/60)/beats) + (L.phase||0);
+    }else{
+      p = t*L.rate + (L.phase||0);
+    }
     let u;
     if(L.shape === 'sh'){
       /* hash the step, don't re-roll: sampling Math.random every frame would be
@@ -2031,16 +2146,6 @@ function suggestionsFor(bus){
   const fxName = busEffect[bus.ch];
   return (fxName && MODMAP.by_effect[fxName]) ? MODMAP.by_effect[fxName] : null;
 }
-function applySuggestions(bus){
-  const blk = suggestionsFor(bus); if(!blk) return;
-  const fxName = busEffect[bus.ch], ps = PARAMS[fxName] || [];
-  blk.suggest.forEach(sg=>{
-    const p = ps.find(x=>x.name === sg.param); if(!p) return;
-    const i = CTRL_CCS.indexOf(p.cc); if(i < 0) return;
-    setLane(bus.ch, i, { shape:sg.shape, rate:sg.rate, depth:sg.depth,
-      phase:sg.phase || 0, bipolar:sg.bipolar !== false, running:true });
-  });
-}
 
 function paintModButtons(){
   BUSES.forEach(bus=>{
@@ -2066,7 +2171,7 @@ function renderMoveBar(){
     chip.innerHTML = '<svg viewBox="0 0 18 16" width="18" height="14" aria-hidden="true"><path d="'+sh.path
       + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     chip.append(el('b',null, bus.label + ' ' + paramNameFor(bus, L.i)),
-                document.createTextNode(' ' + rateText(L.rate) + ' · ' + L.depth + '%'));
+                document.createTextNode(' ' + laneRateText(L) + ' · ' + L.depth + '%'));
     const x = el('button','x','×'); x.type='button';
     x.setAttribute('aria-label','Stop ' + paramNameFor(bus, L.i));
     x.addEventListener('click', e=>{ e.stopPropagation(); clearLane(L.ch, L.i); });
@@ -2125,11 +2230,28 @@ function openModDrawer(bus, i){
   fShape.appendChild(shapes);
 
   const fKnobs = div('modfield');
-  fKnobs.appendChild(span('modlab','Rate & depth'));
+  const rlab = div('modfield');
+  const modeWrap = div('modmode');
+  [['hz','Hz'],['sync','Sync']].forEach(([id,txt])=>{
+    const b = el('button',null,txt); b.type='button';
+    b.setAttribute('aria-pressed', String((lane.mode||'hz') === id));
+    b.addEventListener('click', ()=>{ setLane(bus.ch, i, { mode:id }); openModDrawer(bus, i); });
+    modeWrap.appendChild(b);
+  });
+  const rateHead = div('modlab-row');
+  rateHead.append(span('modlab','Rate & depth'), modeWrap);
+  fKnobs.appendChild(rateHead);
   const kwrap = div('modknobs');
-  const rk = makeKnob({ label:'RATE', min:0, max:100, value:rateToPos(lane.rate),
-    format:v=>rateText(posToRate(v)), onChange:v=> setLane(bus.ch, i, { rate:posToRate(v) }) });
-  rk.setTitle('How fast the parameter moves. 0.02Hz is a 50-second sweep; 20Hz is a wobble.');
+  const synced = (lane.mode === 'sync');
+  const rk = synced
+    ? makeKnob({ label:'RATE', min:0, max:SYNC_DIVS.length-1, value:divIndex(lane.div),
+        format:v=>SYNC_DIVS[Math.round(v)].label,
+        onChange:v=> setLane(bus.ch, i, { div:SYNC_DIVS[Math.round(v)].id }) })
+    : makeKnob({ label:'RATE', min:0, max:100, value:rateToPos(lane.rate),
+        format:v=>rateText(posToRate(v)), onChange:v=> setLane(bus.ch, i, { rate:posToRate(v) }) });
+  rk.setTitle(synced
+    ? 'One cycle per this many beats, locked to the SP’s clock when it is sending one. Otherwise it runs against the tempo set in the MIDI card.'
+    : 'How fast the parameter moves, independent of any tempo. 0.02Hz is a 50-second sweep; 20Hz is a wobble.');
   const dk = makeKnob({ label:'DEPTH', min:0, max:100, value:lane.depth,
     format:v=>v+'%', onChange:v=> setLane(bus.ch, i, { depth:v }) });
   dk.setTitle('How far it swings either side of the value you set.');
@@ -2164,6 +2286,7 @@ function openModDrawer(bus, i){
     const apply = sbtn('Use suggested','sm');
     apply.addEventListener('click', ()=>{
       setLane(bus.ch, i, { shape:sg.shape, rate:sg.rate, depth:sg.depth,
+        mode: sg.sync ? 'sync' : 'hz', div: sg.sync || '1bar',
         phase:sg.phase || 0, bipolar:sg.bipolar !== false, running:true });
       openModDrawer(bus, i);
     });
@@ -3066,8 +3189,8 @@ function collectState(){
        the knob value above, so a snapshot restores the sweep, not a frozen
        point on it */
     mod: Object.keys(modLanes).map(k=>{ const L = modLanes[k];
-      return { ch:L.ch, i:L.i, shape:L.shape, rate:L.rate, depth:L.depth,
-               phase:L.phase || 0, bipolar:!!L.bipolar, running:!!L.running }; }),
+      return { ch:L.ch, i:L.i, shape:L.shape, mode:L.mode || 'hz', rate:L.rate, div:L.div,
+               depth:L.depth, phase:L.phase || 0, bipolar:!!L.bipolar, running:!!L.running }; }),
     ui: { monitor:monOn, follow:followOn, padNames:padNamesOn },
   };
 }
@@ -3124,8 +3247,8 @@ function applyState(st, send){
   clearAllMotion(true);
   if(Array.isArray(st.mod)) st.mod.forEach(L=>{
     if(!busByCh[L.ch] || CTRL_CCS[L.i] == null) return;
-    setLane(L.ch, L.i, { shape:L.shape, rate:L.rate, depth:L.depth,
-      phase:L.phase || 0, bipolar:L.bipolar !== false, running:L.running !== false });
+    setLane(L.ch, L.i, { shape:L.shape, mode:L.mode || 'hz', rate:L.rate, div:L.div || '1bar',
+      depth:L.depth, phase:L.phase || 0, bipolar:L.bipolar !== false, running:L.running !== false });
   });
   if(st.ui){
     if(st.ui.monitor != null) setMonitor(!!st.ui.monitor);
