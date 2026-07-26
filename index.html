@@ -186,10 +186,12 @@
   .k-flute{stroke:#fff;stroke-width:2.2;stroke-linecap:round;opacity:.9;fill:none}
   .k-body{fill:var(--white);stroke:var(--ink);stroke-width:5.5;stroke-linejoin:round}
   .k-notch{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;opacity:.55;fill:none}
-  .k-ptr{fill:none;stroke:var(--ink);stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round}
-  /* the wall segment is always light: the skirt is near-black in every theme,
-     so this one cannot follow --ink the way the cap portion does */
-  .k-ptr-side{fill:none;stroke:#fdfbf7;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round}
+  /* The wall segment is the same stroke as the cap portion — it is one index
+     line bending over an edge, so it takes one colour. In zine that means black
+     on the inked skirt, which merges the way ink on ink does; the overhang
+     reads mainly in the hardware theme, where the wall is dark and the line
+     is light. */
+  .k-ptr,.k-ptr-side{fill:none;stroke:var(--ink);stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round}
   .knob.drag .k-fill{stroke:var(--accent2)}
   .knob:focus-visible{outline:none}
   .knob:focus-visible .k-body{stroke:var(--accent2)}
@@ -949,8 +951,8 @@
      rotation lives on the parent <g>, which this never touches. */
   /* the ridge clears the cap edge by ~2 units only. Cap top is y=21; scaled
      about the line's inner end (52,34), so only the outer tip travels. */
-  [data-zn-theme='hardware'] .k-ptr{stroke:#fdfbf7;stroke-width:5.5}
-  [data-zn-theme='hardware'] .k-ptr-side{stroke-width:5.5}
+  [data-zn-theme='hardware'] .k-ptr,
+  [data-zn-theme='hardware'] .k-ptr-side{stroke:#fdfbf7;stroke-width:5.5}
   [data-zn-theme='hardware'] .knob-row{gap:18px}
 
   /* hardware dropdown: a plain drawer, not origami. clip-path needs !important
