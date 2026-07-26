@@ -324,7 +324,7 @@
      row and +1..+12 on the second, so it is two short rows instead of five */
   .chromagrid{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:8px;
     margin:10px 0;max-width:900px}
-  .chromagrid .sbtn{padding:11px 2px;text-align:center;font-size:14px;min-width:0}
+  .chromagrid .sbtn{padding:11px 2px;text-align:center;font-size:14px;min-width:0;white-space:nowrap}
   .chromagrid .sbtn.active-key{background:var(--ink);color:var(--white)}
   .chromagrid .sbtn[data-root='true']{outline:2px solid var(--accent);outline-offset:-4px}
   .pad{position:relative;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
@@ -469,6 +469,11 @@
     .dd{display:block;width:100%;flex:1 1 100%}
     .dd-panel{max-width:100%}
     #fxRouting label.rlab{flex:1 1 100%}
+    /* 13 columns is ~28px per cell on a phone, which wraps "-12" onto three
+       lines and turns the buttons into slivers. 5 columns fits every label on
+       one line and puts the root back in the middle of a 5x5. */
+    .chromagrid{grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+    .chromagrid .sbtn{padding:13px 2px;font-size:15px}
     /* minmax(74px,1fr) forces a floor wider than a phone — let the tracks shrink */
     .padgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
     .patgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
