@@ -35,7 +35,11 @@ const PRECACHE = [
   './sp404mk2-shortcuts.json',
   './sp404mk2-modulation.json',
   './manifest.webmanifest',
-  './icon.svg',
+  './icon-hardware.svg',
+  './icon-hardware-16.svg',
+  './icon-zine.svg',
+  './icon-zine-16.svg',
+  './apple-touch-icon.png',
 ];
 
 self.addEventListener('install', event => {

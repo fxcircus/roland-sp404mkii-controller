@@ -7,8 +7,9 @@
 <meta name="theme-color" content="#16181b">
 <meta name="description" content="Web MIDI control surface, monitor and shortcut finder for the Roland SP-404MK2.">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" id="favSmall" sizes="16x16 32x32" type="image/svg+xml" href="icon-hardware-16.svg">
+<link rel="icon" id="favFull" sizes="any" type="image/svg+xml" href="icon-hardware.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="SP-404MKII">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3045,6 +3046,19 @@ const THEMES = [
   { id:'hardware', label:'Hardware' },
   { id:'zine',     label:'Zine'     },
 ];
+/* Two marks per theme, because the full one mushes in a tab: the small variant
+   drops the waveform and grows the wordmark, which is what actually identifies
+   the app at 16px. The link ELEMENT is replaced rather than its href mutated —
+   browsers are inconsistent about re-reading a favicon whose href changed in
+   place, but a fresh element is always picked up. */
+function setFavicons(id){
+  [['favSmall','-16'], ['favFull','']].forEach(([elId, suffix])=>{
+    const old = document.getElementById(elId); if(!old) return;
+    const next = old.cloneNode();
+    next.href = 'icon-' + id + suffix + '.svg';
+    old.replaceWith(next);
+  });
+}
 function applyTheme(id){
   const t = THEMES.find(x=>x.id===id) || THEMES[0];
   /* zine is what :root already carries, so it is the absence of the attribute */
@@ -3055,6 +3069,7 @@ function applyTheme(id){
   $('themeBtn').setAttribute('aria-label','Theme: '+t.label+', click to switch');
   const tc = document.querySelector('meta[name="theme-color"]');
   if(tc) tc.setAttribute('content', t.id === 'hardware' ? '#16181b' : '#d7e3fb');
+  setFavicons(t.id);
   lsSet('sp404_theme', t.id);
 }
 /* The two themes do not lay out identically and cannot be made to: mono and

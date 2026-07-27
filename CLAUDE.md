@@ -2,7 +2,9 @@
 
 Single-file Web MIDI diagnostic harness for the Roland SP-404MK2. No build step, Chrome/Edge only.
 
-Installable as a PWA (`manifest.webmanifest` + `sw.js` + `icon.svg`), and it works offline once visited.
+Installable as a PWA (`manifest.webmanifest` + `sw.js` + the `icon-*.svg` set), and it works offline once visited.
+
+Favicons are **per theme**: `icon-hardware.svg` / `icon-zine.svg` plus a `-16` variant of each that drops the waveform and enlarges the wordmark, because the full mark mushes in a tab. `applyTheme()` swaps both by replacing the `<link>` elements — mutating `href` in place is not reliably re-read. `apple-touch-icon.png` is a 180×180 render of the hardware mark, since iOS ignores SVG favicons and cannot switch per theme anyway.
 
 Only external dependency: two Google Fonts (`Permanent Marker` for headings/buttons/labels, `Patrick Hand` for body/help text), loaded via `<link>` in `<head>`. Local fallbacks are declared, so the app still works offline — it just loses the hand-drawn lettering. Everything else is self-contained.
 
