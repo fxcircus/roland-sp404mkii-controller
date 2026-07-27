@@ -357,9 +357,25 @@
   #fxRouting .title{display:inline-block;font-family:var(--marker);font-size:var(--s-label);
     letter-spacing:1.1px;text-transform:uppercase;color:var(--white);background:var(--ink);
     border-radius:var(--r-chip);padding:4px 11px 5px;margin-bottom:10px}
-  #fxRouting .rgrid{display:flex;flex-wrap:wrap;gap:14px}
-  #fxRouting label.rlab{display:flex;align-items:center;gap:8px;font-family:var(--hand);font-size:15px}
-  #fxRouting .rn{font-family:var(--hand);color:var(--ink2);font-size:14px;margin-top:10px;line-height:1.4}
+  /* A fixed four-up grid rather than a wrapping flex row. Left to wrap, the
+     wider mono theme broke to a second line while the other stayed on one,
+     costing ~52px — a whole-row step that moved everything below it on a theme
+     switch. A fixed column count makes both themes wrap identically; the
+     dropdowns already ellipsis, so the narrower tracks cost nothing. */
+  #fxRouting .rgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  /* Caption over picker, not beside it. Inline captions in a four-up grid left
+     the mono theme either wrapping its label (a whole-row step on theme switch)
+     or truncating its value to "TYP…" — the fix for the jump cannot cost the
+     reading. Stacked, each picker gets the full column and both themes hold one
+     row. Same pattern as the MIDI card. */
+  #fxRouting label.rlab{display:flex;flex-direction:column;align-items:stretch;gap:5px;
+    font-family:var(--hand);font-size:15px;white-space:nowrap}
+  #fxRouting label.rlab .dd{min-width:0;width:100%}
+  /* Two lines of space are reserved whichever theme is on: this sentence fits
+     one line in the narrower face and wraps to two in mono, and that difference
+     was another ~19px of step. */
+  #fxRouting .rn{font-family:var(--hand);color:var(--ink2);font-size:14px;margin-top:10px;
+    line-height:1.4;min-height:calc(2 * 1.4em)}
 
   /* ---- origami dropdown ---- */
   .dd{position:relative;display:inline-block;max-width:100%;font-family:var(--hand);font-size:var(--s-base);vertical-align:middle}
@@ -618,8 +634,15 @@
     box-shadow:inset 0 2px 6px rgba(0,0,0,.65)}
   [data-zn-theme='hardware'] .mdir.in{color:#16181b}
 
+  /* the theme cross-fade — long enough to read as a dissolve, short enough not
+     to feel like waiting */
+  ::view-transition-old(root),
+  ::view-transition-new(root){animation-duration:.3s;animation-timing-function:ease}
+
   @media (prefers-reduced-motion: reduce){
     .dd-fold,.dd-leaf::before{transition-duration:1ms!important;transition-delay:0ms!important}
+    ::view-transition-old(root),
+    ::view-transition-new(root){animation:none!important}
   }
   @media(max-width:700px){
     #hero h1{font-size:26px;padding:7px 14px 9px}
@@ -672,6 +695,7 @@
        width on its own line keeps the panel inside the card. */
     .dd{display:block;width:100%;flex:1 1 100%}
     .dd-panel{max-width:100%}
+    #fxRouting .rgrid{grid-template-columns:minmax(0,1fr)}
     #fxRouting label.rlab{flex:1 1 100%}
     /* 13 columns is ~28px per cell on a phone, which wraps "-12" onto three
        lines and turns the buttons into slivers. 5 columns fits every label on
@@ -3033,10 +3057,53 @@ function applyTheme(id){
   if(tc) tc.setAttribute('content', t.id === 'hardware' ? '#16181b' : '#d7e3fb');
   lsSet('sp404_theme', t.id);
 }
+/* The two themes do not lay out identically and cannot be made to: mono and
+   Permanent Marker have different metrics, so the hero is 24px shorter in
+   hardware, the nav 15px, and the shortcut list — hundreds of rows, each a
+   pixel or two apart — differs by nearly 500px. Matching all of that would mean
+   compromising both designs.
+
+   So instead of pinning the page height, pin what you are LOOKING at: note the
+   first section still on screen and its exact offset from the top of the
+   viewport, then put it back there afterwards. Everything above and below is
+   free to change height; the thing under your eyes does not move. */
+function themeAnchor(){
+  if(window.scrollY < 4) return null;
+  /* Anchor on the actual element under the top of the reading area, not on its
+     section: sections change height internally too, so pinning a section top
+     still let anything inside it drift by tens of pixels. A theme swap only
+     rewrites one attribute on <html> — no DOM is rebuilt — so a direct element
+     reference stays valid across it. */
+  const y = 150, xs = [0.5, 0.25, 0.75];
+  for(const fx of xs){
+    const el = document.elementFromPoint(Math.round(innerWidth * fx), y);
+    if(el && el.closest && el.closest('#wrap')) return { el, top: el.getBoundingClientRect().top };
+  }
+  for(const id of SECTION_IDS){                    // fallback: nearest section
+    const el = $(id); if(!el) continue;
+    if(el.getBoundingClientRect().bottom > 100) return { el, top: el.getBoundingClientRect().top };
+  }
+  return null;
+}
+function restoreThemeAnchor(a){
+  if(!a || !a.el || !a.el.isConnected) return;
+  window.scrollTo(0, Math.max(0, window.scrollY + (a.el.getBoundingClientRect().top - a.top)));
+}
+function switchTheme(id){
+  /* measured before anything starts, so the reading is of the untouched page */
+  const anchor = themeAnchor();
+  const swap = ()=>{ applyTheme(id); restoreThemeAnchor(anchor); };
+  /* Chrome-only app, and this is a Chrome-only API — it snapshots the page,
+     applies the change and cross-fades the two, which covers the residual
+     reflow far more gracefully than transitioning a few hundred colours. */
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce || !document.startViewTransition){ swap(); return; }
+  document.startViewTransition(swap);
+}
 $('themeBtn').addEventListener('click', ()=>{
   const cur = lsGet('sp404_theme') || 'hardware';
   const i = THEMES.findIndex(x=>x.id===cur);
-  applyTheme(THEMES[(i+1) % THEMES.length].id);
+  switchTheme(THEMES[(i+1) % THEMES.length].id);
 });
 applyTheme(lsGet('sp404_theme') || 'hardware');
 
