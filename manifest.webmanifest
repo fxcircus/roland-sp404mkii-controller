@@ -7,8 +7,8 @@
   "id": "/roland-sp404mkii-controller/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#16181b",
-  "theme_color": "#16181b",
+  "background_color": "#101317",
+  "theme_color": "#101317",
   "categories": [
     "music",
     "utilities"

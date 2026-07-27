@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SP-404 MKII · MIDI Sketchpad</title>
-<meta name="theme-color" content="#16181b">
+<meta name="theme-color" content="#101317">
 <meta name="description" content="Web MIDI control surface, monitor and shortcut finder for the Roland SP-404MK2.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" id="favSmall" sizes="16x16 32x32" type="image/svg+xml" href="icon-hardware-16.svg">
@@ -155,6 +155,11 @@
     letter-spacing:1.4px;padding:5px 20px;
     box-shadow:var(--off) var(--off) 0 var(--shadow)}
   #nav #panicBtn:hover{background:#dc4136}
+  /* icon + legend caps. The gap has to come from flex, not a space in the
+     markup: .sbtn is uppercase with 1.4px letter-spacing, so a text node between
+     the svg and the span would be spaced too and drift as the label changes. */
+  #nav #themeBtn,#nav #panicBtn{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+  .btn-ico{flex:none;display:block}
   /* buy-me-a-coffee: BMC yellow in both themes, icon only */
   #nav #coffeeBtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;
     background:#fbb034;color:#3a2905;border-color:var(--ink);text-decoration:none;
@@ -736,8 +741,15 @@
      on the paper host needs compound selectors and fails silently otherwise.
      ========================================================================== */
   :root[data-zn-theme='hardware']{
-    --paper:#16181b; --paper2:#33383f; --panel:#23262b; --white:#1b1e22;
-    --ink:#e4e1da; --ink2:#9aa0a8; --shadow:#000;
+    /* --paper2 is DARKER than --panel here, which is the reverse of the paper
+       themes: on a chassis an inset area is a routed-out well, not a raised
+       card, and the sunken reading is also the legible one — secondary ink
+       measured 4.5:1 against the old lighter #33383f and measures 8.6:1 here.
+       Anything that wants a *lift* on hover has to say so explicitly now. */
+    --paper:#101317; --paper2:#1a1d21; --panel:#23262b; --white:#1b1e22;
+    /* #9aa0a8 cleared AA on paper but carries most of the actual information in
+       13px letter-spaced mono, where it read as a whisper. 7.7:1 on a card. */
+    --ink:#e4e1da; --ink2:#b3b9c1; --shadow:#000;
     --accent:#ff8a1f; --accent2:#b34d00;
     /* machined, not hand-drawn: every legend is condensed mono silkscreen */
     --marker:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
@@ -757,7 +769,7 @@
   /* ---- colour block ---- */
   [data-zn-theme='hardware'] .card{border-color:#05070a;
     box-shadow:var(--off-lg) var(--off-lg) 0 var(--shadow), inset 0 1px 0 rgba(255,255,255,.09)}
-  [data-zn-theme='hardware'] .card::after{inset:2px;border-color:rgba(255,255,255,.07);opacity:1;border-radius:6px}
+  [data-zn-theme='hardware'] .card::after{inset:2px;border-color:rgba(255,255,255,.11);opacity:1;border-radius:6px}
   /* silkscreen chip: light plate, dark legend — the boxed labels on the unit */
   [data-zn-theme='hardware'] .card > h2,
   [data-zn-theme='hardware'] .label,
@@ -815,14 +827,42 @@
   [data-zn-theme='hardware'] .wkey.active-key{background:var(--accent);color:#14171a}
   [data-zn-theme='hardware'] .bkey{background:#15181b;border-color:#05070a;color:rgba(255,255,255,.5)}
   [data-zn-theme='hardware'] .bkey.active-key{background:var(--accent);color:#14171a}
+  /* ---- recessed wells ----
+     Everything backed by --paper2 is now darker than the card it sits in, so it
+     needs the shadow that sells "routed out of the panel" rather than "a darker
+     rectangle". The top edge is the one that matters: light falls from above, so
+     the near-side wall catches it and the far wall goes black. */
+  [data-zn-theme='hardware'] #fxRouting,
+  [data-zn-theme='hardware'] .zn-steps,
+  [data-zn-theme='hardware'] .monlog,
+  [data-zn-theme='hardware'] .snaprow{
+    box-shadow:inset 0 2px 5px rgba(0,0,0,.55), inset 0 -1px 0 rgba(255,255,255,.06)}
   [data-zn-theme='hardware'] #fxRouting{border-color:rgba(255,255,255,.22)}
-  [data-zn-theme='hardware'] .bus{background:#23262b;border-color:#05070a}
+  /* the bus strip is a shallower well — enough to group its knobs, not so deep
+     it competes with the routing panel above it */
+  [data-zn-theme='hardware'] .bus{background:#1e2126;border-color:#05070a;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.45), inset 0 -1px 0 rgba(255,255,255,.05)}
+  /* hover must still read as a LIFT, and --paper2 no longer supplies one */
+  [data-zn-theme='hardware'] .sc-item:hover{background:#2c3138}
+  /* Dimming states were authored against paper: 28% ink on white is grey, 28%
+     ink on a chassis is gone. These are the floors that keep a switched-off
+     control readable as "off" instead of "absent". */
+  [data-zn-theme='hardware'] .knob.disabled{opacity:.5}
+  [data-zn-theme='hardware'] .knob.disabled .modbtn{opacity:.5}
+  /* :hover has to be restated: the generic .modbtn:hover{opacity:1} is also
+     (0,2,0) and sits earlier in the file, so a bare override here would win
+     against it and kill the hover feedback */
+  [data-zn-theme='hardware'] .modbtn{opacity:.8}
+  [data-zn-theme='hardware'] .modbtn:hover{opacity:1}
+  [data-zn-theme='hardware'] .sbtn[disabled],
+  [data-zn-theme='hardware'] .sbtn:disabled{opacity:.55}
+  [data-zn-theme='hardware'] .pad-name.empty{opacity:.55}
   [data-zn-theme='hardware'] .bus-ch{background:#cfcbc2;color:#14171a}
   [data-zn-theme='hardware'] #scSearch{background:#1b1e22;color:var(--ink);border-color:#05070a}
   [data-zn-theme='hardware'] .sc-cap.full{background:var(--accent);color:#14171a;border-color:#05070a}
   [data-zn-theme='hardware'] .sc-cap.partial,
   [data-zn-theme='hardware'] .sc-cap.hw{background:#2b2f35;color:var(--ink);border-color:#05070a}
-  [data-zn-theme='hardware'] .sc-item{border-bottom-color:rgba(255,255,255,.09)}
+  [data-zn-theme='hardware'] .sc-item{border-bottom-color:rgba(255,255,255,.14)}
   [data-zn-theme='hardware'] a{color:#ffb974}
 
   /* ---- material pass ---------------------------------------------------
@@ -837,10 +877,10 @@
      read as a grid. */
   [data-zn-theme='hardware'] body,
   body[data-zn-theme='hardware']{
-    background-color:#15181b;
+    background-color:#0f1215;
     background-image:
       linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0) 13%),
-      linear-gradient(#191d21,#0e1114);
+      linear-gradient(#131619,#08090b);
     background-size:auto,auto;
     background-repeat:no-repeat;
     background-attachment:fixed}
@@ -1055,8 +1095,23 @@
     <button data-t="shortcuts">Shortcuts</button>
   </div>
   <div class="status">
-    <button id="themeBtn" class="sbtn sm" type="button">Theme</button>
-    <button id="panicBtn" class="sbtn sm danger" type="button">Stop All</button>
+    <button id="themeBtn" class="sbtn sm" type="button">
+      <svg class="btn-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2.6c-5.2 0-9.4 4.2-9.4 9.4s4.2 9.4 9.4 9.4c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.6-.4-1.1 0-.9.7-1.6 1.6-1.6h1.9c2.9 0 5.3-2.4 5.3-5.3 0-4.6-4.3-8.1-9.6-8.1z"/>
+        <circle cx="7.4" cy="12.2" r="1.15" fill="currentColor" stroke="none"/>
+        <circle cx="9.4" cy="7.9" r="1.15" fill="currentColor" stroke="none"/>
+        <circle cx="14.2" cy="7.3" r="1.15" fill="currentColor" stroke="none"/>
+        <circle cx="17.3" cy="10.7" r="1.15" fill="currentColor" stroke="none"/>
+      </svg><span id="themeTxt">Hardware</span>
+    </button>
+    <button id="panicBtn" class="sbtn sm danger" type="button">
+      <svg class="btn-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/>
+        <rect x="8.75" y="8.75" width="6.5" height="6.5" rx="1.2" fill="currentColor" stroke="none"/>
+      </svg><span>Stop All</span>
+    </button>
     <a id="coffeeBtn" class="sbtn sm" href="https://buymeacoffee.com/fxcircus"
        target="_blank" rel="noopener noreferrer" aria-label="Buy me a coffee" title="Buy me a coffee">
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"
@@ -3042,9 +3097,12 @@ window.addEventListener('resize', syncNav);
    hardware (default) emulates the real unit; zine is the blue paper look. The
    attribute sits on <html> and is set in the markup too, so there is no flash
    of the wrong theme before this runs. */
+/* `label` is what the button reads, not the id: the zine theme keeps its id
+   everywhere (storage key, favicon filename, this file's CSS) and is only ever
+   *shown* as Sketch. */
 const THEMES = [
   { id:'hardware', label:'Hardware' },
-  { id:'zine',     label:'Zine'     },
+  { id:'zine',     label:'Sketch'   },
 ];
 /* Two marks per theme, because the full one mushes in a tab: the small variant
    drops the waveform and grows the wordmark, which is what actually identifies
@@ -3064,11 +3122,13 @@ function applyTheme(id){
   /* zine is what :root already carries, so it is the absence of the attribute */
   if(t.id === 'hardware') document.documentElement.setAttribute('data-zn-theme','hardware');
   else document.documentElement.removeAttribute('data-zn-theme');
-  $('themeBtn').textContent = 'Theme';
+  /* the span, never the button — textContent on the button would delete the
+     palette icon that lives beside it */
+  $('themeTxt').textContent = t.label;
   $('themeBtn').title = 'Theme: '+t.label+' — click to switch';
   $('themeBtn').setAttribute('aria-label','Theme: '+t.label+', click to switch');
   const tc = document.querySelector('meta[name="theme-color"]');
-  if(tc) tc.setAttribute('content', t.id === 'hardware' ? '#16181b' : '#d7e3fb');
+  if(tc) tc.setAttribute('content', t.id === 'hardware' ? '#101317' : '#d7e3fb');
   setFavicons(t.id);
   lsSet('sp404_theme', t.id);
 }
