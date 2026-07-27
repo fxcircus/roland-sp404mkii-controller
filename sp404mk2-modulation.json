@@ -15,7 +15,8 @@
       "1/8T",
       "1/16",
       "1/32"
-    ]
+    ],
+    "position_units": "Percent of the parameter range where the swing is centred. 50 is the middle. Anything else is a judgement that one end of that parameter is musically worse than the other — runaway feedback, screaming resonance, a fully shut filter."
   },
   "shapes": [
     {
@@ -68,7 +69,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "A new slice pattern every two beats. Hitting one of 32 detents on cue is not a human action.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "SPEED",
@@ -77,7 +80,9 @@
           "depth": 70,
           "phase": 0,
           "bipolar": true,
-          "why": "Ramps the slice rate up over ~16 seconds — an automated build."
+          "why": "Ramps the slice rate up over ~16 seconds — an automated build.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "MODE",
@@ -87,7 +92,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Flips LEGATO/SLASH in rhythm, so the slice envelope changes character bar to bar.",
-          "sync": "1/2"
+          "sync": "1/2",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         }
       ]
     },
@@ -102,7 +109,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "A different scatter pattern each step — the move the effect is built for.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "SCATTER",
@@ -112,7 +121,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Gates the whole effect on the beat instead of holding it on.",
-          "sync": "1/4"
+          "sync": "1/4",
+          "pos": 50,
+          "pos_why": "straddles the threshold so the shape actually flips it"
         },
         {
           "param": "SPEED",
@@ -122,7 +133,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Random single/double-time bursts.",
-          "sync": "2bar"
+          "sync": "2bar",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         }
       ]
     },
@@ -137,7 +150,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Rhythmic loop stutter, engaged and released on the beat.",
-          "sync": "1/4"
+          "sync": "1/4",
+          "pos": 50,
+          "pos_why": "straddles the threshold so the shape actually flips it"
         },
         {
           "param": "LENGTH",
@@ -147,7 +162,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Varies the stutter length so the repeat never settles.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -162,7 +179,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Beat-locked loop stabs.",
-          "sync": "1/4"
+          "sync": "1/4",
+          "pos": 50,
+          "pos_why": "straddles the threshold so the shape actually flips it"
         },
         {
           "param": "SPEED",
@@ -172,7 +191,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Jumps between forward and reverse playback — a scratch you cannot perform.",
-          "sync": "1/2"
+          "sync": "1/2",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -187,7 +208,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Fires the spin every two seconds instead of by hand.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "straddles the threshold so the shape actually flips it"
         },
         {
           "param": "LENGTH",
@@ -197,7 +220,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Randomises the spin length so repeats do not sound copied.",
-          "sync": "2bar"
+          "sync": "2bar",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         }
       ]
     },
@@ -212,7 +237,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Steps through scale degrees on the beat: an arpeggio the SP has no other way to make.",
-          "sync": "1/4"
+          "sync": "1/4",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "SCALE",
@@ -221,7 +248,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Very slow modal shifts under a drone."
+          "why": "Very slow modal shifts under a drone.",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         },
         {
           "param": "CHARACTER",
@@ -230,7 +259,9 @@
           "depth": 45,
           "phase": 0,
           "bipolar": true,
-          "why": "Breathes brightness and detune through the resonance."
+          "why": "Breathes brightness and detune through the resonance.",
+          "pos": 55,
+          "pos_why": "bright side of centre"
         }
       ]
     },
@@ -245,7 +276,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Jumps the resonant root — melodic scatter over whatever you feed it.",
-          "sync": "1/2"
+          "sync": "1/2",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "CHORD",
@@ -254,7 +287,9 @@
           "depth": 70,
           "phase": 0,
           "bipolar": true,
-          "why": "Rotates the chord shape every few bars."
+          "why": "Rotates the chord shape every few bars.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "PANNING",
@@ -263,7 +298,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Swings the resonance across the stereo field."
+          "why": "Swings the resonance across the stereo field.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -278,7 +315,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Jumps the delay between note values — the classic dub time-shift, on a timer.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "MODE",
@@ -288,7 +327,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Toggles centre and ping-pong so the repeats move around.",
-          "sync": "2bar"
+          "sync": "2bar",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         }
       ]
     },
@@ -303,7 +344,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Steps the delay time between note values.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "MODE",
@@ -312,7 +355,9 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Cycles 2/3/4-tap, changing the rhythm of the repeats."
+          "why": "Cycles 2/3/4-tap, changing the rhythm of the repeats.",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         }
       ]
     },
@@ -327,7 +372,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Note-value jumps you cannot dial by hand mid-bar.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "FEEDBACK",
@@ -336,7 +383,9 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "Slowly swells and drains the repeats."
+          "why": "Slowly swells and drains the repeats.",
+          "pos": 40,
+          "pos_why": "kept below the runaway end of the range"
         }
       ]
     },
@@ -351,7 +400,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Steps between note divisions.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "FEEDBACK",
@@ -360,7 +411,9 @@
           "depth": 50,
           "phase": 0,
           "bipolar": true,
-          "why": "A slow feedback swell that never quite runs away."
+          "why": "A slow feedback swell that never quite runs away.",
+          "pos": 40,
+          "pos_why": "kept below the runaway end of the range"
         }
       ]
     },
@@ -375,7 +428,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Stepped time changes pitch-shift the tail on every jump.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "FEEDBACK",
@@ -384,7 +439,9 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "Swells the repeats without touching the knob."
+          "why": "Swells the repeats without touching the knob.",
+          "pos": 40,
+          "pos_why": "kept below the runaway end of the range"
         }
       ]
     },
@@ -399,7 +456,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "A different flavour of destruction every few seconds.",
-          "sync": "2bar"
+          "sync": "2bar",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "CUTOFF",
@@ -408,7 +467,9 @@
           "depth": 50,
           "phase": 0,
           "bipolar": true,
-          "why": "Opens and closes the lo-fi filter underneath it."
+          "why": "Opens and closes the lo-fi filter underneath it.",
+          "pos": 58,
+          "pos_why": "sits open, so the sweep darkens rather than muting"
         }
       ]
     },
@@ -423,7 +484,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Drops the bass on the beat — the isolator cut, automated.",
-          "sync": "1/4"
+          "sync": "1/4",
+          "pos": 40,
+          "pos_why": "alternates between killed and roughly flat, not killed and boosted"
         },
         {
           "param": "HIGH",
@@ -433,7 +496,9 @@
           "phase": 0.5,
           "bipolar": true,
           "why": "Counter-phased against LOW so the bands trade places.",
-          "sync": "1/4"
+          "sync": "1/4",
+          "pos": 40,
+          "pos_why": "alternates between killed and roughly flat, not killed and boosted"
         }
       ]
     },
@@ -447,7 +512,9 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Rotates the harmony interval so the part rewrites itself."
+          "why": "Rotates the harmony interval so the part rewrites itself.",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         },
         {
           "param": "FORMANT",
@@ -456,7 +523,9 @@
           "depth": 45,
           "phase": 0,
           "bipolar": true,
-          "why": "Slides the vocal character while the pitch holds."
+          "why": "Slides the vocal character while the pitch holds.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -471,7 +540,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Steps the vocoder pitch on the beat — melody from a spoken source.",
-          "sync": "1/4"
+          "sync": "1/4",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "CHORD",
@@ -480,7 +551,9 @@
           "depth": 80,
           "phase": 0,
           "bipolar": true,
-          "why": "Rotates the chord voicing every few bars."
+          "why": "Rotates the chord voicing every few bars.",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         },
         {
           "param": "FORMANT",
@@ -489,7 +562,9 @@
           "depth": 40,
           "phase": 0,
           "bipolar": true,
-          "why": "Slow gender morph under the melody."
+          "why": "Slow gender morph under the melody.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -503,7 +578,9 @@
           "depth": 50,
           "phase": 0,
           "bipolar": true,
-          "why": "Slow formant slide — the voice changes character, not pitch."
+          "why": "Slow formant slide — the voice changes character, not pitch.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "ROBOT",
@@ -513,7 +590,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Snaps in and out of full robot on a timer.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "straddles the threshold so the shape actually flips it"
         }
       ]
     },
@@ -528,7 +607,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Steps voice 1 through intervals — an arpeggio over any source.",
-          "sync": "1/2"
+          "sync": "1/2",
+          "pos": 50,
+          "pos_why": "steps either side of unison"
         },
         {
           "param": "PAN1",
@@ -537,7 +618,9 @@
           "depth": 80,
           "phase": 0,
           "bipolar": true,
-          "why": "Swings voice 1 across the field."
+          "why": "Swings voice 1 across the field.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "PAN2",
@@ -546,7 +629,9 @@
           "depth": 80,
           "phase": 0.5,
           "bipolar": true,
-          "why": "Counter-phased, so the two voices cross in the middle."
+          "why": "Counter-phased, so the two voices cross in the middle.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -561,7 +646,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Scatters the grain pitch — clouds instead of echoes.",
-          "sync": "1/2"
+          "sync": "1/2",
+          "pos": 50,
+          "pos_why": "scatters either side of unison"
         },
         {
           "param": "CLOUDY",
@@ -570,7 +657,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Thickens and thins the cloud over ~16 seconds."
+          "why": "Thickens and thins the cloud over ~16 seconds.",
+          "pos": 55,
+          "pos_why": "thick side of centre"
         }
       ]
     },
@@ -584,7 +673,9 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Rotates through the JUNO/JX voicings slowly."
+          "why": "Rotates through the JUNO/JX voicings slowly.",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         }
       ]
     },
@@ -598,7 +689,9 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Swaps the amp every few seconds — a different rig per phrase."
+          "why": "Swaps the amp every few seconds — a different rig per phrase.",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         },
         {
           "param": "DRIVE",
@@ -607,7 +700,9 @@
           "depth": 40,
           "phase": 0,
           "bipolar": true,
-          "why": "Slow gain swell underneath."
+          "why": "Slow gain swell underneath.",
+          "pos": 45,
+          "pos_why": "swells into breakup without living there"
         }
       ]
     },
@@ -621,7 +716,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "The sweep everyone wants, held perfectly steady for as long as you like."
+          "why": "The sweep everyone wants, held perfectly steady for as long as you like.",
+          "pos": 58,
+          "pos_why": "sits open, so the sweep darkens rather than muting"
         },
         {
           "param": "RESONANCE",
@@ -630,7 +727,9 @@
           "depth": 45,
           "phase": 0.5,
           "bipolar": true,
-          "why": "Counter-phased against cutoff, so resonance peaks as the filter closes."
+          "why": "Counter-phased against cutoff, so resonance peaks as the filter closes.",
+          "pos": 35,
+          "pos_why": "high resonance screams; the swing stays in the usable half"
         },
         {
           "param": "FLT TYPE",
@@ -640,7 +739,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Jumps LPF/BPF/HPF in rhythm — impossible to do cleanly by hand.",
-          "sync": "1/2"
+          "sync": "1/2",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         }
       ]
     },
@@ -654,7 +755,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Classic sweep, steady over minutes."
+          "why": "Classic sweep, steady over minutes.",
+          "pos": 58,
+          "pos_why": "sits open, so the sweep darkens rather than muting"
         },
         {
           "param": "RESONANCE",
@@ -663,7 +766,9 @@
           "depth": 45,
           "phase": 0.5,
           "bipolar": true,
-          "why": "Peaks as the filter closes."
+          "why": "Peaks as the filter closes.",
+          "pos": 35,
+          "pos_why": "high resonance screams; the swing stays in the usable half"
         },
         {
           "param": "FLT TYPE",
@@ -673,7 +778,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Flips high-pass and low-pass on a timer.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         }
       ]
     },
@@ -687,7 +794,9 @@
           "depth": 45,
           "phase": 0,
           "bipolar": true,
-          "why": "A 20-second drift that pitch-bends every repeat — tape slowing and recovering."
+          "why": "A 20-second drift that pitch-bends every repeat — tape slowing and recovering.",
+          "pos": 45,
+          "pos_why": "a short delay that drifts long, the way tape sags"
         },
         {
           "param": "W/F DEPTH",
@@ -696,7 +805,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Breathes the wow and flutter in and out."
+          "why": "Breathes the wow and flutter in and out.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "MODE",
@@ -705,7 +816,9 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Rotates the playback-head combination, changing the echo pattern."
+          "why": "Rotates the playback-head combination, changing the echo pattern.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -720,7 +833,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "The sweep itself, at a rate no ankle holds steady.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 55,
+          "pos_why": "the sweep sits above the muddy end"
         },
         {
           "param": "RATE",
@@ -729,7 +844,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Accelerates the auto-wah into a build."
+          "why": "Accelerates the auto-wah into a build.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -743,7 +860,9 @@
           "depth": 65,
           "phase": 0,
           "bipolar": true,
-          "why": "Slow jet sweep through the notches."
+          "why": "Slow jet sweep through the notches.",
+          "pos": 55,
+          "pos_why": "the sweep sits above the muddy end"
         },
         {
           "param": "RATE",
@@ -752,7 +871,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Speeds the phaser up over ~20 seconds."
+          "why": "Speeds the phaser up over ~20 seconds.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -766,7 +887,9 @@
           "depth": 65,
           "phase": 0,
           "bipolar": true,
-          "why": "Moves the flange peak through the source."
+          "why": "Moves the flange peak through the source.",
+          "pos": 55,
+          "pos_why": "the sweep sits above the muddy end"
         },
         {
           "param": "RATE",
@@ -775,7 +898,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "An accelerating jet."
+          "why": "An accelerating jet.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -789,7 +914,9 @@
           "depth": 50,
           "phase": 0,
           "bipolar": true,
-          "why": "Wobbles the chorus speed — detune that never settles."
+          "why": "Wobbles the chorus speed — detune that never settles.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "DEPTH",
@@ -798,7 +925,9 @@
           "depth": 45,
           "phase": 0,
           "bipolar": true,
-          "why": "Thickens and thins the chorus."
+          "why": "Thickens and thins the chorus.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -812,7 +941,9 @@
           "depth": 65,
           "phase": 0,
           "bipolar": true,
-          "why": "Sweeps the sidebands — the classic sci-fi glide."
+          "why": "Sweeps the sidebands — the classic sci-fi glide.",
+          "pos": 55,
+          "pos_why": "centred a little high so the sidebands stay audible"
         },
         {
           "param": "POLARITY",
@@ -822,7 +953,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Flips the modulation direction on the beat.",
-          "sync": "1/2"
+          "sync": "1/2",
+          "pos": 50,
+          "pos_why": "straddles the threshold so the shape actually flips it"
         }
       ]
     },
@@ -836,7 +969,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Slides the band spacing so the comb walks through the source."
+          "why": "Slides the band spacing so the comb walks through the source.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "TYPE",
@@ -845,7 +980,9 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Jumps between the six filter ranges."
+          "why": "Jumps between the six filter ranges.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -859,7 +996,9 @@
           "depth": 70,
           "phase": 0,
           "bipolar": true,
-          "why": "Ramps sample-rate destruction into a build."
+          "why": "Ramps sample-rate destruction into a build.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "FILTER",
@@ -868,7 +1007,9 @@
           "depth": 50,
           "phase": 0,
           "bipolar": true,
-          "why": "Sweeps the post-crush filter to keep it musical."
+          "why": "Sweeps the post-crush filter to keep it musical.",
+          "pos": 58,
+          "pos_why": "sits open, so the sweep darkens rather than muting"
         }
       ]
     },
@@ -882,7 +1023,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Breathes the effect depth."
+          "why": "Breathes the effect depth.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "TIME",
@@ -891,7 +1034,9 @@
           "depth": 45,
           "phase": 0,
           "bipolar": true,
-          "why": "Slowly stretches and shortens the effect."
+          "why": "Slowly stretches and shortens the effect.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -905,7 +1050,9 @@
           "depth": 70,
           "phase": 0,
           "bipolar": true,
-          "why": "Accelerating tremolo — a build with no hands on it."
+          "why": "Accelerating tremolo — a build with no hands on it.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "WAVE",
@@ -914,7 +1061,9 @@
           "depth": 100,
           "phase": 0,
           "bipolar": true,
-          "why": "Rotates the LFO wave, so the tremolo changes shape."
+          "why": "Rotates the LFO wave, so the tremolo changes shape.",
+          "pos": 50,
+          "pos_why": "centred so the swing reaches the whole list"
         },
         {
           "param": "DEPTH",
@@ -923,7 +1072,9 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "Fades the effect in and out."
+          "why": "Fades the effect in and out.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -937,7 +1088,9 @@
           "depth": 50,
           "phase": 0,
           "bipolar": true,
-          "why": "A 25-second swell of the room size."
+          "why": "A 25-second swell of the room size.",
+          "pos": 60,
+          "pos_why": "a big room that breathes, not a small one that swells"
         },
         {
           "param": "HIGH CUT",
@@ -946,7 +1099,9 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "Darkens and brightens the tail."
+          "why": "Darkens and brightens the tail.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -960,7 +1115,9 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "Slow expansion and collapse of the space."
+          "why": "Slow expansion and collapse of the space.",
+          "pos": 60,
+          "pos_why": "a big room that breathes, not a small one that swells"
         },
         {
           "param": "TONE",
@@ -969,7 +1126,9 @@
           "depth": 45,
           "phase": 0.5,
           "bipolar": true,
-          "why": "Counter-phased, so the tail darkens as it lengthens."
+          "why": "Counter-phased, so the tail darkens as it lengthens.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -984,7 +1143,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Dives on the beat instead of when you turn a knob.",
-          "sync": "1/2"
+          "sync": "1/2",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "FILTER",
@@ -993,7 +1154,9 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "Sweeps the high-frequency loss under the dive."
+          "why": "Sweeps the high-frequency loss under the dive.",
+          "pos": 58,
+          "pos_why": "sits open, so the sweep darkens rather than muting"
         }
       ]
     },
@@ -1008,7 +1171,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "A stop every two seconds, exactly on time.",
-          "sync": "1bar"
+          "sync": "1bar",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "RATE",
@@ -1017,7 +1182,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Shortens the stop over a build."
+          "why": "Shortens the stop over a build.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -1032,7 +1199,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Rhythmic slowdowns.",
-          "sync": "1/2"
+          "sync": "1/2",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         },
         {
           "param": "RATE",
@@ -1041,7 +1210,9 @@
           "depth": 60,
           "phase": 0,
           "bipolar": true,
-          "why": "Tightens the cycle over time."
+          "why": "Tightens the cycle over time.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -1055,7 +1226,9 @@
           "depth": 70,
           "phase": 0,
           "bipolar": true,
-          "why": "Ages and un-ages the tape over half a minute."
+          "why": "Ages and un-ages the tape over half a minute.",
+          "pos": 50,
+          "pos_why": "ages and un-ages around the middle"
         },
         {
           "param": "WOW FLUT",
@@ -1064,7 +1237,9 @@
           "depth": 50,
           "phase": 0,
           "bipolar": true,
-          "why": "Varies the instability instead of leaving it fixed."
+          "why": "Varies the instability instead of leaving it fixed.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -1078,7 +1253,9 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "The record warping in and out of focus."
+          "why": "The record warping in and out of focus.",
+          "pos": 55,
+          "pos_why": "centred a little high so the sidebands stay audible"
         },
         {
           "param": "WOW FLUT",
@@ -1087,7 +1264,9 @@
           "depth": 45,
           "phase": 0,
           "bipolar": true,
-          "why": "Uneven platter speed rather than a constant."
+          "why": "Uneven platter speed rather than a constant.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -1101,7 +1280,9 @@
           "depth": 50,
           "phase": 0,
           "bipolar": true,
-          "why": "Varying instability keeps it from sounding looped."
+          "why": "Varying instability keeps it from sounding looped.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -1116,7 +1297,9 @@
           "phase": 0,
           "bipolar": true,
           "why": "Scoops the mids on the beat.",
-          "sync": "1/4"
+          "sync": "1/4",
+          "pos": 45,
+          "pos_why": "scoops below flat rather than pumping above it"
         },
         {
           "param": "Mid Freq",
@@ -1125,7 +1308,9 @@
           "depth": 55,
           "phase": 0,
           "bipolar": true,
-          "why": "Sweeps the mid band through the source."
+          "why": "Sweeps the mid band through the source.",
+          "pos": 50,
+          "pos_why": "centred, so the swing uses the range evenly"
         }
       ]
     },
@@ -1139,7 +1324,9 @@
           "depth": 40,
           "phase": 0,
           "bipolar": true,
-          "why": "Builds and releases saturation over ~20 seconds."
+          "why": "Builds and releases saturation over ~20 seconds.",
+          "pos": 45,
+          "pos_why": "swells into breakup without living there"
         }
       ]
     },
@@ -1153,7 +1340,9 @@
           "depth": 40,
           "phase": 0,
           "bipolar": true,
-          "why": "A slow push into breakup and back."
+          "why": "A slow push into breakup and back.",
+          "pos": 45,
+          "pos_why": "swells into breakup without living there"
         }
       ]
     },

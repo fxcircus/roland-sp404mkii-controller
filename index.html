@@ -258,7 +258,7 @@
   .shape[aria-pressed='true']{background:var(--mod);color:var(--paper);border-color:var(--mod)}
   /* wide enough for its own label: "RATE 0.51Hz" needs ~110px, and a narrower
      box lets the nowrap chip spill until the two labels read as one bar */
-  .modknobs{display:flex;gap:14px}
+  .modknobs{display:flex;flex-wrap:wrap;gap:14px}
   .modknobs .knob{width:112px}
   .modknobs .knob-svg{width:78px;height:74px}
   .modfoot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:11px}
@@ -2065,7 +2065,7 @@ function laneRateText(L){
 
 const modLanes = {};
 const modKey = (ch, cc) => ch + ':' + cc;
-let modTimer = null, modT0 = 0, modEditing = null;
+let modTimer = null, modT0 = 0, modEditing = null, modPosKnob = null;
 
 function modTick(){
   const t = (performance.now() - modT0) / 1000;
@@ -2098,6 +2098,7 @@ function modTick(){
     if(!L.bipolar) u = (u + 1)/2;
     const out = Math.max(0, Math.min(127, Math.round(centre + u*span)));
     k.showMod(out, Math.max(0, centre - (L.bipolar ? span : 0)), Math.min(127, centre + span));
+    if(modPosKnob && modEditing && modEditing.ch === L.ch && modEditing.i === L.i) modPosKnob.set(centre, true);
     /* only on change: a slow sine spends most of its life on a value the SP
        already holds, and dropping the repeats roughly halves the traffic */
     if(out !== L.last){
@@ -2121,7 +2122,7 @@ function setLane(ch, i, patch){
   const lane = modLanes[key] || Object.assign({ ch, i, cc, last:null }, MOD_DEFAULT);
   modLanes[key] = Object.assign(lane, patch || {});
   lane.last = null;                 // force the next tick to emit
-  if(isNew || (patch && patch.recentre)) fitCentre(ch, i, lane);
+  if((isNew || (patch && patch.recentre)) && !(patch && patch.skipFit)) fitCentre(ch, i, lane);
   ensureModTimer(); renderMoveBar(); paintModButtons();
   return lane;
 }
@@ -2220,6 +2221,7 @@ $('stopMotion').title = 'Return every modulated parameter to the value you set a
 
 /* ---------- the drawer ---------- */
 function closeModDrawer(){
+  modPosKnob = null;
   if(!modEditing) return;
   const bus = busByCh[modEditing.ch];
   if(bus && bus.drawer) bus.drawer.classList.remove('open');
@@ -2274,7 +2276,7 @@ function openModDrawer(bus, i){
     modeWrap.appendChild(b);
   });
   const rateHead = div('modlab-row');
-  rateHead.append(span('modlab','Rate & depth'), modeWrap);
+  rateHead.append(span('modlab','Motion'), modeWrap);
   fKnobs.appendChild(rateHead);
   const kwrap = div('modknobs');
   const synced = (lane.mode === 'sync');
@@ -2290,7 +2292,15 @@ function openModDrawer(bus, i){
   const dk = makeKnob({ label:'DEPTH', min:0, max:100, value:lane.depth,
     format:v=>v+'%', onChange:v=> setLane(bus.ch, i, { depth:v }) });
   dk.setTitle('How far it swings either side of the value you set.');
-  kwrap.append(rk.el, dk.el);
+  /* Position drives the parameter knob's own value — the centre has exactly one
+     home and this is a remote for it, so dragging either stays in step. It earns
+     its place because while a motion runs the parameter knob displays the LFO,
+     not the centre, so there was no way to see or place the sweep. */
+  const pk = makeKnob({ label:'POSITION', min:0, max:127, value:bus.knobs[i].get(),
+    format:v=>Math.round(v/127*100)+'%', onChange:v=> bus.knobs[i].set(v) });
+  pk.setTitle('Where the swing is centred. A 50% sine at position 50% moves either side of the middle; drop the position and the same swing sits lower in the range.');
+  modPosKnob = pk;
+  kwrap.append(rk.el, dk.el, pk.el);
   fKnobs.appendChild(kwrap);
   grid.append(fShape, fKnobs);
 
@@ -2320,9 +2330,11 @@ function openModDrawer(bus, i){
     const row = div('modsug');
     const apply = sbtn('Use suggested','sm');
     apply.addEventListener('click', ()=>{
+      if(sg.pos != null) bus.knobs[i].set(Math.round(sg.pos/100*127));
       setLane(bus.ch, i, { shape:sg.shape, rate:sg.rate, depth:sg.depth,
         mode: sg.sync ? 'sync' : 'hz', div: sg.sync || '1bar',
-        phase:sg.phase || 0, bipolar:sg.bipolar !== false, running:true });
+        phase:sg.phase || 0, bipolar:sg.bipolar !== false, running:true,
+        skipFit: sg.pos != null });
       openModDrawer(bus, i);
     });
     row.append(apply, span('modwhy', sg.why));
